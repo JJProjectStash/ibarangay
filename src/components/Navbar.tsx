@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
       <div className="container" style={styles.container}>
         <Link to="/" style={styles.logo}>
           <BarangayLogo size={36} />
-          <span style={styles.logoText}>Barangay Services</span>
+          <span style={styles.logoText}>iBarangay</span>
         </Link>
 
         {/* Desktop Menu */}
