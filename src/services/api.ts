@@ -149,6 +149,99 @@ class ApiService {
     return response.data;
   }
 
+  // File upload endpoints
+  async uploadComplaintFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.api.post("/upload/complaint", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  }
+
+  async uploadEventFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.api.post("/upload/event", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  }
+
+  // Bulk operations
+  async bulkUpdateComplaintStatus(ids: string[], status: string) {
+    const response = await this.api.put("/bulk/complaints/status", {
+      ids,
+      status,
+    });
+    return response.data;
+  }
+
+  async bulkAssignComplaints(ids: string[], assignedTo: string) {
+    const response = await this.api.put("/bulk/complaints/assign", {
+      ids,
+      assignedTo,
+    });
+    return response.data;
+  }
+
+  async bulkDeleteComplaints(ids: string[]) {
+    const response = await this.api.post("/bulk/complaints/delete", { ids });
+    return response.data;
+  }
+
+  async exportComplaints(format: "csv" | "excel", filters?: any) {
+    const response = await this.api.post(
+      "/bulk/complaints/export",
+      { format, filters },
+      { responseType: "blob" }
+    );
+    return response.data;
+  }
+
+  // Analytics endpoints
+  async getTimeSeriesData(period: string = "daily", days: number = 30) {
+    const response = await this.api.get("/analytics/time-series", {
+      params: { period, days },
+    });
+    return response.data;
+  }
+
+  async getStaffPerformance(startDate?: string, endDate?: string) {
+    const response = await this.api.get("/analytics/staff-performance", {
+      params: { startDate, endDate },
+    });
+    return response.data;
+  }
+
+  async getCategoryAnalytics() {
+    const response = await this.api.get("/analytics/category");
+    return response.data;
+  }
+
+  async getResponseTimeAnalytics() {
+    const response = await this.api.get("/analytics/response-time");
+    return response.data;
+  }
+
+  async getTrendAnalysis(days: number = 30) {
+    const response = await this.api.get("/analytics/trends", {
+      params: { days },
+    });
+    return response.data;
+  }
+
+  async getMonthlyReport(year?: number, month?: number) {
+    const response = await this.api.get("/analytics/monthly-report", {
+      params: { year, month },
+    });
+    return response.data;
+  }
+
   // Event endpoints
   async createEvent(data: {
     title: string;

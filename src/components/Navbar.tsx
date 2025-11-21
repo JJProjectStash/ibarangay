@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Bell, Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, BarChart3 } from "lucide-react";
 import { BarangayLogo } from "./CustomIcons";
-import api from "../services/api";
+import NotificationBell from "./NotificationBell";
 
 const Navbar: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUnreadCount();
-    }
-  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,15 +19,6 @@ const Navbar: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await api.getNotifications(false);
-      setUnreadCount(response.data.unreadCount || 0);
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -65,6 +49,16 @@ const Navbar: React.FC = () => {
                 Home
               </Link>
               <Link
+                to="/dashboard"
+                style={{
+                  ...styles.navLink,
+                  ...(isActive("/dashboard") ? styles.navLinkActive : {}),
+                }}
+              >
+                <BarChart3 size={18} style={{ marginRight: "0.25rem" }} />
+                Dashboard
+              </Link>
+              <Link
                 to="/services"
                 style={{
                   ...styles.navLink,
@@ -92,16 +86,7 @@ const Navbar: React.FC = () => {
                 Events
               </Link>
 
-              <Link to="/notifications" style={styles.iconButton}>
-                <div style={styles.notificationWrapper}>
-                  <Bell size={20} />
-                  {unreadCount > 0 && (
-                    <span style={styles.badge} className="pulse-badge">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
+              <NotificationBell />
 
               <div style={styles.userMenu}>
                 <div style={styles.userAvatar}>
@@ -156,6 +141,13 @@ const Navbar: React.FC = () => {
                 Home
               </Link>
               <Link
+                to="/dashboard"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
                 to="/services"
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
@@ -181,7 +173,7 @@ const Navbar: React.FC = () => {
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Notifications {unreadCount > 0 && `(${unreadCount})`}
+                Notifications
               </Link>
               <button onClick={handleLogout} style={styles.mobileLogout}>
                 Logout
@@ -256,41 +248,12 @@ const styles: Record<string, React.CSSProperties> = {
     opacity: 0.85,
     position: "relative",
     padding: "0.5rem 0",
+    display: "flex",
+    alignItems: "center",
   },
   navLinkActive: {
     opacity: 1,
     fontWeight: "600",
-  },
-  iconButton: {
-    color: "white",
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    padding: "0.5rem",
-    display: "flex",
-    alignItems: "center",
-    transition: "transform 0.2s ease",
-  },
-  notificationWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-  },
-  badge: {
-    position: "absolute",
-    top: "-8px",
-    right: "-8px",
-    background: "var(--error)",
-    color: "white",
-    borderRadius: "50%",
-    minWidth: "20px",
-    height: "20px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "0.7rem",
-    fontWeight: "bold",
-    border: "2px solid var(--primary)",
   },
   userMenu: {
     display: "flex",
@@ -391,29 +354,12 @@ styleSheet.textContent = `
     transform: scale(1.05);
   }
   
-  nav button[style*="iconButton"]:hover {
-    transform: scale(1.1);
-  }
-  
   nav div[style*="userMenu"]:hover {
     background: rgba(255,255,255,0.25);
   }
   
   nav button[style*="logoutBtn"]:hover {
     transform: scale(1.2);
-  }
-  
-  .pulse-badge {
-    animation: pulse 2s ease-in-out infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
   }
   
   nav a[style*="mobileLink"]:hover {
