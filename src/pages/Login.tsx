@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
+import { showToast } from "../utils/toast";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -18,16 +20,20 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
+      showToast({ message: "Login successful!", type: "success" });
       navigate("/");
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Login failed. Please try again.";
+      setError(errorMessage);
+      showToast({ message: errorMessage, type: "error" });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="fade-in">
       <div style={styles.formWrapper}>
         <div className="card" style={styles.formCard}>
           <div style={styles.header}>
@@ -38,7 +44,11 @@ const Login: React.FC = () => {
             <p style={styles.subtitle}>Login to access your account</p>
           </div>
 
-          {error && <div style={styles.errorAlert}>{error}</div>}
+          {error && (
+            <div style={styles.errorAlert} className="slide-in-right">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formGroup}>
@@ -50,19 +60,32 @@ const Login: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="juan@example.com"
                 required
+                disabled={isLoading}
               />
             </div>
 
             <div style={styles.formGroup}>
               <label style={styles.label}>Password</label>
-              <input
-                type="password"
-                className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div style={styles.passwordWrapper}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={isLoading}
+                  style={{ paddingRight: "3rem" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.eyeButton}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -71,7 +94,14 @@ const Login: React.FC = () => {
               style={styles.submitBtn}
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? (
+                <>
+                  <div style={styles.spinner} />
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
 
@@ -85,10 +115,12 @@ const Login: React.FC = () => {
           </div>
 
           <div style={styles.demoAccounts}>
-            <p style={styles.demoTitle}>Demo Accounts:</p>
-            <p style={styles.demoText}>Admin: admin@barangay.com / admin123</p>
+            <p style={styles.demoTitle}>🎯 Demo Accounts:</p>
             <p style={styles.demoText}>
-              Resident: resident@barangay.com / resident123
+              👨‍💼 Admin: admin@barangay.com / admin123
+            </p>
+            <p style={styles.demoText}>
+              👤 Resident: resident@barangay.com / resident123
             </p>
           </div>
         </div>
@@ -132,12 +164,14 @@ const styles: Record<string, React.CSSProperties> = {
     color: "var(--text-secondary)",
   },
   errorAlert: {
-    background: "#FEE2E2",
+    background: "linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)",
     color: "#991B1B",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "8px",
     marginBottom: "1.5rem",
     fontSize: "0.95rem",
+    fontWeight: "500",
+    border: "1px solid #FCA5A5",
   },
   form: {
     display: "flex",
@@ -153,9 +187,33 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: "500",
     color: "var(--text-primary)",
   },
+  passwordWrapper: {
+    position: "relative",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: "0.75rem",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "transparent",
+    border: "none",
+    color: "var(--text-secondary)",
+    cursor: "pointer",
+    padding: "0.25rem",
+    display: "flex",
+    alignItems: "center",
+  },
   submitBtn: {
     width: "100%",
     marginTop: "1rem",
+  },
+  spinner: {
+    width: "16px",
+    height: "16px",
+    border: "2px solid rgba(255, 255, 255, 0.3)",
+    borderTop: "2px solid white",
+    borderRadius: "50%",
+    animation: "spin 0.8s linear infinite",
   },
   footer: {
     marginTop: "2rem",
@@ -166,13 +224,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   link: {
     color: "var(--primary)",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   demoAccounts: {
     marginTop: "2rem",
     padding: "1rem",
-    background: "var(--background)",
-    borderRadius: "6px",
+    background: "linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)",
+    borderRadius: "8px",
+    border: "1px solid var(--border)",
   },
   demoTitle: {
     fontWeight: "600",
