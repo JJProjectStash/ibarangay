@@ -3,11 +3,13 @@ import React from "react";
 interface LoadingSpinnerProps {
   size?: "small" | "medium" | "large";
   fullScreen?: boolean;
+  message?: string;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "medium",
   fullScreen = false,
+  message,
 }) => {
   const sizes = {
     small: "24px",
@@ -32,27 +34,41 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         right: 0,
         bottom: 0,
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
         zIndex: 9999,
+        gap: "1rem",
       }
     : {
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem",
+        gap: "1rem",
       };
+
+  const messageStyle: React.CSSProperties = {
+    color: "#6B7280",
+    fontSize: "0.95rem",
+    fontWeight: "500",
+  };
 
   return (
     <div style={containerStyle}>
       <div style={spinnerStyle} />
+      {message && <p style={messageStyle}>{message}</p>}
     </div>
   );
 };
 
 // Add spin animation
-if (!document.getElementById("spinner-animation")) {
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("spinner-animation")
+) {
   const style = document.createElement("style");
   style.id = "spinner-animation";
   style.textContent = `

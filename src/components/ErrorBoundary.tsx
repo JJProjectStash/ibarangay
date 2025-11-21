@@ -30,6 +30,8 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      const isDevelopment = import.meta.env.MODE === "development";
+
       return (
         <div style={styles.container}>
           <div style={styles.content}>
@@ -38,7 +40,7 @@ class ErrorBoundary extends Component<Props, State> {
             <p style={styles.message}>
               We're sorry for the inconvenience. Please try refreshing the page.
             </p>
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {isDevelopment && this.state.error && (
               <details style={styles.details}>
                 <summary style={styles.summary}>Error Details</summary>
                 <pre style={styles.errorText}>
