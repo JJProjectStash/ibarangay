@@ -2,6 +2,12 @@
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: [
+    {
+      pattern:
+        /^(bg|text|border|shadow|backdrop|from|to|via|p|m|animate|rounded|transition|ring|backdrop-blur|hover|dark|grid|flex|gap|h-|w-).*/,
+    },
+  ],
   theme: {
     container: {
       center: true,
@@ -109,5 +115,90 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Add a tiny plugin so utilities that reference custom color names
+    // (e.g. bg-background, text-foreground, ring-offset-background)
+    // exist in the base layer. This lets @apply inside @layer base use
+    // these names without changing project CSS.
+    function ({ addUtilities, theme }) {
+      // Generate utilities for all top-level theme colors used in the project
+      // and a few common opacity variants. This ensures classes such as
+      // `bg-background`, `bg-background/50`, `text-foreground` and
+      // `ring-offset-background` exist at build time so @apply resolves.
+      const colorNames = [
+        "border",
+        "input",
+        "ring",
+        "background",
+        "foreground",
+        "primary",
+        "primary-foreground",
+        "primary-light",
+        "primary-dark",
+        "secondary",
+        "secondary-foreground",
+        "destructive",
+        "destructive-foreground",
+        "muted",
+        "muted-foreground",
+        "accent",
+        "accent-foreground",
+        "accent-light",
+        "popover",
+        "popover-foreground",
+        "card",
+        "card-foreground",
+        "success",
+        "warning",
+        "error",
+        "info",
+      ];
+
+      const alphaVariants = {
+        "/5": "0.05",
+        "/10": "0.1",
+        "/30": "0.3",
+        "/40": "0.4",
+        "/50": "0.5",
+      };
+
+      const utilities = {};
+
+      // plain name utilities
+      for (const name of colorNames) {
+        // convert e.g. primary-foreground -> text-primary-foreground
+        utilities[`.text-${name}`] = { color: theme(`colors.${name}`) };
+        utilities[`.bg-${name}`] = { backgroundColor: theme(`colors.${name}`) };
+        utilities[`.border-${name}`] = { borderColor: theme(`colors.${name}`) };
+        // ring-offset for background specifically
+        if (name === "background") {
+          utilities[".ring-offset-background"] = {
+            "--tw-ring-offset-color": theme("colors.background"),
+          };
+        }
+      }
+
+      // alpha variants for backgrounds
+      for (const name of [
+        "background",
+        "muted",
+        "primary",
+        "accent",
+        "destructive",
+      ]) {
+        const base = `var(--${name})`;
+        // If theme contains a literal color (e.g. hsl(var(--background))) use it.
+        // For safety prefer theme('colors.<name>') when available.
+        for (const [suffix, value] of Object.entries(alphaVariants)) {
+          // Build the hsl(var(--name) / alpha) pattern — Theme already stores colors
+          // in the form `hsl(var(--...))`, so we can inject the alpha fraction.
+          utilities[`.bg-${name}\\${suffix}`] = {
+            backgroundColor: `hsl(var(--${name}) / ${value})`,
+          };
+        }
+      }
+
+      addUtilities(utilities, { variants: ["responsive", "hover"] });
+    },
+  ],
 };
