@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
+import EventAttendeesModal from "../components/events/EventAttendeesModal";
 
 const Events: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -13,6 +14,10 @@ const Events: React.FC = () => {
   const [processingEventId, setProcessingEventId] = useState<string | null>(
     null
   );
+  const [selectedEvent, setSelectedEvent] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -23,7 +28,6 @@ const Events: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getEvents();
-      // Backend returns { success: true, data: [...] }
       const eventsData = Array.isArray(response.data) ? response.data : [];
       setEvents(eventsData);
     } catch (error) {
@@ -77,6 +81,10 @@ const Events: React.FC = () => {
     } finally {
       setProcessingEventId(null);
     }
+  };
+
+  const handleViewAttendees = (eventId: string, eventTitle: string) => {
+    setSelectedEvent({ id: eventId, title: eventTitle });
   };
 
   const isRegistered = (event: Event) => {
@@ -137,46 +145,37 @@ const Events: React.FC = () => {
           Barangay Events
         </h1>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          {events.length === 0 ? (
-            <div
-              className="card"
-              style={{
-                textAlign: "center",
-                padding: "3rem",
-                gridColumn: "1 / -1",
-              }}
-            >
-              <Calendar
-                size={48}
-                style={{
-                  margin: "0 auto 1rem",
-                  color: "var(--text-secondary)",
-                }}
-              />
-              <p style={{ color: "var(--text-secondary)" }}>
-                No events scheduled
-              </p>
-            </div>
-          ) : (
-            events.map((event) => {
-              const statusBadge = getStatusBadge(event.status);
+        {events.length === 0 ? (
+          <div
+            className="card"
+            style={{ padding: "3rem", textAlign: "center" }}
+          >
+            <Calendar
+              size={64}
+              style={{ margin: "0 auto 1rem", color: "var(--text-secondary)" }}
+            />
+            <p style={{ fontSize: "1.25rem", color: "var(--text-secondary)" }}>
+              No events available at the moment
+            </p>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+              gap: "1.5rem",
+            }}
+          >
+            {events.map((event) => {
               const registered = isRegistered(event);
-              const eventFull = isEventFull(event);
-              const isProcessing = processingEventId === event._id;
+              const statusBadge = getStatusBadge(event.status);
+              const attendeeCount = event.attendees.length;
+              const spotsRemaining = event.maxAttendees
+                ? event.maxAttendees - attendeeCount
+                : null;
 
               return (
-                <div
-                  key={event._id}
-                  className="card"
-                  style={{ display: "flex", flexDirection: "column" }}
-                >
+                <div key={event._id} className="card" style={{ padding: "0" }}>
                   {event.imageUrl && (
                     <img
                       src={event.imageUrl}
@@ -185,41 +184,46 @@ const Events: React.FC = () => {
                         width: "100%",
                         height: "200px",
                         objectFit: "cover",
-                        borderRadius: "6px",
-                        marginBottom: "1rem",
+                        borderRadius: "12px 12px 0 0",
                       }}
                     />
                   )}
-                  <div style={{ marginBottom: "1rem" }}>
+                  <div style={{ padding: "1.5rem" }}>
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "start",
-                        marginBottom: "0.75rem",
+                        marginBottom: "1rem",
                       }}
                     >
                       <h3
                         style={{
                           fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          flex: 1,
+                          fontWeight: "600",
+                          marginBottom: "0.5rem",
                         }}
                       >
                         {event.title}
                       </h3>
                       <span
-                        className={`badge ${statusBadge.class}`}
+                        className={statusBadge.class}
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "0.25rem",
+                          padding: "0.25rem 0.75rem",
+                          borderRadius: "12px",
+                          fontSize: "0.875rem",
+                          fontWeight: "600",
                         }}
                       >
                         {statusBadge.icon}
-                        {event.status.toUpperCase()}
+                        {event.status.charAt(0).toUpperCase() +
+                          event.status.slice(1)}
                       </span>
                     </div>
+
                     <p
                       style={{
                         color: "var(--text-secondary)",
@@ -229,153 +233,168 @@ const Events: React.FC = () => {
                     >
                       {event.description}
                     </p>
-                  </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.75rem",
-                      marginBottom: "1rem",
-                    }}
-                  >
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        color: "var(--text-secondary)",
+                        flexDirection: "column",
+                        gap: "0.75rem",
+                        marginBottom: "1rem",
                       }}
                     >
-                      <Calendar size={16} />
-                      <span style={{ fontSize: "0.9rem" }}>
-                        {format(new Date(event.eventDate), "MMMM dd, yyyy")}
-                      </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        <Calendar size={18} />
+                        <span style={{ fontSize: "0.875rem" }}>
+                          {format(new Date(event.eventDate), "MMM dd, yyyy")}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        <MapPin size={18} />
+                        <span style={{ fontSize: "0.875rem" }}>
+                          {event.location}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        <Users size={18} />
+                        <span style={{ fontSize: "0.875rem" }}>
+                          {attendeeCount} registered
+                          {event.maxAttendees && ` / ${event.maxAttendees} max`}
+                        </span>
+                      </div>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <MapPin size={16} />
-                      <span style={{ fontSize: "0.9rem" }}>
-                        {event.location}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <Users size={16} />
-                      <span style={{ fontSize: "0.9rem" }}>
-                        {event.attendees.length}{" "}
-                        {event.maxAttendees && `/ ${event.maxAttendees}`}{" "}
-                        attendees
-                      </span>
-                    </div>
-                  </div>
 
-                  <div
-                    style={{
-                      padding: "0.75rem",
-                      background: "var(--background)",
-                      borderRadius: "6px",
-                      marginBottom: "1rem",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "0.85rem",
-                        fontWeight: "500",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Category: {event.category}
-                    </span>
-                  </div>
-
-                  {event.status === "upcoming" && (
-                    <div style={{ marginTop: "auto" }}>
-                      {registered ? (
-                        <button
-                          className="btn btn-outline"
+                    {spotsRemaining !== null &&
+                      spotsRemaining <= 5 &&
+                      spotsRemaining > 0 && (
+                        <div
                           style={{
-                            width: "100%",
-                            borderColor: "var(--error)",
-                            color: "var(--error)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.5rem",
+                            padding: "0.5rem",
+                            background: "rgba(245, 158, 11, 0.1)",
+                            color: "#f59e0b",
+                            borderRadius: "6px",
+                            fontSize: "0.875rem",
+                            marginBottom: "1rem",
+                            textAlign: "center",
                           }}
-                          onClick={() => handleUnregister(event._id)}
-                          disabled={isProcessing}
                         >
-                          {isProcessing ? (
-                            "Processing..."
+                          Only {spotsRemaining} spot
+                          {spotsRemaining !== 1 ? "s" : ""} left!
+                        </div>
+                      )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.75rem",
+                        marginTop: "1rem",
+                      }}
+                    >
+                      {user &&
+                        (user.role === "admin" || user.role === "staff") && (
+                          <button
+                            className="btn btn-outline"
+                            onClick={() =>
+                              handleViewAttendees(event._id, event.title)
+                            }
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "0.5rem",
+                            }}
+                          >
+                            <Users size={18} />
+                            View Attendees
+                          </button>
+                        )}
+                      {event.status === "upcoming" && (
+                        <>
+                          {registered ? (
+                            <button
+                              className="btn"
+                              onClick={() => handleUnregister(event._id)}
+                              disabled={processingEventId === event._id}
+                              style={{
+                                flex: 1,
+                                background: "rgba(239, 68, 68, 0.1)",
+                                color: "#ef4444",
+                                border: "none",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "0.5rem",
+                              }}
+                            >
+                              <XCircle size={18} />
+                              {processingEventId === event._id
+                                ? "Processing..."
+                                : "Unregister"}
+                            </button>
                           ) : (
-                            <>
-                              <CheckCircle size={18} /> Registered - Click to
-                              Unregister
-                            </>
+                            <button
+                              className="btn btn-primary"
+                              onClick={() => handleRegister(event._id)}
+                              disabled={
+                                processingEventId === event._id ||
+                                (spotsRemaining !== null && spotsRemaining <= 0)
+                              }
+                              style={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "0.5rem",
+                              }}
+                            >
+                              <CheckCircle size={18} />
+                              {processingEventId === event._id
+                                ? "Processing..."
+                                : spotsRemaining !== null && spotsRemaining <= 0
+                                ? "Event Full"
+                                : "Register"}
+                            </button>
                           )}
-                        </button>
-                      ) : (
-                        <button
-                          className="btn btn-primary"
-                          style={{ width: "100%" }}
-                          onClick={() => handleRegister(event._id)}
-                          disabled={eventFull || isProcessing}
-                        >
-                          {isProcessing
-                            ? "Processing..."
-                            : eventFull
-                            ? "Event Full"
-                            : "Register"}
-                        </button>
+                        </>
                       )}
                     </div>
-                  )}
-                  {event.status === "completed" && (
-                    <div
-                      style={{
-                        marginTop: "auto",
-                        padding: "0.75rem",
-                        background: "var(--background)",
-                        borderRadius: "6px",
-                        textAlign: "center",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      This event has been completed
-                    </div>
-                  )}
-                  {event.status === "cancelled" && (
-                    <div
-                      style={{
-                        marginTop: "auto",
-                        padding: "0.75rem",
-                        background: "rgba(239, 68, 68, 0.1)",
-                        borderRadius: "6px",
-                        textAlign: "center",
-                        color: "#dc2626",
-                      }}
-                    >
-                      This event has been cancelled
-                    </div>
-                  )}
+                  </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
+
+        {/* Event Attendees Modal */}
+        {selectedEvent && (
+          <EventAttendeesModal
+            isOpen={true}
+            onClose={() => setSelectedEvent(null)}
+            eventId={selectedEvent.id}
+            eventTitle={selectedEvent.title}
+          />
+        )}
       </div>
     </div>
   );

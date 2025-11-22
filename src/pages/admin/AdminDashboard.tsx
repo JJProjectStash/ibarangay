@@ -6,9 +6,11 @@ import {
   UserX,
   Activity,
   TrendingUp,
+  UserPlus,
 } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import UserManagementTable from "../../components/admin/UserManagementTable";
+import CreateStaffAdminModal from "../../components/admin/CreateStaffAdminModal";
 import { UserManagement } from "../../types/admin";
 import { showToast } from "../../utils/toast";
 
@@ -26,6 +28,7 @@ const AdminDashboard: React.FC = () => {
   const [filter, setFilter] = useState<{ role?: string; isVerified?: boolean }>(
     {}
   );
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -106,6 +109,10 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleCreateSuccess = () => {
+    fetchData();
+  };
+
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -117,11 +124,30 @@ const AdminDashboard: React.FC = () => {
   return (
     <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
       <div className="container">
-        <h1
-          style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "2rem" }}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "2rem",
+          }}
         >
-          Admin Dashboard
-        </h1>
+          <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
+            Admin Dashboard
+          </h1>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <UserPlus size={20} />
+            Create Staff/Admin
+          </button>
+        </div>
 
         {/* Stats Cards */}
         <div
@@ -401,6 +427,13 @@ const AdminDashboard: React.FC = () => {
             onDeleteUser={handleDeleteUser}
           />
         </div>
+
+        {/* Create Staff/Admin Modal */}
+        <CreateStaffAdminModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
       </div>
     </div>
   );
