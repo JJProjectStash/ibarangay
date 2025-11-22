@@ -45,11 +45,13 @@ const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       navigate("/");
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

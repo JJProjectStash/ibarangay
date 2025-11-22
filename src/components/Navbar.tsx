@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Menu, X, LogOut, User, BarChart3 } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  User,
+  BarChart3,
+  Shield,
+  Briefcase,
+} from "lucide-react";
 import { BarangayLogo } from "./CustomIcons";
 import NotificationBell from "./NotificationBell";
 
@@ -27,6 +35,47 @@ const Navbar: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const getRoleBasedDashboard = () => {
+    if (!user) return "/dashboard";
+    switch (user.role) {
+      case "admin":
+        return "/admin";
+      case "staff":
+        return "/staff";
+      default:
+        return "/dashboard";
+    }
+  };
+
+  const getRoleBadge = () => {
+    if (!user) return null;
+    const badges = {
+      admin: { icon: Shield, color: "#ef4444", label: "Admin" },
+      staff: { icon: Briefcase, color: "#3b82f6", label: "Staff" },
+      resident: { icon: User, color: "#10b981", label: "Resident" },
+    };
+    const badge = badges[user.role];
+    const Icon = badge.icon;
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.25rem",
+          padding: "0.25rem 0.75rem",
+          background: `${badge.color}20`,
+          color: badge.color,
+          borderRadius: "12px",
+          fontSize: "0.75rem",
+          fontWeight: "600",
+        }}
+      >
+        <Icon size={14} />
+        {badge.label}
+      </span>
+    );
+  };
+
   return (
     <nav style={{ ...styles.nav, ...(scrolled ? styles.navScrolled : {}) }}>
       <div className="container" style={styles.container}>
@@ -49,42 +98,48 @@ const Navbar: React.FC = () => {
                 Home
               </Link>
               <Link
-                to="/dashboard"
+                to={getRoleBasedDashboard()}
                 style={{
                   ...styles.navLink,
-                  ...(isActive("/dashboard") ? styles.navLinkActive : {}),
+                  ...(isActive(getRoleBasedDashboard())
+                    ? styles.navLinkActive
+                    : {}),
                 }}
               >
                 <BarChart3 size={18} style={{ marginRight: "0.25rem" }} />
                 Dashboard
               </Link>
-              <Link
-                to="/services"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/services") ? styles.navLinkActive : {}),
-                }}
-              >
-                Services
-              </Link>
-              <Link
-                to="/complaints"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/complaints") ? styles.navLinkActive : {}),
-                }}
-              >
-                Complaints
-              </Link>
-              <Link
-                to="/events"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/events") ? styles.navLinkActive : {}),
-                }}
-              >
-                Events
-              </Link>
+              {user?.role === "resident" && (
+                <>
+                  <Link
+                    to="/services"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/services") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Services
+                  </Link>
+                  <Link
+                    to="/complaints"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/complaints") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Complaints
+                  </Link>
+                  <Link
+                    to="/events"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/events") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Events
+                  </Link>
+                </>
+              )}
 
               <NotificationBell />
 
@@ -92,7 +147,16 @@ const Navbar: React.FC = () => {
                 <div style={styles.userAvatar}>
                   <User size={18} />
                 </div>
-                <span style={styles.userName}>{user?.firstName}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.125rem",
+                  }}
+                >
+                  <span style={styles.userName}>{user?.firstName}</span>
+                  {getRoleBadge()}
+                </div>
                 <button
                   onClick={handleLogout}
                   style={styles.logoutBtn}
@@ -133,6 +197,17 @@ const Navbar: React.FC = () => {
         <div style={styles.mobileMenu} className="slide-in-right">
           {isAuthenticated ? (
             <>
+              <div
+                style={{
+                  padding: "0.75rem",
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <div style={{ fontWeight: "600", marginBottom: "0.25rem" }}>
+                  {user?.firstName} {user?.lastName}
+                </div>
+                {getRoleBadge()}
+              </div>
               <Link
                 to="/"
                 style={styles.mobileLink}
@@ -141,33 +216,37 @@ const Navbar: React.FC = () => {
                 Home
               </Link>
               <Link
-                to="/dashboard"
+                to={getRoleBasedDashboard()}
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Dashboard
               </Link>
-              <Link
-                to="/services"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link
-                to="/complaints"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Complaints
-              </Link>
-              <Link
-                to="/events"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Events
-              </Link>
+              {user?.role === "resident" && (
+                <>
+                  <Link
+                    to="/services"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Services
+                  </Link>
+                  <Link
+                    to="/complaints"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Complaints
+                  </Link>
+                  <Link
+                    to="/events"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Events
+                  </Link>
+                </>
+              )}
               <Link
                 to="/notifications"
                 style={styles.mobileLink}

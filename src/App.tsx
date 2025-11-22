@@ -19,6 +19,8 @@ import Complaints from "./pages/Complaints";
 import Events from "./pages/Events";
 import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import StaffDashboard from "./pages/staff/StaffDashboard";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,6 +30,30 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const RoleBasedRoute = ({
+  children,
+  allowedRoles,
+}: {
+  children: React.ReactNode;
+  allowedRoles: Array<"admin" | "staff" | "resident">;
+}) => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <>{children}</>;
 };
 
 function AppRoutes() {
@@ -59,6 +85,22 @@ function AppRoutes() {
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RoleBasedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <RoleBasedRoute allowedRoles={["staff"]}>
+              <StaffDashboard />
+            </RoleBasedRoute>
           }
         />
         <Route
