@@ -73,6 +73,19 @@ class ApiService {
     return response.data;
   }
 
+  async createStaffAdmin(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    address: string;
+    phoneNumber: string;
+    role: "admin" | "staff";
+  }) {
+    const response = await this.api.post("/auth/users/staff-admin", data);
+    return response.data;
+  }
+
   // Config endpoints
   async getComplaintCategories() {
     const response = await this.api.get("/config/complaint-categories");
@@ -112,10 +125,8 @@ class ApiService {
     return response.data;
   }
 
-  async getServiceRequests(status?: string) {
-    const response = await this.api.get("/services", {
-      params: status ? { status } : {},
-    });
+  async getServiceRequests(params?: { status?: string; search?: string; page?: number; limit?: number }) {
+    const response = await this.api.get("/services", { params });
     return response.data;
   }
 
@@ -124,9 +135,23 @@ class ApiService {
     return response.data;
   }
 
-  async updateServiceStatus(id: string, status: string, notes?: string) {
+  async updateServiceStatus(id: string, status: string, notes?: string, rejectionReason?: string) {
     const response = await this.api.put(`/services/${id}/status`, {
       status,
+      notes,
+      rejectionReason,
+    });
+    return response.data;
+  }
+
+  async approveServiceRequest(id: string, notes?: string) {
+    const response = await this.api.put(`/services/${id}/approve`, { notes });
+    return response.data;
+  }
+
+  async rejectServiceRequest(id: string, rejectionReason: string, notes?: string) {
+    const response = await this.api.put(`/services/${id}/reject`, {
+      rejectionReason,
       notes,
     });
     return response.data;
@@ -282,15 +307,23 @@ class ApiService {
     return response.data;
   }
 
-  async getEvents(status?: string, category?: string) {
-    const response = await this.api.get("/events", {
-      params: { status, category },
-    });
+  async getEvents(params?: { status?: string; category?: string; search?: string }) {
+    const response = await this.api.get("/events", { params });
     return response.data;
   }
 
   async getEventById(id: string) {
     const response = await this.api.get(`/events/${id}`);
+    return response.data;
+  }
+
+  async getEventAttendees(id: string) {
+    const response = await this.api.get(`/events/${id}/attendees`);
+    return response.data;
+  }
+
+  async exportEventAttendees(id: string) {
+    const response = await this.api.get(`/events/${id}/attendees/export`);
     return response.data;
   }
 
