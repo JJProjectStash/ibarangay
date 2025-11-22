@@ -1,153 +1,117 @@
 import React from "react";
-import {
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Package,
-  Calendar,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Badge } from "./ui/badge";
+import { CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 
 interface StatusBadgeProps {
   status: string;
-  className?: string;
+  variant?: "default" | "outline";
+  showIcon?: boolean;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({
+const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
-  className,
+  variant = "default",
+  showIcon = true,
 }) => {
-  const getStatusConfig = () => {
+  const getStatusConfig = (status: string) => {
+    const statusLower = status.toLowerCase();
+
     const configs: Record<
       string,
-      { icon: React.ReactNode; className: string; label: string }
+      { label: string; className: string; icon: React.ReactNode }
     > = {
-      // Service statuses
       pending: {
-        icon: <Clock className="h-3.5 w-3.5" />,
-        className: "bg-yellow-50 text-yellow-700 border-yellow-200",
         label: "Pending",
+        className:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+        icon: <Clock className="h-3 w-3" />,
       },
       approved: {
-        icon: <CheckCircle className="h-3.5 w-3.5" />,
-        className: "bg-green-50 text-green-700 border-green-200",
         label: "Approved",
-      },
-      borrowed: {
-        icon: <Package className="h-3.5 w-3.5" />,
-        className: "bg-blue-50 text-blue-700 border-blue-200",
-        label: "Borrowed",
-      },
-      returned: {
-        icon: <CheckCircle className="h-3.5 w-3.5" />,
-        className: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        label: "Returned",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+        icon: <CheckCircle className="h-3 w-3" />,
       },
       rejected: {
-        icon: <XCircle className="h-3.5 w-3.5" />,
-        className: "bg-red-50 text-red-700 border-red-200",
         label: "Rejected",
+        className:
+          "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+        icon: <XCircle className="h-3 w-3" />,
       },
-      // Complaint statuses
+      borrowed: {
+        label: "Borrowed",
+        className:
+          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+        icon: <AlertCircle className="h-3 w-3" />,
+      },
+      returned: {
+        label: "Returned",
+        className:
+          "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800",
+        icon: <CheckCircle className="h-3 w-3" />,
+      },
       "in-progress": {
-        icon: <AlertCircle className="h-3.5 w-3.5" />,
-        className: "bg-blue-50 text-blue-700 border-blue-200",
         label: "In Progress",
+        className:
+          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+        icon: <Clock className="h-3 w-3" />,
       },
       resolved: {
-        icon: <CheckCircle className="h-3.5 w-3.5" />,
-        className: "bg-green-50 text-green-700 border-green-200",
         label: "Resolved",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+        icon: <CheckCircle className="h-3 w-3" />,
       },
       closed: {
-        icon: <XCircle className="h-3.5 w-3.5" />,
-        className: "bg-gray-50 text-gray-700 border-gray-200",
         label: "Closed",
+        className:
+          "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800",
+        icon: <XCircle className="h-3 w-3" />,
       },
-      // Event statuses
       upcoming: {
-        icon: <Calendar className="h-3.5 w-3.5" />,
-        className: "bg-blue-50 text-blue-700 border-blue-200",
         label: "Upcoming",
+        className:
+          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+        icon: <Clock className="h-3 w-3" />,
       },
       ongoing: {
-        icon: <AlertCircle className="h-3.5 w-3.5" />,
-        className: "bg-orange-50 text-orange-700 border-orange-200",
         label: "Ongoing",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+        icon: <AlertCircle className="h-3 w-3" />,
       },
       completed: {
-        icon: <CheckCircle className="h-3.5 w-3.5" />,
-        className: "bg-green-50 text-green-700 border-green-200",
         label: "Completed",
+        className:
+          "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800",
+        icon: <CheckCircle className="h-3 w-3" />,
       },
       cancelled: {
-        icon: <XCircle className="h-3.5 w-3.5" />,
-        className: "bg-red-50 text-red-700 border-red-200",
         label: "Cancelled",
+        className:
+          "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+        icon: <XCircle className="h-3 w-3" />,
       },
     };
 
     return (
-      configs[status.toLowerCase()] || {
-        icon: <AlertCircle className="h-3.5 w-3.5" />,
-        className: "bg-gray-50 text-gray-700 border-gray-200",
+      configs[statusLower] || {
         label: status,
+        className:
+          "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800",
+        icon: <AlertCircle className="h-3 w-3" />,
       }
     );
   };
 
-  const config = getStatusConfig();
+  const config = getStatusConfig(status);
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
-        config.className,
-        className
-      )}
-    >
-      {config.icon}
+    <Badge variant={variant} className={config.className}>
+      {showIcon && <span className="mr-1">{config.icon}</span>}
       {config.label}
-    </span>
+    </Badge>
   );
 };
 
-interface PriorityBadgeProps {
-  priority: "low" | "medium" | "high";
-  className?: string;
-}
-
-export const PriorityBadge: React.FC<PriorityBadgeProps> = ({
-  priority,
-  className,
-}) => {
-  const configs = {
-    low: {
-      className: "bg-blue-50 text-blue-700 border-blue-200",
-      label: "Low",
-    },
-    medium: {
-      className: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      label: "Medium",
-    },
-    high: {
-      className: "bg-red-50 text-red-700 border-red-200",
-      label: "High",
-    },
-  };
-
-  const config = configs[priority];
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border",
-        config.className,
-        className
-      )}
-    >
-      {config.label}
-    </span>
-  );
-};
+export default StatusBadge;

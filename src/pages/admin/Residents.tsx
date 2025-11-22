@@ -3,10 +3,10 @@ import { Users, Search, UserPlus, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import UserManagementTable from "@/components/admin/UserManagementTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { adminApi } from "@/services/adminApi";
+import adminApi from "@/services/adminApi";
 
 const AdminResidents = () => {
   const [residents, setResidents] = useState([]);
@@ -20,12 +20,41 @@ const AdminResidents = () => {
   const fetchResidents = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllUsers();
-      setResidents(data.filter((user: any) => user.role === "resident"));
+      const response = await adminApi.getAllUsers();
+      setResidents(
+        response.data.filter((user: any) => user.role === "resident")
+      );
     } catch (error) {
       console.error("Failed to fetch residents:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, role: string) => {
+    try {
+      await adminApi.updateUserRole(userId, role);
+      fetchResidents();
+    } catch (error) {
+      console.error("Failed to update role:", error);
+    }
+  };
+
+  const handleVerifyUser = async (userId: string) => {
+    try {
+      await adminApi.verifyUser(userId);
+      fetchResidents();
+    } catch (error) {
+      console.error("Failed to verify user:", error);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await adminApi.deleteUser(userId);
+      fetchResidents();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
     }
   };
 
@@ -38,7 +67,7 @@ const AdminResidents = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -126,7 +155,9 @@ const AdminResidents = () => {
           <CardContent>
             <UserManagementTable
               users={filteredResidents}
-              onUpdate={fetchResidents}
+              onUpdateRole={handleUpdateRole}
+              onVerifyUser={handleVerifyUser}
+              onDeleteUser={handleDeleteUser}
             />
           </CardContent>
         </Card>

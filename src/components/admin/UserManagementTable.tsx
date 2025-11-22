@@ -8,6 +8,7 @@ interface UserManagementTableProps {
   onUpdateRole: (userId: string, role: string) => void;
   onVerifyUser: (userId: string) => void;
   onDeleteUser: (userId: string) => void;
+  onUpdate?: () => void;
 }
 
 const UserManagementTable: React.FC<UserManagementTableProps> = ({
@@ -15,6 +16,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
   onUpdateRole,
   onVerifyUser,
   onDeleteUser,
+  onUpdate,
 }) => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -27,6 +29,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
   const handleSaveRole = (userId: string) => {
     onUpdateRole(userId, selectedRole);
     setEditingUserId(null);
+    if (onUpdate) onUpdate();
   };
 
   const getRoleBadgeStyle = (role: string) => {
@@ -262,7 +265,10 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
                   {!user.isVerified && (
                     <button
                       className="btn btn-primary"
-                      onClick={() => onVerifyUser(user.id)}
+                      onClick={() => {
+                        onVerifyUser(user.id);
+                        if (onUpdate) onUpdate();
+                      }}
                       style={{
                         padding: "0.5rem 0.75rem",
                         fontSize: "0.875rem",
@@ -285,6 +291,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
                         )
                       ) {
                         onDeleteUser(user.id);
+                        if (onUpdate) onUpdate();
                       }
                     }}
                     style={{

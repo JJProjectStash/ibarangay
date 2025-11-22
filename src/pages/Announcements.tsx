@@ -3,7 +3,7 @@ import { Megaphone, Search, Calendar, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import api from "@/services/api";
 import { Announcement } from "@/types";
@@ -78,7 +78,7 @@ const Announcements = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -88,7 +88,6 @@ const Announcements = () => {
       <PageHeader
         title="Announcements"
         description="Stay updated with the latest news and announcements from your barangay"
-        icon={<Megaphone className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">

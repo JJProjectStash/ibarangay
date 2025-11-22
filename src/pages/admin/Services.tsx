@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { adminApi } from "@/services/adminApi";
+import api from "@/services/api";
 
 const AdminServices = () => {
   const [services, setServices] = useState([]);
@@ -19,7 +19,7 @@ const AdminServices = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllServices();
+      const data = await api.getServiceRequests();
       setServices(data);
     } catch (error) {
       console.error("Failed to fetch services:", error);
@@ -35,7 +35,7 @@ const AdminServices = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
