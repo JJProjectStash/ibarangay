@@ -26,7 +26,10 @@ const StaffDashboard: React.FC = () => {
       setComplaints(complaintsResponse.data || []);
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to fetch data", "error");
+      showToast({
+        message: err.message || "Failed to fetch data",
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -39,11 +42,17 @@ const StaffDashboard: React.FC = () => {
   ) => {
     try {
       await api.updateServiceStatus(id, status, notes);
-      showToast("Service request updated successfully", "success");
+      showToast({
+        message: "Service request updated successfully",
+        type: "success",
+      });
       fetchData();
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to update service request", "error");
+      showToast({
+        message: err.message || "Failed to update service request",
+        type: "error",
+      });
     }
   };
 
@@ -54,11 +63,14 @@ const StaffDashboard: React.FC = () => {
   ) => {
     try {
       await api.updateComplaintStatus(id, status, response);
-      showToast("Complaint updated successfully", "success");
+      showToast({ message: "Complaint updated successfully", type: "success" });
       fetchData();
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to update complaint", "error");
+      showToast({
+        message: err.message || "Failed to update complaint",
+        type: "error",
+      });
     }
   };
 

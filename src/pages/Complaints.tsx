@@ -455,7 +455,7 @@ const Complaints: React.FC = () => {
                               flexWrap: "wrap",
                             }}
                           >
-                            {complaint.attachments.map((attachment, idx) => (
+                            {complaint.attachments.map((_, idx) => (
                               <span
                                 key={idx}
                                 style={{

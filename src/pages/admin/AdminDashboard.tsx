@@ -51,7 +51,10 @@ const AdminDashboard: React.FC = () => {
       });
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to fetch users", "error");
+      showToast({
+        message: err.message || "Failed to fetch users",
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -64,33 +67,42 @@ const AdminDashboard: React.FC = () => {
   const handleUpdateRole = async (userId: string, role: string) => {
     try {
       await adminApi.updateUserRole(userId, role);
-      showToast("User role updated successfully", "success");
+      showToast({ message: "User role updated successfully", type: "success" });
       fetchData();
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to update user role", "error");
+      showToast({
+        message: err.message || "Failed to update user role",
+        type: "error",
+      });
     }
   };
 
   const handleVerifyUser = async (userId: string) => {
     try {
       await adminApi.verifyUser(userId);
-      showToast("User verified successfully", "success");
+      showToast({ message: "User verified successfully", type: "success" });
       fetchData();
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to verify user", "error");
+      showToast({
+        message: err.message || "Failed to verify user",
+        type: "error",
+      });
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
     try {
       await adminApi.deleteUser(userId);
-      showToast("User deleted successfully", "success");
+      showToast({ message: "User deleted successfully", type: "success" });
       fetchData();
     } catch (error) {
       const err = error as Error;
-      showToast(err.message || "Failed to delete user", "error");
+      showToast({
+        message: err.message || "Failed to delete user",
+        type: "error",
+      });
     }
   };
 
