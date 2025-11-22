@@ -13,6 +13,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  signup: (data: RegisterData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -24,7 +25,8 @@ interface RegisterData {
   email: string;
   password: string;
   address: string;
-  phoneNumber: string;
+  phoneNumber?: string;
+  phone?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,7 +66,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const register = async (data: RegisterData) => {
     try {
-      const response = await api.register(data);
+      // Normalize the data to ensure phoneNumber is present
+      const registerData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        address: data.address,
+        phoneNumber: data.phoneNumber || data.phone || "",
+      };
+
+      const response = await api.register(registerData);
       const { user: userData, token: userToken } = response.data;
 
       setUser(userData);
@@ -88,6 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     token,
     login,
     register,
+    signup: register, // Alias for register
     logout,
     isAuthenticated: !!token,
     isLoading,

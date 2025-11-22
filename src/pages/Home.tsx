@@ -8,6 +8,13 @@ import {
   EventIcon,
   NotificationIcon,
 } from "../components/CustomIcons";
+import {
+  ArrowRight,
+  CheckCircle,
+  TrendingUp,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -16,7 +23,8 @@ const Home: React.FC = () => {
     {
       icon: <ServiceIcon size={64} />,
       title: "Borrow & Return",
-      description: "Request to borrow barangay equipment and facilities",
+      description:
+        "Request to borrow barangay equipment and facilities with ease",
       link: "/services",
       color: "#3B82F6",
       gradient: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
@@ -24,7 +32,7 @@ const Home: React.FC = () => {
     {
       icon: <ComplaintIcon size={64} />,
       title: "Complaint Center",
-      description: "Submit and track your complaints and concerns",
+      description: "Submit and track your complaints and concerns efficiently",
       link: "/complaints",
       color: "#EF4444",
       gradient: "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
@@ -40,56 +48,77 @@ const Home: React.FC = () => {
     {
       icon: <NotificationIcon size={64} />,
       title: "Notifications",
-      description: "Stay updated with important announcements",
+      description: "Stay updated with important announcements and updates",
       link: "/notifications",
       color: "#F59E0B",
       gradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
     },
   ];
 
+  const features = [
+    {
+      icon: CheckCircle,
+      title: "Quick & Easy",
+      description:
+        "Access barangay services anytime, anywhere. No need to visit the office for simple requests.",
+      color: "blue",
+    },
+    {
+      icon: TrendingUp,
+      title: "Track Your Requests",
+      description:
+        "Monitor the status of your service requests and complaints in real-time with detailed updates.",
+      color: "green",
+    },
+    {
+      icon: Clock,
+      title: "Stay Informed",
+      description:
+        "Get instant notifications about events, announcements, and updates from your barangay.",
+      color: "yellow",
+    },
+  ];
+
   return (
-    <div style={styles.container}>
+    <div className="min-h-[calc(100vh-64px)]">
       {/* Hero Section */}
-      <section style={styles.hero}>
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-700 to-blue-600 text-white py-20 md:py-32 overflow-hidden">
         <AnimatedBackground />
-        <div className="container" style={styles.heroContent}>
-          <div className="fade-in">
-            <h1 style={styles.heroTitle}>
-              Welcome to Barangay Online Services
+        <div className="container relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8 animate-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-4">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                Welcome to the Future of Community Services
+              </span>
+            </div>
+
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              Barangay Services
+              <br />
+              <span className="bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent">
+                Made Simple
+              </span>
             </h1>
-            <p style={styles.heroSubtitle}>
+
+            <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
               {isAuthenticated
-                ? `Hello, ${user?.firstName}! Access all barangay services in one place.`
+                ? `Hello, ${user?.firstName}! Access all barangay services in one convenient place.`
                 : "Your one-stop platform for all barangay services and information"}
             </p>
+
             {!isAuthenticated && (
-              <div style={styles.heroCta}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Link
                   to="/signup"
-                  className="btn btn-primary"
-                  style={styles.ctaBtn}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-200"
                 >
                   Get Started
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M4 10h12m0 0l-4-4m4 4l-4 4"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   to="/login"
-                  className="btn btn-outline"
-                  style={styles.ctaBtnOutline}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md text-white rounded-xl font-semibold text-lg border-2 border-white/30 hover:bg-white/20 transition-all duration-200"
                 >
                   Login
                 </Link>
@@ -100,39 +129,46 @@ const Home: React.FC = () => {
       </section>
 
       {/* Services Grid */}
-      <section style={styles.servicesSection}>
+      <section className="py-20 md:py-28 bg-gradient-to-b from-white to-blue-50">
         <div className="container">
-          <h2 style={styles.sectionTitle}>Our Services</h2>
-          <p style={styles.sectionSubtitle}>
-            Everything you need for barangay services, all in one place
-          </p>
-          <div style={styles.servicesGrid}>
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+              Our Services
+            </h2>
+            <p className="text-xl text-gray-600">
+              Everything you need for barangay services, all in one place
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, index) => (
               <Link
                 key={index}
                 to={isAuthenticated ? service.link : "/login"}
-                style={styles.serviceCard}
-                className="service-card"
+                className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
               >
-                <div style={styles.serviceIconWrapper}>{service.icon}</div>
-                <h3 style={styles.serviceTitle}>{service.title}</h3>
-                <p style={styles.serviceDescription}>{service.description}</p>
-                <div style={styles.serviceArrow}>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div
+                  className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: service.color }}
+                />
+
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="transform group-hover:scale-110 transition-transform duration-300">
+                    {service.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {service.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {service.description}
+                  </p>
+                  <div
+                    className="flex items-center gap-2 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: service.color }}
                   >
-                    <path
-                      d="M5 12h14m0 0l-6-6m6 6l-6 6"
-                      stroke={service.color}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                    Learn more
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -141,418 +177,104 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section style={styles.featuresSection}>
+      <section className="py-20 md:py-28 bg-white">
         <div className="container">
-          <div style={styles.featuresGrid}>
-            <div className="feature-card" style={styles.featureCard}>
-              <div style={styles.featureIcon}>
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 48 48"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center space-y-4 group">
+                <div
+                  className={`mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br ${
+                    feature.color === "blue"
+                      ? "from-blue-400 to-blue-600"
+                      : feature.color === "green"
+                      ? "from-green-400 to-green-600"
+                      : "from-yellow-400 to-yellow-600"
+                  } flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}
                 >
-                  <circle cx="24" cy="24" r="20" fill="#3B82F6" opacity="0.1" />
-                  <path
-                    d="M16 24l6 6 12-12"
-                    stroke="#3B82F6"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                  <feature.icon className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <h3 style={styles.featureTitle}>Quick & Easy</h3>
-              <p style={styles.featureText}>
-                Access barangay services anytime, anywhere. No need to visit the
-                office for simple requests.
-              </p>
-            </div>
-            <div className="feature-card" style={styles.featureCard}>
-              <div style={styles.featureIcon}>
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 48 48"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="24" cy="24" r="20" fill="#10B981" opacity="0.1" />
-                  <path
-                    d="M24 14v20m-10-6l10 6 10-6"
-                    stroke="#10B981"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <h3 style={styles.featureTitle}>Track Your Requests</h3>
-              <p style={styles.featureText}>
-                Monitor the status of your service requests and complaints in
-                real-time.
-              </p>
-            </div>
-            <div className="feature-card" style={styles.featureCard}>
-              <div style={styles.featureIcon}>
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 48 48"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="24" cy="24" r="20" fill="#F59E0B" opacity="0.1" />
-                  <path
-                    d="M24 16v12l6 4"
-                    stroke="#F59E0B"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="10"
-                    stroke="#F59E0B"
-                    strokeWidth="3"
-                    fill="none"
-                  />
-                </svg>
-              </div>
-              <h3 style={styles.featureTitle}>Stay Informed</h3>
-              <p style={styles.featureText}>
-                Get instant notifications about events, announcements, and
-                updates from your barangay.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section style={styles.statsSection}>
+      <section className="py-20 md:py-28 bg-gradient-to-br from-blue-900 via-blue-700 to-blue-600 text-white">
         <div className="container">
-          <div style={styles.statsGrid}>
-            <div className="stat-card" style={styles.statCard}>
-              <div style={styles.statNumber}>1000+</div>
-              <div style={styles.statLabel}>Active Users</div>
-            </div>
-            <div className="stat-card" style={styles.statCard}>
-              <div style={styles.statNumber}>500+</div>
-              <div style={styles.statLabel}>Services Completed</div>
-            </div>
-            <div className="stat-card" style={styles.statCard}>
-              <div style={styles.statNumber}>50+</div>
-              <div style={styles.statLabel}>Events Hosted</div>
-            </div>
-            <div className="stat-card" style={styles.statCard}>
-              <div style={styles.statNumber}>24/7</div>
-              <div style={styles.statLabel}>Available Support</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+            {[
+              { number: "1000+", label: "Active Users" },
+              { number: "500+", label: "Services Completed" },
+              { number: "50+", label: "Events Hosted" },
+              { number: "24/7", label: "Available Support" },
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className="text-center space-y-2 group cursor-pointer"
+              >
+                <div className="text-4xl md:text-5xl font-bold group-hover:scale-110 transition-transform duration-300">
+                  {stat.number}
+                </div>
+                <div className="text-lg text-blue-200">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={styles.footer}>
+      <footer className="bg-gray-900 text-white py-12">
         <div className="container">
-          <div style={styles.footerContent}>
-            <div style={styles.footerSection}>
-              <h4 style={styles.footerTitle}>Barangay Services</h4>
-              <p style={styles.footerText}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold">iBarangay Services</h4>
+              <p className="text-gray-400 leading-relaxed">
                 Making community services accessible to everyone
               </p>
             </div>
-            <div style={styles.footerSection}>
-              <h4 style={styles.footerTitle}>Quick Links</h4>
-              <div style={styles.footerLinks}>
-                <Link to="/services" style={styles.footerLink}>
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold">Quick Links</h4>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  to="/services"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Services
                 </Link>
-                <Link to="/events" style={styles.footerLink}>
+                <Link
+                  to="/events"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Events
                 </Link>
-                <Link to="/complaints" style={styles.footerLink}>
+                <Link
+                  to="/complaints"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Complaints
                 </Link>
               </div>
             </div>
-            <div style={styles.footerSection}>
-              <h4 style={styles.footerTitle}>Contact</h4>
-              <p style={styles.footerText}>barangay@example.com</p>
-              <p style={styles.footerText}>+63 123 456 7890</p>
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold">Contact</h4>
+              <p className="text-gray-400">barangay@example.com</p>
+              <p className="text-gray-400">+63 123 456 7890</p>
             </div>
           </div>
-          <div style={styles.footerBottom}>
-            <p style={styles.footerCopyright}>
-              © 2024 Barangay Online Services. All rights reserved.
-            </p>
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+            <p>© 2024 iBarangay Online Services. All rights reserved.</p>
           </div>
         </div>
       </footer>
     </div>
   );
 };
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: "calc(100vh - 64px)",
-  },
-  hero: {
-    position: "relative",
-    background: "linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)",
-    color: "white",
-    padding: "6rem 0",
-    textAlign: "center",
-    overflow: "hidden",
-  },
-  heroContent: {
-    position: "relative",
-    zIndex: 1,
-  },
-  heroTitle: {
-    fontSize: "3.5rem",
-    fontWeight: "bold",
-    marginBottom: "1.5rem",
-    lineHeight: "1.2",
-    textShadow: "0 2px 10px rgba(0,0,0,0.2)",
-  },
-  heroSubtitle: {
-    fontSize: "1.4rem",
-    marginBottom: "2.5rem",
-    opacity: 0.95,
-    maxWidth: "700px",
-    margin: "0 auto 2.5rem",
-  },
-  heroCta: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "center",
-    flexWrap: "wrap",
-  },
-  ctaBtn: {
-    fontSize: "1.1rem",
-    padding: "1rem 2.5rem",
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  ctaBtnOutline: {
-    fontSize: "1.1rem",
-    padding: "1rem 2.5rem",
-    background: "rgba(255,255,255,0.1)",
-    backdropFilter: "blur(10px)",
-    border: "2px solid white",
-    color: "white",
-  },
-  servicesSection: {
-    padding: "5rem 0",
-    background: "var(--background)",
-  },
-  sectionTitle: {
-    fontSize: "2.8rem",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: "1rem",
-    color: "var(--text-primary)",
-  },
-  sectionSubtitle: {
-    fontSize: "1.2rem",
-    textAlign: "center",
-    marginBottom: "3rem",
-    color: "var(--text-secondary)",
-  },
-  servicesGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "2rem",
-  },
-  serviceCard: {
-    background: "var(--surface)",
-    borderRadius: "16px",
-    padding: "2.5rem 2rem",
-    textAlign: "center",
-    transition: "all 0.3s ease",
-    cursor: "pointer",
-    position: "relative",
-    overflow: "hidden",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-  },
-  serviceIconWrapper: {
-    marginBottom: "1.5rem",
-    display: "flex",
-    justifyContent: "center",
-  },
-  serviceTitle: {
-    fontSize: "1.6rem",
-    fontWeight: "bold",
-    marginBottom: "1rem",
-    color: "var(--text-primary)",
-  },
-  serviceDescription: {
-    color: "var(--text-secondary)",
-    lineHeight: "1.7",
-    marginBottom: "1.5rem",
-  },
-  serviceArrow: {
-    display: "flex",
-    justifyContent: "center",
-    opacity: 0,
-    transform: "translateX(-10px)",
-    transition: "all 0.3s ease",
-  },
-  featuresSection: {
-    padding: "5rem 0",
-    background: "var(--surface)",
-  },
-  featuresGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "3rem",
-  },
-  featureCard: {
-    textAlign: "center",
-    padding: "2rem",
-  },
-  featureIcon: {
-    marginBottom: "1.5rem",
-    display: "flex",
-    justifyContent: "center",
-  },
-  featureTitle: {
-    fontSize: "1.6rem",
-    fontWeight: "bold",
-    marginBottom: "1rem",
-    color: "var(--text-primary)",
-  },
-  featureText: {
-    color: "var(--text-secondary)",
-    lineHeight: "1.7",
-    fontSize: "1.05rem",
-  },
-  statsSection: {
-    padding: "5rem 0",
-    background: "linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)",
-    color: "white",
-  },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "2rem",
-  },
-  statCard: {
-    textAlign: "center",
-    padding: "2rem",
-  },
-  statNumber: {
-    fontSize: "3rem",
-    fontWeight: "bold",
-    marginBottom: "0.5rem",
-  },
-  statLabel: {
-    fontSize: "1.1rem",
-    opacity: 0.9,
-  },
-  footer: {
-    background: "var(--text-primary)",
-    color: "white",
-    padding: "3rem 0 1rem",
-  },
-  footerContent: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "2rem",
-    marginBottom: "2rem",
-  },
-  footerSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  footerTitle: {
-    fontSize: "1.3rem",
-    fontWeight: "bold",
-    marginBottom: "0.5rem",
-  },
-  footerText: {
-    opacity: 0.8,
-    lineHeight: "1.6",
-  },
-  footerLinks: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-  },
-  footerLink: {
-    opacity: 0.8,
-    transition: "opacity 0.2s",
-  },
-  footerBottom: {
-    borderTop: "1px solid rgba(255,255,255,0.1)",
-    paddingTop: "1.5rem",
-    textAlign: "center",
-  },
-  footerCopyright: {
-    opacity: 0.7,
-  },
-};
-
-// Add enhanced animations
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  .service-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #3B82F6, #10B981, #F59E0B, #EF4444);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-  }
-  
-  .service-card:hover::before {
-    transform: scaleX(1);
-  }
-  
-  .service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-  }
-  
-  .service-card:hover .serviceArrow {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
-  .feature-card {
-    transition: transform 0.3s ease;
-  }
-  
-  .feature-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .stat-card {
-    transition: transform 0.3s ease;
-  }
-  
-  .stat-card:hover {
-    transform: scale(1.1);
-  }
-  
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2.2rem !important;
-    }
-    h2 {
-      font-size: 2rem !important;
-    }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Home;

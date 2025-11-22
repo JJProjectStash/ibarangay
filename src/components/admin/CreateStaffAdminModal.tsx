@@ -77,6 +77,7 @@ const CreateStaffAdminModal: React.FC<CreateStaffAdminModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...submitData } = formData;
       await api.createStaffAdmin(submitData);
       showSuccessToast(
