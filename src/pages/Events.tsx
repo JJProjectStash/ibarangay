@@ -63,10 +63,9 @@ const Events: React.FC = () => {
       await api.registerForEvent(eventId);
       showSuccessToast("Successfully registered for the event!");
       fetchEvents();
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Failed to register for event:", error);
-      const err = error as { response?: { data?: { message?: string } } };
-      showErrorToast(err.response?.data?.message || getErrorMessage(error));
+      showErrorToast(error.response?.data?.message || getErrorMessage(error));
     } finally {
       setProcessingEventId(null);
     }
@@ -89,10 +88,9 @@ const Events: React.FC = () => {
       await api.unregisterFromEvent(eventId);
       showSuccessToast("Successfully unregistered from the event");
       fetchEvents();
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Failed to unregister from event:", error);
-      const err = error as { response?: { data?: { message?: string } } };
-      showErrorToast(err.response?.data?.message || getErrorMessage(error));
+      showErrorToast(error.response?.data?.message || getErrorMessage(error));
     } finally {
       setProcessingEventId(null);
     }
@@ -102,16 +100,14 @@ const Events: React.FC = () => {
     setSelectedEvent({ id: eventId, title: eventTitle });
   };
 
+  // Fixed isRegistered function - restored working logic from commit 771bfd6
   const isRegistered = (event: Event) => {
     if (!user) return false;
-    return event.attendees.some((attendee) => {
-      if (typeof attendee === "string") {
-        return attendee === user.id;
-      } else {
-        const userAttendee = attendee as User;
-        return userAttendee.id === user.id;
-      }
-    });
+    return event.attendees.some((attendee: any) =>
+      typeof attendee === "string"
+        ? attendee === user.id
+        : attendee._id === user.id
+    );
   };
 
   const getStatusBadge = (status: string) => {
