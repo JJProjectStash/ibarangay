@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Package, Clock, CheckCircle, XCircle } from "lucide-react";
+import {
+  Plus,
+  Package,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Settings,
+} from "lucide-react";
 import api from "../services/api";
 import { Service } from "../types";
 import { format } from "date-fns";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import { validators, getValidationMessage } from "../utils/validators";
+import { useAuth } from "../context/AuthContext";
 
 const Services: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showItemTypeModal, setShowItemTypeModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [itemTypes, setItemTypes] = useState<string[]>([]);
+  const [newItemTypes, setNewItemTypes] = useState<string>("");
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     itemName: "",
     itemType: "",
@@ -25,13 +37,22 @@ const Services: React.FC = () => {
 
   useEffect(() => {
     fetchServices();
+    fetchItemTypes();
   }, []);
+
+  const fetchItemTypes = async () => {
+    try {
+      const response = await api.getServiceItemTypes();
+      setItemTypes(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch item types:", error);
+    }
+  };
 
   const fetchServices = async () => {
     try {
       setIsLoading(true);
       const response = await api.getServiceRequests();
-      // Backend returns { success: true, data: [...] }
       const servicesData = Array.isArray(response.data) ? response.data : [];
       setServices(servicesData);
     } catch (error) {
@@ -40,6 +61,29 @@ const Services: React.FC = () => {
       setServices([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdateItemTypes = async () => {
+    try {
+      const itemTypeArray = newItemTypes
+        .split(",")
+        .map((type) => type.trim())
+        .filter((type) => type.length > 0);
+
+      if (itemTypeArray.length === 0) {
+        showErrorToast("Please enter at least one item type");
+        return;
+      }
+
+      await api.updateServiceItemTypes(itemTypeArray);
+      showSuccessToast("Item types updated successfully!");
+      setShowItemTypeModal(false);
+      setNewItemTypes("");
+      fetchItemTypes();
+    } catch (error) {
+      console.error("Failed to update item types:", error);
+      showErrorToast(getErrorMessage(error));
     }
   };
 
@@ -121,7 +165,6 @@ const Services: React.FC = () => {
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData({ ...formData, [field]: value });
-    // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
     }
@@ -153,6 +196,8 @@ const Services: React.FC = () => {
     return badges[status] || badges.pending;
   };
 
+  const canEditItemTypes = user?.role === "admin" || user?.role === "staff";
+
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -180,12 +225,26 @@ const Services: React.FC = () => {
           <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
             Borrow & Return Services
           </h1>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowModal(true)}
-          >
-            <Plus size={20} /> New Request
-          </button>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {canEditItemTypes && (
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  setNewItemTypes(itemTypes.join(", "));
+                  setShowItemTypeModal(true);
+                }}
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <Settings size={18} /> Manage Item Types
+              </button>
+            )}
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowModal(true)}
+            >
+              <Plus size={20} /> New Request
+            </button>
+          </div>
         </div>
 
         <div style={{ display: "grid", gap: "1.5rem" }}>
@@ -338,7 +397,74 @@ const Services: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Item Type Management Modal */}
+      {showItemTypeModal && (
+        <div
+          style={modalStyles.overlay}
+          onClick={() => setShowItemTypeModal(false)}
+        >
+          <div
+            className="card"
+            style={modalStyles.modal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                marginBottom: "1.5rem",
+              }}
+            >
+              Manage Service Item Types
+            </h2>
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "500",
+                }}
+              >
+                Item Types (comma-separated)
+              </label>
+              <textarea
+                className="input"
+                rows={4}
+                value={newItemTypes}
+                onChange={(e) => setNewItemTypes(e.target.value)}
+                placeholder="e.g., equipment, facility, document, other"
+              />
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "var(--text-secondary)",
+                  marginTop: "0.5rem",
+                }}
+              >
+                Current item types: {itemTypes.join(", ")}
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+                onClick={handleUpdateItemTypes}
+              >
+                Update Item Types
+              </button>
+              <button
+                className="btn btn-outline"
+                style={{ flex: 1 }}
+                onClick={() => setShowItemTypeModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Service Request Modal */}
       {showModal && (
         <div
           style={modalStyles.overlay}
@@ -403,15 +529,21 @@ const Services: React.FC = () => {
                 >
                   Item Type *
                 </label>
-                <input
+                <select
                   className="input"
                   value={formData.itemType}
                   onChange={(e) =>
                     handleInputChange("itemType", e.target.value)
                   }
                   disabled={isSubmitting}
-                  placeholder="e.g., Furniture, Equipment"
-                />
+                >
+                  <option value="">Select an item type</option>
+                  {itemTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
                 {errors.itemType && (
                   <p
                     style={{

@@ -6,6 +6,7 @@ import {
   Download,
   Trash2,
   AlertCircle,
+  Settings,
 } from "lucide-react";
 import api from "../services/api";
 import socketService from "../services/socket";
@@ -21,13 +22,16 @@ const Complaints: React.FC = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedComplaints, setSelectedComplaints] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterPriority, setFilterPriority] = useState<string>("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { token } = useAuth();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCategories, setNewCategories] = useState<string>("");
+  const { token, user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,6 +41,7 @@ const Complaints: React.FC = () => {
 
   useEffect(() => {
     fetchComplaints();
+    fetchCategories();
 
     // Connect socket if authenticated
     if (token) {
@@ -76,11 +81,19 @@ const Complaints: React.FC = () => {
     fetchComplaints();
   }, [filterStatus, filterPriority]);
 
+  const fetchCategories = async () => {
+    try {
+      const response = await api.getComplaintCategories();
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
   const fetchComplaints = async () => {
     try {
       setIsLoading(true);
       const response = await api.getComplaints(filterStatus, filterPriority);
-      // Backend returns { success: true, data: [...] }
       const complaintsData = Array.isArray(response.data) ? response.data : [];
       setComplaints(complaintsData);
     } catch (error) {
@@ -89,6 +102,29 @@ const Complaints: React.FC = () => {
       setComplaints([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdateCategories = async () => {
+    try {
+      const categoryArray = newCategories
+        .split(",")
+        .map((cat) => cat.trim())
+        .filter((cat) => cat.length > 0);
+
+      if (categoryArray.length === 0) {
+        showErrorToast("Please enter at least one category");
+        return;
+      }
+
+      await api.updateComplaintCategories(categoryArray);
+      showSuccessToast("Categories updated successfully!");
+      setShowCategoryModal(false);
+      setNewCategories("");
+      fetchCategories();
+    } catch (error) {
+      console.error("Failed to update categories:", error);
+      showErrorToast(getErrorMessage(error));
     }
   };
 
@@ -136,7 +172,6 @@ const Complaints: React.FC = () => {
         for (const file of uploadedFiles) {
           try {
             const uploadResponse = await api.uploadComplaintFile(file);
-            // Backend returns { success: true, data: { filePath: "..." } }
             if (uploadResponse.data?.filePath) {
               attachments.push(uploadResponse.data.filePath);
             }
@@ -174,7 +209,6 @@ const Complaints: React.FC = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
-    // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
     }
@@ -252,6 +286,8 @@ const Complaints: React.FC = () => {
     return badges[priority] || "badge-info";
   };
 
+  const canEditCategories = user?.role === "admin" || user?.role === "staff";
+
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -280,6 +316,18 @@ const Complaints: React.FC = () => {
             Complaint Center
           </h1>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {canEditCategories && (
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  setNewCategories(categories.join(", "));
+                  setShowCategoryModal(true);
+                }}
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <Settings size={18} /> Manage Categories
+              </button>
+            )}
             {selectedComplaints.length > 0 && (
               <button
                 className="btn btn-outline"
@@ -527,6 +575,74 @@ const Complaints: React.FC = () => {
         </div>
       </div>
 
+      {/* Category Management Modal */}
+      {showCategoryModal && (
+        <div
+          style={modalStyles.overlay}
+          onClick={() => setShowCategoryModal(false)}
+        >
+          <div
+            className="card"
+            style={modalStyles.modal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                marginBottom: "1.5rem",
+              }}
+            >
+              Manage Complaint Categories
+            </h2>
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "500",
+                }}
+              >
+                Categories (comma-separated)
+              </label>
+              <textarea
+                className="input"
+                rows={4}
+                value={newCategories}
+                onChange={(e) => setNewCategories(e.target.value)}
+                placeholder="e.g., infrastructure, sanitation, security, noise"
+              />
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "var(--text-secondary)",
+                  marginTop: "0.5rem",
+                }}
+              >
+                Current categories: {categories.join(", ")}
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+                onClick={handleUpdateCategories}
+              >
+                Update Categories
+              </button>
+              <button
+                className="btn btn-outline"
+                style={{ flex: 1 }}
+                onClick={() => setShowCategoryModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Complaint Modal */}
       {showModal && (
         <div
           style={modalStyles.overlay}
@@ -592,15 +708,21 @@ const Complaints: React.FC = () => {
                 >
                   Category *
                 </label>
-                <input
+                <select
                   className="input"
                   value={formData.category}
                   onChange={(e) =>
                     handleInputChange("category", e.target.value)
                   }
-                  placeholder="e.g., Infrastructure, Sanitation, Noise"
                   disabled={isSubmitting}
-                />
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </option>
+                  ))}
+                </select>
                 {errors.category && (
                   <p
                     style={{

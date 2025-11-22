@@ -73,6 +73,31 @@ class ApiService {
     return response.data;
   }
 
+  // Config endpoints
+  async getComplaintCategories() {
+    const response = await this.api.get("/config/complaint-categories");
+    return response.data;
+  }
+
+  async getServiceItemTypes() {
+    const response = await this.api.get("/config/service-item-types");
+    return response.data;
+  }
+
+  async updateComplaintCategories(categories: string[]) {
+    const response = await this.api.put("/config/complaint-categories", {
+      categories,
+    });
+    return response.data;
+  }
+
+  async updateServiceItemTypes(itemTypes: string[]) {
+    const response = await this.api.put("/config/service-item-types", {
+      itemTypes,
+    });
+    return response.data;
+  }
+
   // Service endpoints
   async createServiceRequest(data: {
     itemName: string;
@@ -175,7 +200,7 @@ class ApiService {
   // Bulk operations
   async bulkUpdateComplaintStatus(ids: string[], status: string) {
     const response = await this.api.put("/bulk/complaints/status", {
-      ids,
+      complaintIds: ids,
       status,
     });
     return response.data;
@@ -183,23 +208,24 @@ class ApiService {
 
   async bulkAssignComplaints(ids: string[], assignedTo: string) {
     const response = await this.api.put("/bulk/complaints/assign", {
-      ids,
-      assignedTo,
+      complaintIds: ids,
+      staffId: assignedTo,
     });
     return response.data;
   }
 
   async bulkDeleteComplaints(ids: string[]) {
-    const response = await this.api.post("/bulk/complaints/delete", { ids });
+    const response = await this.api.post("/bulk/complaints/delete", {
+      complaintIds: ids,
+    });
     return response.data;
   }
 
   async exportComplaints(format: "csv" | "excel", filters?: any) {
-    const response = await this.api.post(
-      "/bulk/complaints/export",
-      { format, filters },
-      { responseType: "blob" }
-    );
+    const response = await this.api.get("/bulk/complaints/export", {
+      params: { format, ...filters },
+      responseType: "blob",
+    });
     return response.data;
   }
 
