@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Wrench,
   Search,
@@ -6,8 +6,8 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Eye,
   MoreHorizontal,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,12 +69,9 @@ const StaffServices = () => {
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(
     null
   );
-  const [showNotesModal, setShowNotesModal] = useState(false);
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [itemTypes, setItemTypes] = useState<string[]>([]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.getServiceRequests({
@@ -86,7 +83,7 @@ const StaffServices = () => {
       // Apply item type filter
       if (itemTypeFilter) {
         requestsData = requestsData.filter(
-          (r) => r.itemType === itemTypeFilter
+          (r: ServiceRequest) => r.itemType === itemTypeFilter
         );
       }
 
@@ -98,7 +95,7 @@ const StaffServices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, searchTerm, itemTypeFilter]);
 
   const fetchItemTypes = async () => {
     try {
@@ -112,44 +109,22 @@ const StaffServices = () => {
   useEffect(() => {
     fetchRequests();
     fetchItemTypes();
-  }, [statusFilter, itemTypeFilter, fetchRequests]);
+  }, [fetchRequests]);
 
-  const handleStatusUpdate = async (
-    requestId: string,
-    newStatus: string,
-    notes?: string
-  ) => {
+  const handleStatusUpdate = async (requestId: string, newStatus: string) => {
     try {
-      setIsSubmitting(true);
-      await api.updateServiceStatus(requestId, newStatus, notes);
+      await api.updateServiceStatus(requestId, newStatus);
       showSuccessToast("Service request updated successfully");
       fetchRequests();
-      setShowNotesModal(false);
-      setNotes("");
-      setSelectedRequest(null);
     } catch (error) {
       console.error("Failed to update status:", error);
       showErrorToast(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleViewDetails = (request: ServiceRequest) => {
     setSelectedRequest(request);
     setShowDetailsModal(true);
-  };
-
-  const handleAddNotes = (request: ServiceRequest) => {
-    setSelectedRequest(request);
-    setNotes(request.notes || "");
-    setShowNotesModal(true);
-  };
-
-  const handleSubmitNotes = () => {
-    if (selectedRequest) {
-      handleStatusUpdate(selectedRequest._id, selectedRequest.status, notes);
-    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -207,7 +182,7 @@ const StaffServices = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Service Requests"
+        title="Service Management"
         description="Manage service requests from residents"
         icon={<Wrench className="h-8 w-8 text-primary" />}
       />
@@ -413,9 +388,9 @@ const StaffServices = () => {
                     </div>
 
                     {request.notes && (
-                      <div className="mb-3 p-3 bg-muted/50 rounded-lg border-l-4 border-blue-500">
-                        <p className="text-sm font-medium text-blue-700 mb-1">
-                          Notes:
+                      <div className="mb-3 p-3 bg-muted/50 rounded-lg border-l-4 border-green-500">
+                        <p className="text-sm font-medium text-green-700 mb-1">
+                          Admin Notes:
                         </p>
                         <p className="text-sm">{request.notes}</p>
                       </div>
@@ -455,14 +430,6 @@ const StaffServices = () => {
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Details
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddNotes(request)}
-                        >
-                          Add Notes
                         </Button>
 
                         <DropdownMenu>
@@ -567,55 +534,6 @@ const StaffServices = () => {
                   className="flex-1"
                 >
                   Close
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Notes Modal */}
-      {showNotesModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto">
-            <CardHeader>
-              <CardTitle>Add Notes</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {selectedRequest.itemName} by {selectedRequest.userId.firstName}{" "}
-                {selectedRequest.userId.lastName}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Notes</label>
-                <textarea
-                  className="w-full p-3 border rounded-md resize-none"
-                  rows={4}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add notes for this request..."
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSubmitNotes}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  {isSubmitting ? "Saving..." : "Save Notes"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowNotesModal(false);
-                    setNotes("");
-                    setSelectedRequest(null);
-                  }}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  Cancel
                 </Button>
               </div>
             </CardContent>

@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -91,15 +92,10 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative rounded-full hover:bg-accent hover-scale"
-                  onClick={() => navigate("/notifications")}
-                >
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background animate-pulse" />
-                </Button>
+                {/* Notification Bell - only show for authenticated users */}
+                <div className="flex items-center">
+                  <NotificationBell />
+                </div>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -217,6 +213,17 @@ const Navbar = () => {
             <div className="h-px bg-border my-2" />
             {user ? (
               <>
+                <Button
+                  variant="ghost"
+                  className="justify-start w-full"
+                  onClick={() => {
+                    navigate("/notifications");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
+                </Button>
                 <Button
                   variant="ghost"
                   className="justify-start w-full"

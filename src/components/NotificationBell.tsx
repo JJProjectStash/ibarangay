@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 import { format } from "date-fns";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 import api from "../services/api";
 import socketService from "../services/socket";
 
@@ -102,106 +104,44 @@ const NotificationBell: React.FC = () => {
   };
 
   return (
-    <div style={{ position: "relative" }} ref={dropdownRef}>
-      <button
+    <div className="relative" ref={dropdownRef}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative rounded-full hover:bg-accent hover-scale"
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          position: "relative",
-          padding: "0.5rem",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          color: "var(--text)",
-          display: "flex",
-          alignItems: "center",
-        }}
       >
-        <Bell size={24} />
+        <Bell className="h-5 w-5 text-muted-foreground" />
         {unreadCount > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: "0.25rem",
-              right: "0.25rem",
-              background: "#ef4444",
-              color: "white",
-              borderRadius: "50%",
-              width: "18px",
-              height: "18px",
-              fontSize: "0.7rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "bold",
-            }}
-          >
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
+          <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background animate-pulse" />
         )}
-      </button>
+      </Button>
 
       {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 0.5rem)",
-            right: 0,
-            width: "360px",
-            maxHeight: "500px",
-            background: "var(--card-bg)",
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-            zIndex: 1000,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              padding: "1rem",
-              borderBottom: "1px solid var(--border)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <h3 style={{ fontSize: "1rem", fontWeight: "600" }}>
-              Notifications
-            </h3>
+        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden animate-in slide-in-from-top-2">
+          <div className="p-4 border-b border-border flex justify-between items-center">
+            <h3 className="text-sm font-semibold">Notifications</h3>
             {unreadCount > 0 && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={markAllAsRead}
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--accent)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                }}
+                className="text-xs text-primary hover:text-primary/80"
               >
                 Mark all as read
-              </button>
+              </Button>
             )}
           </div>
 
-          <div style={{ overflowY: "auto", maxHeight: "400px" }}>
+          <div className="overflow-y-auto max-h-80">
             {isLoading ? (
-              <div style={{ padding: "2rem", textAlign: "center" }}>
-                <p style={{ color: "var(--text-secondary)" }}>Loading...</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">Loading...</p>
               </div>
             ) : notifications.length === 0 ? (
-              <div style={{ padding: "2rem", textAlign: "center" }}>
-                <Bell
-                  size={48}
-                  style={{
-                    margin: "0 auto 1rem",
-                    color: "var(--text-secondary)",
-                  }}
-                />
-                <p style={{ color: "var(--text-secondary)" }}>
+              <div className="p-8 text-center">
+                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
                   No notifications yet
                 </p>
               </div>
@@ -212,85 +152,35 @@ const NotificationBell: React.FC = () => {
                   onClick={() =>
                     !notification.isRead && markAsRead(notification._id)
                   }
-                  style={{
-                    padding: "1rem",
-                    borderBottom: "1px solid var(--border)",
-                    cursor: notification.isRead ? "default" : "pointer",
-                    background: notification.isRead
-                      ? "transparent"
-                      : "rgba(99, 102, 241, 0.05)",
-                    transition: "background 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!notification.isRead) {
-                      e.currentTarget.style.background =
-                        "rgba(99, 102, 241, 0.1)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!notification.isRead) {
-                      e.currentTarget.style.background =
-                        "rgba(99, 102, 241, 0.05)";
-                    }
-                  }}
+                  className={cn(
+                    "p-4 border-b border-border/50 cursor-pointer transition-colors hover:bg-accent/50",
+                    !notification.isRead && "bg-primary/5"
+                  )}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "0.75rem",
-                      alignItems: "start",
-                    }}
-                  >
-                    <span style={{ fontSize: "1.5rem" }}>
+                  <div className="flex gap-3 items-start">
+                    <span className="text-lg">
                       {getNotificationIcon(notification.type)}
                     </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "start",
-                          marginBottom: "0.25rem",
-                        }}
-                      >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
                         <p
-                          style={{
-                            fontSize: "0.875rem",
-                            fontWeight: notification.isRead ? "400" : "600",
-                            marginBottom: "0.25rem",
-                          }}
+                          className={cn(
+                            "text-sm truncate",
+                            notification.isRead
+                              ? "font-normal text-muted-foreground"
+                              : "font-medium text-foreground"
+                          )}
                         >
                           {notification.title}
                         </p>
                         {!notification.isRead && (
-                          <span
-                            style={{
-                              width: "8px",
-                              height: "8px",
-                              background: "var(--accent)",
-                              borderRadius: "50%",
-                              flexShrink: 0,
-                              marginTop: "0.25rem",
-                            }}
-                          />
+                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
                         )}
                       </div>
-                      <p
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-secondary)",
-                          marginBottom: "0.5rem",
-                          lineHeight: "1.4",
-                        }}
-                      >
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p
-                        style={{
-                          fontSize: "0.7rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
+                      <p className="text-xs text-muted-foreground">
                         {format(
                           new Date(notification.createdAt),
                           "MMM dd, yyyy 'at' h:mm a"

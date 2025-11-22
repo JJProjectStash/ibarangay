@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Wrench,
   Search,
@@ -75,7 +75,7 @@ const AdminServices = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [itemTypes, setItemTypes] = useState<string[]>([]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.getServiceRequests({
@@ -87,7 +87,7 @@ const AdminServices = () => {
       // Apply item type filter
       if (itemTypeFilter) {
         requestsData = requestsData.filter(
-          (r) => r.itemType === itemTypeFilter
+          (r: ServiceRequest) => r.itemType === itemTypeFilter
         );
       }
 
@@ -99,7 +99,7 @@ const AdminServices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, searchTerm, itemTypeFilter]);
 
   const fetchItemTypes = async () => {
     try {
@@ -113,7 +113,7 @@ const AdminServices = () => {
   useEffect(() => {
     fetchRequests();
     fetchItemTypes();
-  }, [statusFilter, itemTypeFilter, fetchRequests]);
+  }, [fetchRequests]);
 
   const handleStatusUpdate = async (
     requestId: string,
