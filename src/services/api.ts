@@ -208,6 +208,13 @@ class ApiService {
     return res.data;
   }
 
+  async respondToComplaint(id: string, response: string) {
+    const res = await this.api.put(`/complaints/${id}/response`, {
+      response,
+    });
+    return res.data;
+  }
+
   async deleteComplaint(id: string) {
     const response = await this.api.delete(`/complaints/${id}`);
     return response.data;
