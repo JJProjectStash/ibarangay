@@ -80,10 +80,13 @@ const Complaints: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getComplaints(filterStatus, filterPriority);
-      setComplaints(response.data || []);
+      // Backend returns { success: true, data: [...] }
+      const complaintsData = Array.isArray(response.data) ? response.data : [];
+      setComplaints(complaintsData);
     } catch (error) {
       console.error("Failed to fetch complaints:", error);
       showErrorToast(getErrorMessage(error));
+      setComplaints([]);
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +136,10 @@ const Complaints: React.FC = () => {
         for (const file of uploadedFiles) {
           try {
             const uploadResponse = await api.uploadComplaintFile(file);
-            attachments.push(uploadResponse.data.filePath);
+            // Backend returns { success: true, data: { filePath: "..." } }
+            if (uploadResponse.data?.filePath) {
+              attachments.push(uploadResponse.data.filePath);
+            }
           } catch (uploadError) {
             console.error("Failed to upload file:", file.name, uploadError);
             showErrorToast(`Failed to upload ${file.name}`);

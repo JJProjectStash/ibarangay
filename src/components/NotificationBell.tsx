@@ -52,11 +52,18 @@ const NotificationBell: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await api.getNotifications();
-      const notifs = response.data || [];
+      // Backend returns { success: true, data: { notifications: [], unreadCount: 0 } }
+      const notificationData = response.data || {};
+      const notifs = Array.isArray(notificationData.notifications)
+        ? notificationData.notifications
+        : [];
       setNotifications(notifs);
-      setUnreadCount(notifs.filter((n: Notification) => !n.isRead).length);
+      setUnreadCount(notificationData.unreadCount || 0);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+      // Set empty array on error to prevent crashes
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setIsLoading(false);
     }

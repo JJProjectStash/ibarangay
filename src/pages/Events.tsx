@@ -23,10 +23,13 @@ const Events: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getEvents();
-      setEvents(response.data || []);
+      // Backend returns { success: true, data: [...] }
+      const eventsData = Array.isArray(response.data) ? response.data : [];
+      setEvents(eventsData);
     } catch (error) {
       console.error("Failed to fetch events:", error);
       showErrorToast(getErrorMessage(error));
+      setEvents([]);
     } finally {
       setIsLoading(false);
     }

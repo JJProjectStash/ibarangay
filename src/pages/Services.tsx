@@ -31,10 +31,13 @@ const Services: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getServiceRequests();
-      setServices(response.data || []);
+      // Backend returns { success: true, data: [...] }
+      const servicesData = Array.isArray(response.data) ? response.data : [];
+      setServices(servicesData);
     } catch (error) {
       console.error("Failed to fetch services:", error);
       showErrorToast(getErrorMessage(error));
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
