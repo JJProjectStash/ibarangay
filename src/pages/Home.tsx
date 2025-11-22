@@ -13,8 +13,6 @@ import {
   Users,
   ArrowRight,
   TrendingUp,
-  CheckCircle,
-  Clock,
 } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { EnhancedCard } from "@/components/EnhancedCard";
@@ -23,7 +21,6 @@ import {
   ServiceIcon,
   ComplaintIcon,
   EventIcon,
-  NotificationIcon,
 } from "@/components/CustomIcons";
 import {
   AnimatedCheckIcon,
