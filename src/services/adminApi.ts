@@ -86,6 +86,24 @@ class AdminApiService {
     });
     return response.data;
   }
+
+  // Complaints Management
+  async getAllComplaints() {
+    const response = await this.api.get("/complaints");
+    return response.data.data || [];
+  }
+
+  // Events Management
+  async getAllEvents() {
+    const response = await this.api.get("/events");
+    return response.data.data || [];
+  }
+
+  // Service Requests Management
+  async getAllServiceRequests() {
+    const response = await this.api.get("/services");
+    return response.data.data || [];
+  }
 }
 
 export default new AdminApiService();

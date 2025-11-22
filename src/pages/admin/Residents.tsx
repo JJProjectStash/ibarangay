@@ -3,22 +3,14 @@ import { Users, Search, UserPlus, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/PageHeader";
+import PageHeader from "@/components/PageHeader";
 import UserManagementTable from "@/components/admin/UserManagementTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import adminApi from "@/services/adminApi";
-
-interface ResidentData {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  isVerified: boolean;
-}
+import { UserManagement } from "@/types/admin";
 
 const AdminResidents = () => {
-  const [residents, setResidents] = useState<ResidentData[]>([]);
+  const [residents, setResidents] = useState<UserManagement[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -30,9 +22,22 @@ const AdminResidents = () => {
     try {
       setLoading(true);
       const response = await adminApi.getAllUsers();
-      setResidents(
-        response.data.filter((user: ResidentData) => user.role === "resident")
-      );
+      // Map the backend data to UserManagement format
+      const mappedResidents = response.data
+        .filter((user: any) => user.role === "resident")
+        .map((user: any) => ({
+          id: user._id || user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          address: user.address || "N/A",
+          phoneNumber: user.phoneNumber || "N/A",
+          isVerified: user.isVerified,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt || user.createdAt,
+        }));
+      setResidents(mappedResidents);
     } catch (error) {
       console.error("Failed to fetch residents:", error);
     } finally {

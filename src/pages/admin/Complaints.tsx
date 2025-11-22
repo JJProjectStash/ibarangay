@@ -6,11 +6,23 @@ import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import StatusBadge from "@/components/StatusBadge";
-import { adminApi } from "@/services/adminApi";
+import adminApi from "@/services/adminApi";
 import { format } from "date-fns";
 
+interface Complaint {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  resident?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
 const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -30,21 +42,20 @@ const AdminComplaints = () => {
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
+  const filteredComplaints = complaints.filter((complaint) =>
     complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
+    pending: complaints.filter((c) => c.status === "pending").length,
+    inProgress: complaints.filter((c) => c.status === "in_progress").length,
+    resolved: complaints.filter((c) => c.status === "resolved").length,
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -136,7 +147,7 @@ const AdminComplaints = () => {
 
         {/* Complaints List */}
         <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
+          {filteredComplaints.map((complaint) => (
             <Card key={complaint.id} className="glass-card card-hover">
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">

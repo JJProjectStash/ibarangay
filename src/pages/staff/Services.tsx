@@ -1,15 +1,28 @@
 import { useState, useEffect } from "react";
-import { FileText, Search, Filter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Wrench, Search, Filter } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import RequestManagement from "@/components/staff/RequestManagement";
-import { adminApi } from "@/services/adminApi";
+import StatusBadge from "@/components/StatusBadge";
+import adminApi from "@/services/adminApi";
+import { format } from "date-fns";
+
+interface ServiceRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  resident?: {
+    firstName: string;
+    lastName: string;
+  };
+}
 
 const StaffServices = () => {
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -20,23 +33,19 @@ const StaffServices = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllDocuments();
+      const data = await adminApi.getAllServiceRequests();
       setRequests(data);
     } catch (error) {
-      console.error("Failed to fetch requests:", error);
+      console.error("Failed to fetch service requests:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredRequests = requests.filter((req: any) =>
-    req.type?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -45,61 +54,18 @@ const StaffServices = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
         title="Service Requests"
-        description="Process and manage service requests"
-        icon={<FileText className="h-8 w-8 text-primary" />}
+        description="Manage service requests from residents"
+        icon={<Wrench className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending Requests
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {requests.filter((r: any) => r.status === "pending").length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {requests.filter((r: any) => r.status === "processing").length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Completed Today
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {Math.floor(requests.length * 0.2)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
         <Card className="glass-card">
           <CardContent className="pt-6">
             <div className="flex gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search requests..."
+                  placeholder="Search service requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -113,18 +79,38 @@ const StaffServices = () => {
           </CardContent>
         </Card>
 
-        {/* Request Management */}
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>Service Requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RequestManagement
-              requests={filteredRequests}
-              onUpdate={fetchRequests}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          {requests.map((request) => (
+            <Card key={request.id} className="glass-card card-hover">
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-1">
+                      {request.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {request.description}
+                    </p>
+                  </div>
+                  <StatusBadge status={request.status} />
+                </div>
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>
+                    Requested by {request.resident?.firstName}{" "}
+                    {request.resident?.lastName}
+                  </span>
+                  <span>{format(new Date(request.createdAt), "PPP")}</span>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button size="sm" variant="outline">
+                    View Details
+                  </Button>
+                  <Button size="sm">Update Status</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,28 @@
 import { useState, useEffect } from "react";
 import { AlertCircle, Search, Filter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import StatusBadge from "@/components/StatusBadge";
-import { adminApi } from "@/services/adminApi";
+import adminApi from "@/services/adminApi";
 import { format } from "date-fns";
 
+interface Complaint {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  resident?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
 const StaffComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -30,21 +42,14 @@ const StaffComplaints = () => {
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
+  const filteredComplaints = complaints.filter((complaint) =>
     complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -53,54 +58,11 @@ const StaffComplaints = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
         title="Complaint Management"
-        description="Process and resolve resident complaints"
+        description="Monitor and resolve resident complaints"
         icon={<AlertCircle className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Resolved Today
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {Math.floor(statusCounts.resolved * 0.2)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
         <Card className="glass-card">
           <CardContent className="pt-6">
             <div className="flex gap-4">
@@ -121,9 +83,8 @@ const StaffComplaints = () => {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
         <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
+          {filteredComplaints.map((complaint) => (
             <Card key={complaint.id} className="glass-card card-hover">
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">
@@ -137,14 +98,14 @@ const StaffComplaints = () => {
                   </div>
                   <StatusBadge status={complaint.status} />
                 </div>
-                <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
                   <span>
                     Submitted by {complaint.resident?.firstName}{" "}
                     {complaint.resident?.lastName}
                   </span>
                   <span>{format(new Date(complaint.createdAt), "PPP")}</span>
                 </div>
-                <div className="flex gap-2">
+                <div className="mt-4 flex gap-2">
                   <Button size="sm" variant="outline">
                     View Details
                   </Button>

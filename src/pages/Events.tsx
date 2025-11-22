@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import api from "../services/api";
-import { Event } from "../types";
+import { Event, User } from "../types";
 import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
@@ -104,11 +104,14 @@ const Events: React.FC = () => {
 
   const isRegistered = (event: Event) => {
     if (!user) return false;
-    return event.attendees.some((attendee: string | { _id: string }) =>
-      typeof attendee === "string"
-        ? attendee === user.id
-        : attendee._id === user.id
-    );
+    return event.attendees.some((attendee) => {
+      if (typeof attendee === "string") {
+        return attendee === user.id;
+      } else {
+        const userAttendee = attendee as User;
+        return userAttendee.id === user.id;
+      }
+    });
   };
 
   const getStatusBadge = (status: string) => {

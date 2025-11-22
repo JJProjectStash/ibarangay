@@ -1,28 +1,17 @@
 import { useState, useEffect } from "react";
-import { Search, Filter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle, Plus, Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/PageHeader";
+import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import StatusBadge from "@/components/StatusBadge";
-import adminApi from "@/services/adminApi";
+import api from "@/services/api";
+import { Complaint } from "@/types";
 import { format } from "date-fns";
 
-interface ComplaintData {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  resident?: {
-    firstName: string;
-    lastName: string;
-  };
-}
-
-const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState<ComplaintData[]>([]);
+const Complaints = () => {
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -33,8 +22,8 @@ const AdminComplaints = () => {
   const fetchComplaints = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllUsers();
-      setComplaints(data as unknown as ComplaintData[]);
+      const response = await api.getComplaints();
+      setComplaints(response.data || []);
     } catch (error) {
       console.error("Failed to fetch complaints:", error);
     } finally {
@@ -43,14 +32,8 @@ const AdminComplaints = () => {
   };
 
   const filteredComplaints = complaints.filter((complaint) =>
-    complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    complaint.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c) => c.status === "pending").length,
-    inProgress: complaints.filter((c) => c.status === "in_progress").length,
-    resolved: complaints.filter((c) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
@@ -63,91 +46,35 @@ const AdminComplaints = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Complaint Management"
-        description="Monitor and resolve resident complaints"
+        title="My Complaints"
+        description="Track and manage your submitted complaints"
+        icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        action={
+          <Button className="btn-glow hover-lift">
+            <Plus className="h-4 w-4 mr-2" />
+            New Complaint
+          </Button>
+        }
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Resolved
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
         <Card className="glass-card">
           <CardContent className="pt-6">
-            <div className="flex gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search complaints..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filters
-              </Button>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search complaints..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
         <div className="space-y-4">
           {filteredComplaints.map((complaint) => (
-            <Card key={complaint.id} className="glass-card card-hover">
+            <Card key={complaint._id} className="glass-card card-hover">
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
@@ -161,17 +88,13 @@ const AdminComplaints = () => {
                   <StatusBadge status={complaint.status} />
                 </div>
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>
-                    Submitted by {complaint.resident?.firstName}{" "}
-                    {complaint.resident?.lastName}
-                  </span>
+                  <span>Category: {complaint.category}</span>
                   <span>{format(new Date(complaint.createdAt), "PPP")}</span>
                 </div>
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4">
                   <Button size="sm" variant="outline">
                     View Details
                   </Button>
-                  <Button size="sm">Update Status</Button>
                 </div>
               </CardContent>
             </Card>
@@ -182,4 +105,4 @@ const AdminComplaints = () => {
   );
 };
 
-export default AdminComplaints;
+export default Complaints;

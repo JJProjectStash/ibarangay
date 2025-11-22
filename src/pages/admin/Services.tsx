@@ -1,36 +1,46 @@
 import { useState, useEffect } from "react";
-import { FileText, Plus, Search, Filter } from "lucide-react";
+import { Wrench, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import api from "@/services/api";
+import StatusBadge from "@/components/StatusBadge";
+import adminApi from "@/services/adminApi";
+import { format } from "date-fns";
+
+interface ServiceRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  resident?: {
+    firstName: string;
+    lastName: string;
+  };
+}
 
 const AdminServices = () => {
-  const [services, setServices] = useState([]);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchServices();
+    fetchRequests();
   }, []);
 
-  const fetchServices = async () => {
+  const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data = await api.getServiceRequests();
-      setServices(data);
+      const data = await adminApi.getAllServiceRequests();
+      setRequests(data);
     } catch (error) {
-      console.error("Failed to fetch services:", error);
+      console.error("Failed to fetch service requests:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  const filteredServices = services.filter((service: any) =>
-    service.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (loading) {
     return (
@@ -44,76 +54,18 @@ const AdminServices = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
         title="Service Management"
-        description="Manage barangay services and document requests"
-        icon={<FileText className="h-8 w-8 text-primary" />}
-        action={
-          <Button className="gap-2 shadow-lg shadow-primary/20">
-            <Plus className="h-4 w-4" />
-            Add Service
-          </Button>
-        }
+        description="Manage service requests from residents"
+        icon={<Wrench className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold gradient-text-primary">
-                {services.length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending Requests
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">24</div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Completed Today
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">12</div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Active Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-accent">
-                {services.filter((s: any) => s.isActive).length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
         <Card className="glass-card">
           <CardContent className="pt-6">
             <div className="flex gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search services..."
+                  placeholder="Search service requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -127,24 +79,33 @@ const AdminServices = () => {
           </CardContent>
         </Card>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredServices.map((service: any) => (
-            <Card key={service.id} className="glass-card card-hover">
-              <CardHeader>
-                <CardTitle className="text-lg">{service.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {service.description}
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-primary">
-                    ₱{service.fee || 0}
+        <div className="space-y-4">
+          {requests.map((request) => (
+            <Card key={request.id} className="glass-card card-hover">
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-1">
+                      {request.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {request.description}
+                    </p>
+                  </div>
+                  <StatusBadge status={request.status} />
+                </div>
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>
+                    Requested by {request.resident?.firstName}{" "}
+                    {request.resident?.lastName}
                   </span>
+                  <span>{format(new Date(request.createdAt), "PPP")}</span>
+                </div>
+                <div className="mt-4 flex gap-2">
                   <Button size="sm" variant="outline">
-                    Manage
+                    View Details
                   </Button>
+                  <Button size="sm">Update Status</Button>
                 </div>
               </CardContent>
             </Card>
