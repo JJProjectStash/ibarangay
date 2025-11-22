@@ -125,7 +125,12 @@ class ApiService {
     return response.data;
   }
 
-  async getServiceRequests(params?: { status?: string; search?: string; page?: number; limit?: number }) {
+  async getServiceRequests(params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const response = await this.api.get("/services", { params });
     return response.data;
   }
@@ -135,7 +140,12 @@ class ApiService {
     return response.data;
   }
 
-  async updateServiceStatus(id: string, status: string, notes?: string, rejectionReason?: string) {
+  async updateServiceStatus(
+    id: string,
+    status: string,
+    notes?: string,
+    rejectionReason?: string
+  ) {
     const response = await this.api.put(`/services/${id}/status`, {
       status,
       notes,
@@ -149,7 +159,11 @@ class ApiService {
     return response.data;
   }
 
-  async rejectServiceRequest(id: string, rejectionReason: string, notes?: string) {
+  async rejectServiceRequest(
+    id: string,
+    rejectionReason: string,
+    notes?: string
+  ) {
     const response = await this.api.put(`/services/${id}/reject`, {
       rejectionReason,
       notes,
@@ -307,7 +321,11 @@ class ApiService {
     return response.data;
   }
 
-  async getEvents(params?: { status?: string; category?: string; search?: string }) {
+  async getEvents(params?: {
+    status?: string;
+    category?: string;
+    search?: string;
+  }) {
     const response = await this.api.get("/events", { params });
     return response.data;
   }
@@ -347,6 +365,58 @@ class ApiService {
     return response.data;
   }
 
+  // Announcement endpoints
+  async createAnnouncement(data: {
+    title: string;
+    content: string;
+    category: string;
+    priority?: string;
+    imageUrl?: string;
+    expiresAt?: string;
+  }) {
+    const response = await this.api.post("/announcements", data);
+    return response.data;
+  }
+
+  async getAnnouncements(params?: {
+    category?: string;
+    priority?: string;
+    isPublished?: boolean;
+  }) {
+    const response = await this.api.get("/announcements", { params });
+    return response.data;
+  }
+
+  async getAnnouncementById(id: string) {
+    const response = await this.api.get(`/announcements/${id}`);
+    return response.data;
+  }
+
+  async updateAnnouncement(id: string, data: any) {
+    const response = await this.api.put(`/announcements/${id}`, data);
+    return response.data;
+  }
+
+  async publishAnnouncement(id: string) {
+    const response = await this.api.patch(`/announcements/${id}/publish`);
+    return response.data;
+  }
+
+  async unpublishAnnouncement(id: string) {
+    const response = await this.api.patch(`/announcements/${id}/unpublish`);
+    return response.data;
+  }
+
+  async deleteAnnouncement(id: string) {
+    const response = await this.api.delete(`/announcements/${id}`);
+    return response.data;
+  }
+
+  async getAnnouncementStats() {
+    const response = await this.api.get("/announcements/stats");
+    return response.data;
+  }
+
   // Notification endpoints
   async getNotifications(isRead?: boolean) {
     const response = await this.api.get("/notifications", {
@@ -367,6 +437,12 @@ class ApiService {
 
   async deleteNotification(id: string) {
     const response = await this.api.delete(`/notifications/${id}`);
+    return response.data;
+  }
+
+  // Dashboard endpoint
+  async getDashboardStats() {
+    const response = await this.api.get("/dashboard/stats");
     return response.data;
   }
 }

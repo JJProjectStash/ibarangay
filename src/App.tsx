@@ -17,6 +17,7 @@ import Events from "./pages/Events";
 import Complaints from "./pages/Complaints";
 import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
+import Announcements from "./pages/Announcements";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -24,8 +25,7 @@ import AdminResidents from "./pages/admin/Residents";
 import AdminServices from "./pages/admin/Services";
 import AdminEvents from "./pages/admin/Events";
 import AdminComplaints from "./pages/admin/Complaints";
-import AdminDocuments from "./pages/admin/Documents";
-import AdminBlotter from "./pages/admin/Blotter";
+import AdminAnnouncements from "./pages/admin/Announcements";
 
 // Staff Pages
 import StaffDashboard from "./pages/staff/Dashboard";
@@ -48,6 +48,7 @@ const App: React.FC = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/services" element={<Services />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/announcements" element={<Announcements />} />
 
             {/* Protected Resident Routes */}
             <Route
@@ -117,18 +118,10 @@ const App: React.FC = () => {
               }
             />
             <Route
-              path="/admin/documents"
+              path="/admin/announcements"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminDocuments />
-                </RoleGuard>
-              }
-            />
-            <Route
-              path="/admin/blotter"
-              element={
-                <RoleGuard allowedRoles={["admin"]}>
-                  <AdminBlotter />
+                  <AdminAnnouncements />
                 </RoleGuard>
               }
             />

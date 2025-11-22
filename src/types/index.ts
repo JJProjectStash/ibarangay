@@ -66,6 +66,23 @@ export interface Event {
   updatedAt: string;
 }
 
+export interface Announcement {
+  _id: string;
+  title: string;
+  content: string;
+  category: "general" | "emergency" | "event" | "service" | "maintenance";
+  priority: "low" | "medium" | "high" | "urgent";
+  author: string | User;
+  isPublished: boolean;
+  publishedAt?: string;
+  expiresAt?: string;
+  imageUrl?: string;
+  attachments?: string[];
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Notification {
   _id: string;
   userId: string;
@@ -74,7 +91,7 @@ export interface Notification {
   type: "info" | "warning" | "success" | "error";
   isRead: boolean;
   relatedId?: string;
-  relatedType?: "service" | "complaint" | "event";
+  relatedType?: "service" | "complaint" | "event" | "announcement";
   createdAt: string;
 }
 

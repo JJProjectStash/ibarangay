@@ -37,6 +37,7 @@ const Navbar = () => {
     { path: "/", label: "Home" },
     { path: "/services", label: "Services" },
     { path: "/events", label: "Events" },
+    { path: "/announcements", label: "Announcements" },
     { path: "/complaints", label: "Complaints" },
   ];
 
@@ -47,7 +48,7 @@ const Navbar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
         isScrolled
-          ? "bg-background/80 backdrop-blur-md shadow-sm border-border/50 py-2"
+          ? "glass-nav shadow-sm border-border/50 py-2"
           : "bg-transparent py-4"
       )}
     >
@@ -55,7 +56,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-primary/50 transition-all duration-300 group-hover:scale-105">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-primary/50 transition-all duration-300 group-hover:scale-105 hover-lift">
               iB
             </div>
             <span
@@ -75,9 +76,9 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover-lift",
                   isActive(link.path)
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/10 text-primary shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
               >
@@ -93,17 +94,18 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative rounded-full hover:bg-accent"
+                  className="relative rounded-full hover:bg-accent hover-scale"
+                  onClick={() => navigate("/notifications")}
                 >
                   <Bell className="h-5 w-5 text-muted-foreground" />
-                  <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background" />
+                  <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background animate-pulse" />
                 </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center space-x-2 rounded-full pl-2 pr-4 hover:bg-accent border border-transparent hover:border-border"
+                      className="flex items-center space-x-2 rounded-full pl-2 pr-4 hover:bg-accent border border-transparent hover:border-border transition-all duration-300"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white font-medium text-sm shadow-sm">
                         {user.firstName?.[0] || "U"}
@@ -119,7 +121,10 @@ const Navbar = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 p-2">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 p-2 glass-card"
+                  >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
@@ -134,7 +139,11 @@ const Navbar = () => {
                     <DropdownMenuItem
                       onClick={() =>
                         navigate(
-                          user.role === "admin" ? "/admin" : "/dashboard"
+                          user.role === "admin"
+                            ? "/admin"
+                            : user.role === "staff"
+                            ? "/staff"
+                            : "/dashboard"
                         )
                       }
                       className="cursor-pointer"
@@ -155,12 +164,12 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/login">
-                  <Button variant="ghost" className="rounded-full">
+                  <Button variant="ghost" className="rounded-full hover-lift">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button className="rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
+                  <Button className="rounded-full btn-glow hover-lift">
                     Get Started
                   </Button>
                 </Link>
@@ -174,7 +183,7 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="rounded-full"
+              className="rounded-full hover-scale"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -188,7 +197,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg animate-in slide-in-from-top-5">
+        <div className="md:hidden absolute top-full left-0 right-0 glass-nav border-b border-border/50 shadow-lg animate-in slide-in-from-top-4">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
             {navLinks.map((link) => (
               <Link
@@ -196,7 +205,7 @@ const Navbar = () => {
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
-                  "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  "px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300",
                   isActive(link.path)
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-accent"
@@ -212,7 +221,13 @@ const Navbar = () => {
                   variant="ghost"
                   className="justify-start w-full"
                   onClick={() => {
-                    navigate(user.role === "admin" ? "/admin" : "/dashboard");
+                    navigate(
+                      user.role === "admin"
+                        ? "/admin"
+                        : user.role === "staff"
+                        ? "/staff"
+                        : "/dashboard"
+                    );
                     setIsMobileMenuOpen(false);
                   }}
                 >
