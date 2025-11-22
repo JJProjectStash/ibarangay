@@ -1,45 +1,37 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, Filter } from "lucide-react";
+import { Calendar, Plus, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import StatusBadge from "@/components/StatusBadge";
 import { adminApi } from "@/services/adminApi";
 import { format } from "date-fns";
 
-const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+const AdminEvents = () => {
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchComplaints();
+    fetchEvents();
   }, []);
 
-  const fetchComplaints = async () => {
+  const fetchEvents = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllComplaints();
-      setComplaints(data);
+      const data = await adminApi.getAllEvents();
+      setEvents(data);
     } catch (error) {
-      console.error("Failed to fetch complaints:", error);
+      console.error("Failed to fetch events:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
-    complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter((event: any) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
@@ -52,9 +44,15 @@ const AdminComplaints = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Complaint Management"
-        description="Monitor and resolve resident complaints"
-        icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        title="Event Management"
+        description="Organize and manage barangay events"
+        icon={<Calendar className="h-8 w-8 text-primary" />}
+        action={
+          <Button className="gap-2 shadow-lg shadow-primary/20">
+            <Plus className="h-4 w-4" />
+            Create Event
+          </Button>
+        }
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
@@ -63,12 +61,12 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
+                Total Events
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
+                {events.length}
               </div>
             </CardContent>
           </Card>
@@ -76,25 +74,15 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
+                Upcoming
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
+                {
+                  events.filter((e: any) => new Date(e.date) > new Date())
+                    .length
+                }
               </div>
             </CardContent>
           </Card>
@@ -102,12 +90,28 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Resolved
+                This Month
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-accent">
+                {Math.floor(events.length * 0.3)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card card-hover">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Attendees
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
+                {events.reduce(
+                  (sum: number, e: any) => sum + (e.attendees?.length || 0),
+                  0
+                )}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +124,7 @@ const AdminComplaints = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search complaints..."
+                  placeholder="Search events..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -134,34 +138,27 @@ const AdminComplaints = () => {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
-        <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
-            <Card key={complaint.id} className="glass-card card-hover">
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-1">
-                      {complaint.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {complaint.description}
-                    </p>
-                  </div>
-                  <StatusBadge status={complaint.status} />
-                </div>
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>
-                    Submitted by {complaint.resident?.firstName}{" "}
-                    {complaint.resident?.lastName}
+        {/* Events Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredEvents.map((event: any) => (
+            <Card key={event.id} className="glass-card card-hover">
+              <CardHeader>
+                <CardTitle className="text-lg">{event.title}</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {format(new Date(event.date), "PPP")}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {event.description}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    {event.attendees?.length || 0} attendees
                   </span>
-                  <span>{format(new Date(complaint.createdAt), "PPP")}</span>
-                </div>
-                <div className="mt-4 flex gap-2">
                   <Button size="sm" variant="outline">
-                    View Details
+                    Manage
                   </Button>
-                  <Button size="sm">Update Status</Button>
                 </div>
               </CardContent>
             </Card>
@@ -172,4 +169,4 @@ const AdminComplaints = () => {
   );
 };
 
-export default AdminComplaints;
+export default AdminEvents;

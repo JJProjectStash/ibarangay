@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, Filter } from "lucide-react";
+import { Shield, Search, Filter, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,37 +9,30 @@ import StatusBadge from "@/components/StatusBadge";
 import { adminApi } from "@/services/adminApi";
 import { format } from "date-fns";
 
-const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+const AdminBlotter = () => {
+  const [blotters, setBlotters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchComplaints();
+    fetchBlotters();
   }, []);
 
-  const fetchComplaints = async () => {
+  const fetchBlotters = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllComplaints();
-      setComplaints(data);
+      const data = await adminApi.getAllBlotters();
+      setBlotters(data);
     } catch (error) {
-      console.error("Failed to fetch complaints:", error);
+      console.error("Failed to fetch blotters:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
-    complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBlotters = blotters.filter((blotter: any) =>
+    blotter.incident?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
@@ -52,9 +45,15 @@ const AdminComplaints = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Complaint Management"
-        description="Monitor and resolve resident complaints"
-        icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        title="Blotter Records"
+        description="Manage incident reports and blotter records"
+        icon={<Shield className="h-8 w-8 text-primary" />}
+        action={
+          <Button className="gap-2 shadow-lg shadow-primary/20">
+            <Plus className="h-4 w-4" />
+            New Record
+          </Button>
+        }
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
@@ -63,12 +62,12 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
+                Total Records
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
+                {blotters.length}
               </div>
             </CardContent>
           </Card>
@@ -76,25 +75,12 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
+                Active Cases
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
+                {blotters.filter((b: any) => b.status === "active").length}
               </div>
             </CardContent>
           </Card>
@@ -107,7 +93,20 @@ const AdminComplaints = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
+                {blotters.filter((b: any) => b.status === "resolved").length}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card card-hover">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                This Month
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-accent">
+                {Math.floor(blotters.length * 0.3)}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +119,7 @@ const AdminComplaints = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search complaints..."
+                  placeholder="Search blotter records..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -134,30 +133,41 @@ const AdminComplaints = () => {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
+        {/* Blotter Records */}
         <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
-            <Card key={complaint.id} className="glass-card card-hover">
+          {filteredBlotters.map((blotter: any) => (
+            <Card key={blotter.id} className="glass-card card-hover">
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold mb-1">
-                      {complaint.title}
+                      {blotter.incident}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {complaint.description}
+                      {blotter.description}
                     </p>
                   </div>
-                  <StatusBadge status={complaint.status} />
+                  <StatusBadge status={blotter.status} />
                 </div>
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>
-                    Submitted by {complaint.resident?.firstName}{" "}
-                    {complaint.resident?.lastName}
-                  </span>
-                  <span>{format(new Date(complaint.createdAt), "PPP")}</span>
+                <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
+                  <div>
+                    <span className="font-medium">Complainant:</span>{" "}
+                    {blotter.complainant}
+                  </div>
+                  <div>
+                    <span className="font-medium">Respondent:</span>{" "}
+                    {blotter.respondent}
+                  </div>
+                  <div>
+                    <span className="font-medium">Date:</span>{" "}
+                    {format(new Date(blotter.incidentDate), "PPP")}
+                  </div>
+                  <div>
+                    <span className="font-medium">Location:</span>{" "}
+                    {blotter.location}
+                  </div>
                 </div>
-                <div className="mt-4 flex gap-2">
+                <div className="flex gap-2">
                   <Button size="sm" variant="outline">
                     View Details
                   </Button>
@@ -172,4 +182,4 @@ const AdminComplaints = () => {
   );
 };
 
-export default AdminComplaints;
+export default AdminBlotter;

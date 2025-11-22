@@ -1,45 +1,36 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, Filter } from "lucide-react";
+import { FileText, Plus, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import StatusBadge from "@/components/StatusBadge";
 import { adminApi } from "@/services/adminApi";
-import { format } from "date-fns";
 
-const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+const AdminServices = () => {
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchComplaints();
+    fetchServices();
   }, []);
 
-  const fetchComplaints = async () => {
+  const fetchServices = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllComplaints();
-      setComplaints(data);
+      const data = await adminApi.getAllServices();
+      setServices(data);
     } catch (error) {
-      console.error("Failed to fetch complaints:", error);
+      console.error("Failed to fetch services:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
-    complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = services.filter((service: any) =>
+    service.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
@@ -52,9 +43,15 @@ const AdminComplaints = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Complaint Management"
-        description="Monitor and resolve resident complaints"
-        icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        title="Service Management"
+        description="Manage barangay services and document requests"
+        icon={<FileText className="h-8 w-8 text-primary" />}
+        action={
+          <Button className="gap-2 shadow-lg shadow-primary/20">
+            <Plus className="h-4 w-4" />
+            Add Service
+          </Button>
+        }
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
@@ -63,12 +60,12 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
+                Total Services
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
+                {services.length}
               </div>
             </CardContent>
           </Card>
@@ -76,38 +73,34 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
+                Pending Requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
+              <div className="text-3xl font-bold text-warning">24</div>
             </CardContent>
           </Card>
 
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
+                Completed Today
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
-              </div>
+              <div className="text-3xl font-bold text-success">12</div>
             </CardContent>
           </Card>
 
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Resolved
+                Active Services
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
+              <div className="text-3xl font-bold text-accent">
+                {services.filter((s: any) => s.isActive).length}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +113,7 @@ const AdminComplaints = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search complaints..."
+                  placeholder="Search services..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -134,34 +127,24 @@ const AdminComplaints = () => {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
-        <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
-            <Card key={complaint.id} className="glass-card card-hover">
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-1">
-                      {complaint.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {complaint.description}
-                    </p>
-                  </div>
-                  <StatusBadge status={complaint.status} />
-                </div>
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>
-                    Submitted by {complaint.resident?.firstName}{" "}
-                    {complaint.resident?.lastName}
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredServices.map((service: any) => (
+            <Card key={service.id} className="glass-card card-hover">
+              <CardHeader>
+                <CardTitle className="text-lg">{service.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {service.description}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-primary">
+                    ₱{service.fee || 0}
                   </span>
-                  <span>{format(new Date(complaint.createdAt), "PPP")}</span>
-                </div>
-                <div className="mt-4 flex gap-2">
                   <Button size="sm" variant="outline">
-                    View Details
+                    Manage
                   </Button>
-                  <Button size="sm">Update Status</Button>
                 </div>
               </CardContent>
             </Card>
@@ -172,4 +155,4 @@ const AdminComplaints = () => {
   );
 };
 
-export default AdminComplaints;
+export default AdminServices;

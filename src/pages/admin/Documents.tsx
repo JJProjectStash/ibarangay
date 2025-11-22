@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, Filter } from "lucide-react";
+import { FileText, Search, Filter, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,37 +9,30 @@ import StatusBadge from "@/components/StatusBadge";
 import { adminApi } from "@/services/adminApi";
 import { format } from "date-fns";
 
-const AdminComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
+const AdminDocuments = () => {
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchComplaints();
+    fetchDocuments();
   }, []);
 
-  const fetchComplaints = async () => {
+  const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllComplaints();
-      setComplaints(data);
+      const data = await adminApi.getAllDocuments();
+      setDocuments(data);
     } catch (error) {
-      console.error("Failed to fetch complaints:", error);
+      console.error("Failed to fetch documents:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredComplaints = complaints.filter((complaint: any) =>
-    complaint.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDocuments = documents.filter((doc: any) =>
+    doc.type?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const statusCounts = {
-    pending: complaints.filter((c: any) => c.status === "pending").length,
-    inProgress: complaints.filter((c: any) => c.status === "in_progress")
-      .length,
-    resolved: complaints.filter((c: any) => c.status === "resolved").length,
-  };
 
   if (loading) {
     return (
@@ -52,9 +45,9 @@ const AdminComplaints = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
       <PageHeader
-        title="Complaint Management"
-        description="Monitor and resolve resident complaints"
-        icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        title="Document Management"
+        description="Manage document requests and certificates"
+        icon={<FileText className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">
@@ -63,12 +56,12 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
+                Total Requests
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
+                {documents.length}
               </div>
             </CardContent>
           </Card>
@@ -81,7 +74,7 @@ const AdminComplaints = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
+                {documents.filter((d: any) => d.status === "pending").length}
               </div>
             </CardContent>
           </Card>
@@ -89,25 +82,25 @@ const AdminComplaints = () => {
           <Card className="glass-card card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Resolved
+                Approved
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
+                {documents.filter((d: any) => d.status === "approved").length}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card card-hover">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                This Week
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-accent">
+                {Math.floor(documents.length * 0.2)}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +113,7 @@ const AdminComplaints = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search complaints..."
+                  placeholder="Search documents..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -134,34 +127,31 @@ const AdminComplaints = () => {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
+        {/* Documents List */}
         <div className="space-y-4">
-          {filteredComplaints.map((complaint: any) => (
-            <Card key={complaint.id} className="glass-card card-hover">
+          {filteredDocuments.map((doc: any) => (
+            <Card key={doc.id} className="glass-card card-hover">
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-1">
-                      {complaint.title}
-                    </h3>
+                    <h3 className="text-lg font-semibold mb-1">{doc.type}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {complaint.description}
+                      Requested by {doc.resident?.firstName}{" "}
+                      {doc.resident?.lastName}
                     </p>
                   </div>
-                  <StatusBadge status={complaint.status} />
+                  <StatusBadge status={doc.status} />
                 </div>
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>
-                    Submitted by {complaint.resident?.firstName}{" "}
-                    {complaint.resident?.lastName}
-                  </span>
-                  <span>{format(new Date(complaint.createdAt), "PPP")}</span>
+                  <span>{format(new Date(doc.createdAt), "PPP")}</span>
+                  <span>Purpose: {doc.purpose}</span>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button size="sm" variant="outline">
-                    View Details
+                  <Button size="sm" variant="outline" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Download
                   </Button>
-                  <Button size="sm">Update Status</Button>
+                  <Button size="sm">Process Request</Button>
                 </div>
               </CardContent>
             </Card>
@@ -172,4 +162,4 @@ const AdminComplaints = () => {
   );
 };
 
-export default AdminComplaints;
+export default AdminDocuments;

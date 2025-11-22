@@ -1,14 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Menu,
-  X,
-  Bell,
-  User,
-  LogOut,
-  Settings,
-  ChevronDown,
-} from "lucide-react";
+import { Menu, X, Bell, LogOut, Settings, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
 import {
@@ -69,7 +61,7 @@ const Navbar = () => {
             <span
               className={cn(
                 "text-xl font-bold tracking-tight transition-colors",
-                isScrolled ? "text-foreground" : "text-foreground" // Adjust if using transparent header on dark bg
+                isScrolled ? "text-foreground" : "text-foreground"
               )}
             >
               iBarangay

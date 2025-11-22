@@ -1,9 +1,7 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
@@ -15,8 +13,6 @@ import {
   Users,
   ArrowRight,
   CheckCircle2,
-  Building2,
-  ShieldCheck,
 } from "lucide-react";
 
 const Home = () => {

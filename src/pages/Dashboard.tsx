@@ -1,4 +1,3 @@
-import React from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   Card,
@@ -14,8 +13,9 @@ import {
   AlertTriangle,
   Clock,
   ChevronRight,
-  Bell,
   Activity,
+  Building2,
+  Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -26,8 +26,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 
 const Dashboard = () => {
@@ -311,8 +309,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
-// Helper icons needed for the component
-import { Building2, Users } from "lucide-react";
 
 export default Dashboard;
