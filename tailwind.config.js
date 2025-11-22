@@ -164,6 +164,16 @@ export default {
 
       const utilities = {};
 
+      // Add small set of base helpers so they can be used inside @layer base
+      // (@apply from the base layer needs base-level helpers to exist).
+      addBase({
+        ".bg-background": { backgroundColor: theme("colors.background") },
+        ".text-foreground": { color: theme("colors.foreground") },
+        ".ring-offset-background": {
+          "--tw-ring-offset-color": theme("colors.background"),
+        },
+      });
+
       // plain name utilities
       for (const name of colorNames) {
         // convert e.g. primary-foreground -> text-primary-foreground

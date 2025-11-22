@@ -7,6 +7,7 @@ interface EnhancedCardProps {
   hover?: boolean;
   gradient?: boolean;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 export const EnhancedCard: React.FC<EnhancedCardProps> = ({
@@ -15,6 +16,7 @@ export const EnhancedCard: React.FC<EnhancedCardProps> = ({
   hover = true,
   gradient = false,
   onClick,
+  style,
 }) => {
   return (
     <div
@@ -25,6 +27,7 @@ export const EnhancedCard: React.FC<EnhancedCardProps> = ({
         className
       )}
       onClick={onClick}
+      style={style}
     >
       {gradient && (
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl" />
