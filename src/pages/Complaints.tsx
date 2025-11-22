@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Plus, MessageSquare, Filter, Download, Trash2 } from "lucide-react";
+import {
+  Plus,
+  MessageSquare,
+  Filter,
+  Download,
+  Trash2,
+  AlertCircle,
+} from "lucide-react";
 import api from "../services/api";
 import socketService from "../services/socket";
 import { Complaint } from "../types";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import { validators, getValidationMessage } from "../utils/validators";
+import { useAuth } from "../context/AuthContext";
 
 const Complaints: React.FC = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -15,7 +25,9 @@ const Complaints: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterPriority, setFilterPriority] = useState<string>("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,32 +38,39 @@ const Complaints: React.FC = () => {
   useEffect(() => {
     fetchComplaints();
 
-    // Setup real-time listeners
-    socketService.onComplaintCreated((data) => {
-      setComplaints((prev) => [data.complaint, ...prev]);
-      showSuccessToast("New complaint created!");
-    });
+    // Connect socket if authenticated
+    if (token) {
+      socketService.connect(token);
 
-    socketService.onComplaintUpdated((data) => {
-      setComplaints((prev) =>
-        prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
-      );
-      showSuccessToast("Complaint updated!");
-    });
+      // Setup real-time listeners
+      socketService.onComplaintCreated((data) => {
+        setComplaints((prev) => [data.complaint, ...prev]);
+        showSuccessToast("New complaint created!");
+      });
 
-    socketService.onComplaintStatusChanged((data) => {
-      setComplaints((prev) =>
-        prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
-      );
-      showSuccessToast(`Complaint status changed to ${data.complaint.status}`);
-    });
+      socketService.onComplaintUpdated((data) => {
+        setComplaints((prev) =>
+          prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
+        );
+        showSuccessToast("Complaint updated!");
+      });
 
-    return () => {
-      socketService.offComplaintCreated();
-      socketService.offComplaintUpdated();
-      socketService.offComplaintStatusChanged();
-    };
-  }, []);
+      socketService.onComplaintStatusChanged((data) => {
+        setComplaints((prev) =>
+          prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
+        );
+        showSuccessToast(
+          `Complaint status changed to ${data.complaint.status}`
+        );
+      });
+
+      return () => {
+        socketService.offComplaintCreated();
+        socketService.offComplaintUpdated();
+        socketService.offComplaintStatusChanged();
+      };
+    }
+  }, [token]);
 
   useEffect(() => {
     fetchComplaints();
@@ -59,26 +78,67 @@ const Complaints: React.FC = () => {
 
   const fetchComplaints = async () => {
     try {
+      setIsLoading(true);
       const response = await api.getComplaints(filterStatus, filterPriority);
-      setComplaints(response.data);
+      setComplaints(response.data || []);
     } catch (error) {
       console.error("Failed to fetch complaints:", error);
-      showErrorToast("Failed to load complaints");
+      showErrorToast(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!validators.required(formData.title)) {
+      newErrors.title = getValidationMessage("Title", "required");
+    } else if (!validators.minLength(formData.title, 5)) {
+      newErrors.title = getValidationMessage("Title", "minLength", 5);
+    }
+
+    if (!validators.required(formData.category)) {
+      newErrors.category = getValidationMessage("Category", "required");
+    }
+
+    if (!validators.required(formData.description)) {
+      newErrors.description = getValidationMessage("Description", "required");
+    } else if (!validators.minLength(formData.description, 10)) {
+      newErrors.description = getValidationMessage(
+        "Description",
+        "minLength",
+        10
+      );
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsUploading(true);
+
+    if (!validateForm()) {
+      showErrorToast("Please fix the form errors");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       // Upload files first
       const attachments: string[] = [];
-      for (const file of uploadedFiles) {
-        const uploadResponse = await api.uploadComplaintFile(file);
-        attachments.push(uploadResponse.data.filePath);
+      if (uploadedFiles.length > 0) {
+        for (const file of uploadedFiles) {
+          try {
+            const uploadResponse = await api.uploadComplaintFile(file);
+            attachments.push(uploadResponse.data.filePath);
+          } catch (uploadError) {
+            console.error("Failed to upload file:", file.name, uploadError);
+            showErrorToast(`Failed to upload ${file.name}`);
+          }
+        }
       }
 
       // Create complaint with attachments
@@ -95,13 +155,22 @@ const Complaints: React.FC = () => {
         priority: "medium",
       });
       setUploadedFiles([]);
+      setErrors({});
       showSuccessToast("Complaint submitted successfully!");
       fetchComplaints();
     } catch (error) {
       console.error("Failed to create complaint:", error);
-      showErrorToast("Failed to submit complaint");
+      showErrorToast(getErrorMessage(error));
     } finally {
-      setIsUploading(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
     }
   };
 
@@ -125,7 +194,7 @@ const Complaints: React.FC = () => {
       fetchComplaints();
     } catch (error) {
       console.error("Failed to delete complaints:", error);
-      showErrorToast("Failed to delete complaints");
+      showErrorToast(getErrorMessage(error));
     }
   };
 
@@ -148,7 +217,7 @@ const Complaints: React.FC = () => {
       showSuccessToast(`Complaints exported as ${format.toUpperCase()}`);
     } catch (error) {
       console.error("Failed to export complaints:", error);
-      showErrorToast("Failed to export complaints");
+      showErrorToast(getErrorMessage(error));
     }
   };
 
@@ -179,7 +248,12 @@ const Complaints: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <div className="spinner" />
+        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
+          Loading complaints...
+        </p>
+      </div>
     );
   }
 
@@ -356,6 +430,41 @@ const Complaints: React.FC = () => {
                     <p style={{ marginBottom: "1rem", lineHeight: "1.6" }}>
                       {complaint.description}
                     </p>
+                    {complaint.attachments &&
+                      complaint.attachments.length > 0 && (
+                        <div style={{ marginBottom: "1rem" }}>
+                          <p
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "var(--text-secondary)",
+                              marginBottom: "0.5rem",
+                            }}
+                          >
+                            Attachments ({complaint.attachments.length})
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.5rem",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {complaint.attachments.map((attachment, idx) => (
+                              <span
+                                key={idx}
+                                style={{
+                                  fontSize: "0.85rem",
+                                  padding: "0.25rem 0.5rem",
+                                  background: "var(--background)",
+                                  borderRadius: "4px",
+                                }}
+                              >
+                                📎 File {idx + 1}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     <div
                       style={{
                         display: "flex",
@@ -413,7 +522,10 @@ const Complaints: React.FC = () => {
       </div>
 
       {showModal && (
-        <div style={modalStyles.overlay} onClick={() => setShowModal(false)}>
+        <div
+          style={modalStyles.overlay}
+          onClick={() => !isSubmitting && setShowModal(false)}
+        >
           <div
             className="card"
             style={modalStyles.modal}
@@ -440,17 +552,29 @@ const Complaints: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Title
+                  Title *
                 </label>
                 <input
                   className="input"
                   value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="Brief description of the issue"
-                  required
+                  disabled={isSubmitting}
                 />
+                {errors.title && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <AlertCircle size={14} /> {errors.title}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -460,17 +584,31 @@ const Complaints: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Category
+                  Category *
                 </label>
                 <input
                   className="input"
                   value={formData.category}
                   onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                    handleInputChange("category", e.target.value)
                   }
                   placeholder="e.g., Infrastructure, Sanitation, Noise"
-                  required
+                  disabled={isSubmitting}
                 />
+                {errors.category && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <AlertCircle size={14} /> {errors.category}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -480,14 +618,15 @@ const Complaints: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Priority
+                  Priority *
                 </label>
                 <select
                   className="input"
                   value={formData.priority}
                   onChange={(e) =>
-                    setFormData({ ...formData, priority: e.target.value })
+                    handleInputChange("priority", e.target.value)
                   }
+                  disabled={isSubmitting}
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -502,18 +641,32 @@ const Complaints: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Description
+                  Description *
                 </label>
                 <textarea
                   className="input"
                   rows={5}
                   value={formData.description}
                   onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                    handleInputChange("description", e.target.value)
                   }
                   placeholder="Provide detailed information about your complaint"
-                  required
+                  disabled={isSubmitting}
                 />
+                {errors.description && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <AlertCircle size={14} /> {errors.description}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -536,16 +689,16 @@ const Complaints: React.FC = () => {
                   type="submit"
                   className="btn btn-primary"
                   style={{ flex: 1 }}
-                  disabled={isUploading}
+                  disabled={isSubmitting}
                 >
-                  {isUploading ? "Uploading..." : "Submit Complaint"}
+                  {isSubmitting ? "Submitting..." : "Submit Complaint"}
                 </button>
                 <button
                   type="button"
                   className="btn btn-outline"
                   style={{ flex: 1 }}
                   onClick={() => setShowModal(false)}
-                  disabled={isUploading}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>

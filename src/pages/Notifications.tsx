@@ -1,53 +1,96 @@
 import React, { useState, useEffect } from "react";
-import { Bell, Check, Trash2 } from "lucide-react";
+import { Bell, Check, Trash2, RefreshCw } from "lucide-react";
 import api from "../services/api";
+import socketService from "../services/socket";
 import { Notification } from "../types";
 import { format } from "date-fns";
+import { showSuccessToast, showErrorToast } from "../components/Toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import { useAuth } from "../context/AuthContext";
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
 
-  const fetchNotifications = async () => {
+    // Connect socket and listen for real-time notifications
+    if (token) {
+      socketService.connect(token);
+
+      socketService.onNotification((data) => {
+        setNotifications((prev) => [data.notification, ...prev]);
+        showSuccessToast(data.notification.title);
+      });
+
+      return () => {
+        socketService.offNotification();
+      };
+    }
+  }, [token]);
+
+  const fetchNotifications = async (showLoader = true) => {
     try {
+      if (showLoader) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       const response = await api.getNotifications();
-      setNotifications(response.data.notifications);
+      setNotifications(response.data.notifications || []);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+      showErrorToast(getErrorMessage(error));
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   const handleMarkAsRead = async (id: string) => {
     try {
       await api.markNotificationAsRead(id);
-      fetchNotifications();
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+      );
+      showSuccessToast("Notification marked as read");
     } catch (error) {
       console.error("Failed to mark as read:", error);
+      showErrorToast(getErrorMessage(error));
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await api.markAllNotificationsAsRead();
-      fetchNotifications();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      showSuccessToast("All notifications marked as read");
     } catch (error) {
       console.error("Failed to mark all as read:", error);
+      showErrorToast(getErrorMessage(error));
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this notification?")) {
+      return;
+    }
+
     try {
       await api.deleteNotification(id);
-      fetchNotifications();
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+      showSuccessToast("Notification deleted");
     } catch (error) {
       console.error("Failed to delete notification:", error);
+      showErrorToast(getErrorMessage(error));
     }
+  };
+
+  const handleRefresh = () => {
+    fetchNotifications(false);
   };
 
   const getTypeStyles = (type: string) => {
@@ -60,9 +103,16 @@ const Notifications: React.FC = () => {
     return styles[type] || styles.info;
   };
 
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <div className="spinner" />
+        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
+          Loading notifications...
+        </p>
+      </div>
     );
   }
 
@@ -75,16 +125,42 @@ const Notifications: React.FC = () => {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "2rem",
+            flexWrap: "wrap",
+            gap: "1rem",
           }}
         >
-          <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
-            Notifications
-          </h1>
-          {notifications.some((n) => !n.isRead) && (
-            <button className="btn btn-outline" onClick={handleMarkAllAsRead}>
-              <Check size={18} /> Mark All as Read
+          <div>
+            <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
+              Notifications
+            </h1>
+            {unreadCount > 0 && (
+              <p
+                style={{ color: "var(--text-secondary)", marginTop: "0.25rem" }}
+              >
+                {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button
+              className="btn btn-outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <RefreshCw size={18} className={isRefreshing ? "spinning" : ""} />
+              {isRefreshing ? "Refreshing..." : "Refresh"}
             </button>
-          )}
+            {unreadCount > 0 && (
+              <button
+                className="btn btn-outline"
+                onClick={handleMarkAllAsRead}
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <Check size={18} /> Mark All as Read
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -112,6 +188,7 @@ const Notifications: React.FC = () => {
                   style={{
                     opacity: notification.isRead ? 0.7 : 1,
                     borderLeft: `4px solid ${typeStyles.color}`,
+                    transition: "opacity 0.2s ease",
                   }}
                 >
                   <div
@@ -129,6 +206,7 @@ const Notifications: React.FC = () => {
                           alignItems: "center",
                           gap: "0.75rem",
                           marginBottom: "0.5rem",
+                          flexWrap: "wrap",
                         }}
                       >
                         <div
@@ -139,6 +217,7 @@ const Notifications: React.FC = () => {
                             background: notification.isRead
                               ? "var(--border)"
                               : typeStyles.color,
+                            flexShrink: 0,
                           }}
                         />
                         <h3 style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
@@ -172,7 +251,9 @@ const Notifications: React.FC = () => {
                         )}
                       </p>
                     </div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <div
+                      style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}
+                    >
                       {!notification.isRead && (
                         <button
                           onClick={() => handleMarkAsRead(notification._id)}

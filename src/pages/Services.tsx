@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, Clock, CheckCircle, XCircle } from "lucide-react";
 import api from "../services/api";
 import { Service } from "../types";
 import { format } from "date-fns";
+import { showSuccessToast, showErrorToast } from "../components/Toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import { validators, getValidationMessage } from "../utils/validators";
 
 const Services: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     itemName: "",
     itemType: "",
@@ -24,19 +29,73 @@ const Services: React.FC = () => {
 
   const fetchServices = async () => {
     try {
+      setIsLoading(true);
       const response = await api.getServiceRequests();
-      setServices(response.data);
+      setServices(response.data || []);
     } catch (error) {
       console.error("Failed to fetch services:", error);
+      showErrorToast(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!validators.required(formData.itemName)) {
+      newErrors.itemName = getValidationMessage("Item name", "required");
+    }
+
+    if (!validators.required(formData.itemType)) {
+      newErrors.itemType = getValidationMessage("Item type", "required");
+    }
+
+    if (!validators.required(formData.borrowDate)) {
+      newErrors.borrowDate = getValidationMessage("Borrow date", "required");
+    }
+
+    if (!validators.required(formData.expectedReturnDate)) {
+      newErrors.expectedReturnDate = getValidationMessage(
+        "Expected return date",
+        "required"
+      );
+    }
+
+    // Validate that expected return date is after borrow date
+    if (formData.borrowDate && formData.expectedReturnDate) {
+      const borrowDate = new Date(formData.borrowDate);
+      const returnDate = new Date(formData.expectedReturnDate);
+      if (returnDate <= borrowDate) {
+        newErrors.expectedReturnDate =
+          "Expected return date must be after borrow date";
+      }
+    }
+
+    if (!validators.required(formData.purpose)) {
+      newErrors.purpose = getValidationMessage("Purpose", "required");
+    }
+
+    if (!validators.isPositiveNumber(formData.quantity.toString())) {
+      newErrors.quantity = "Quantity must be a positive number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      showErrorToast("Please fix the form errors");
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await api.createServiceRequest(formData);
+      showSuccessToast("Service request submitted successfully!");
       setShowModal(false);
       setFormData({
         itemName: "",
@@ -47,26 +106,58 @@ const Services: React.FC = () => {
         quantity: 1,
         notes: "",
       });
+      setErrors({});
       fetchServices();
     } catch (error) {
       console.error("Failed to create service request:", error);
+      showErrorToast(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData({ ...formData, [field]: value });
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, string> = {
-      pending: "badge-pending",
-      approved: "badge-approved",
-      borrowed: "badge-info",
-      returned: "badge-success",
-      rejected: "badge-rejected",
+    const badges: Record<string, { class: string; icon: JSX.Element }> = {
+      pending: {
+        class: "badge-pending",
+        icon: <Clock size={14} />,
+      },
+      approved: {
+        class: "badge-approved",
+        icon: <CheckCircle size={14} />,
+      },
+      borrowed: {
+        class: "badge-info",
+        icon: <Package size={14} />,
+      },
+      returned: {
+        class: "badge-success",
+        icon: <CheckCircle size={14} />,
+      },
+      rejected: {
+        class: "badge-rejected",
+        icon: <XCircle size={14} />,
+      },
     };
-    return badges[status] || "badge-info";
+    return badges[status] || badges.pending;
   };
 
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <div className="spinner" />
+        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
+          Loading services...
+        </p>
+      </div>
     );
   }
 
@@ -79,6 +170,8 @@ const Services: React.FC = () => {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "2rem",
+            flexWrap: "wrap",
+            gap: "1rem",
           }}
         >
           <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
@@ -110,129 +203,144 @@ const Services: React.FC = () => {
               </p>
             </div>
           ) : (
-            services.map((service) => (
-              <div key={service._id} className="card">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "bold",
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      {service.itemName}
-                    </h3>
-                    <p
-                      style={{
-                        color: "var(--text-secondary)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      {service.itemType}
-                    </p>
-                  </div>
-                  <span className={`badge ${getStatusBadge(service.status)}`}>
-                    {service.status.charAt(0).toUpperCase() +
-                      service.status.slice(1)}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                    gap: "1rem",
-                    marginTop: "1rem",
-                  }}
-                >
-                  <div>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Quantity
-                    </p>
-                    <p style={{ fontWeight: "500" }}>{service.quantity}</p>
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Borrow Date
-                    </p>
-                    <p style={{ fontWeight: "500" }}>
-                      {format(new Date(service.borrowDate), "MMM dd, yyyy")}
-                    </p>
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Expected Return
-                    </p>
-                    <p style={{ fontWeight: "500" }}>
-                      {format(
-                        new Date(service.expectedReturnDate),
-                        "MMM dd, yyyy"
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div style={{ marginTop: "1rem" }}>
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    Purpose
-                  </p>
-                  <p>{service.purpose}</p>
-                </div>
-                {service.notes && (
+            services.map((service) => {
+              const statusBadge = getStatusBadge(service.status);
+              return (
+                <div key={service._id} className="card">
                   <div
                     style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem",
-                      background: "var(--background)",
-                      borderRadius: "6px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "start",
+                      marginBottom: "1rem",
                     }}
                   >
+                    <div>
+                      <h3
+                        style={{
+                          fontSize: "1.25rem",
+                          fontWeight: "bold",
+                          marginBottom: "0.5rem",
+                        }}
+                      >
+                        {service.itemName}
+                      </h3>
+                      <p
+                        style={{
+                          color: "var(--text-secondary)",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        {service.itemType}
+                      </p>
+                    </div>
+                    <span
+                      className={`badge ${statusBadge.class}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.25rem",
+                      }}
+                    >
+                      {statusBadge.icon}
+                      {service.status.charAt(0).toUpperCase() +
+                        service.status.slice(1)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "1rem",
+                      marginTop: "1rem",
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        Quantity
+                      </p>
+                      <p style={{ fontWeight: "500" }}>{service.quantity}</p>
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        Borrow Date
+                      </p>
+                      <p style={{ fontWeight: "500" }}>
+                        {format(new Date(service.borrowDate), "MMM dd, yyyy")}
+                      </p>
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        Expected Return
+                      </p>
+                      <p style={{ fontWeight: "500" }}>
+                        {format(
+                          new Date(service.expectedReturnDate),
+                          "MMM dd, yyyy"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "1rem" }}>
                     <p
                       style={{
                         fontSize: "0.85rem",
                         color: "var(--text-secondary)",
                       }}
                     >
-                      Notes
+                      Purpose
                     </p>
-                    <p style={{ fontSize: "0.9rem" }}>{service.notes}</p>
+                    <p>{service.purpose}</p>
                   </div>
-                )}
-              </div>
-            ))
+                  {service.notes && (
+                    <div
+                      style={{
+                        marginTop: "1rem",
+                        padding: "0.75rem",
+                        background: "var(--background)",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        Notes
+                      </p>
+                      <p style={{ fontSize: "0.9rem" }}>{service.notes}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div style={modalStyles.overlay} onClick={() => setShowModal(false)}>
+        <div
+          style={modalStyles.overlay}
+          onClick={() => !isSubmitting && setShowModal(false)}
+        >
           <div
             className="card"
             style={modalStyles.modal}
@@ -259,16 +367,28 @@ const Services: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Item Name
+                  Item Name *
                 </label>
                 <input
                   className="input"
                   value={formData.itemName}
                   onChange={(e) =>
-                    setFormData({ ...formData, itemName: e.target.value })
+                    handleInputChange("itemName", e.target.value)
                   }
-                  required
+                  disabled={isSubmitting}
+                  placeholder="e.g., Folding Chairs, Sound System"
                 />
+                {errors.itemName && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    {errors.itemName}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -278,16 +398,28 @@ const Services: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Item Type
+                  Item Type *
                 </label>
                 <input
                   className="input"
                   value={formData.itemType}
                   onChange={(e) =>
-                    setFormData({ ...formData, itemType: e.target.value })
+                    handleInputChange("itemType", e.target.value)
                   }
-                  required
+                  disabled={isSubmitting}
+                  placeholder="e.g., Furniture, Equipment"
                 />
+                {errors.itemType && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    {errors.itemType}
+                  </p>
+                )}
               </div>
               <div
                 style={{
@@ -304,17 +436,29 @@ const Services: React.FC = () => {
                       fontWeight: "500",
                     }}
                   >
-                    Borrow Date
+                    Borrow Date *
                   </label>
                   <input
                     type="date"
                     className="input"
                     value={formData.borrowDate}
                     onChange={(e) =>
-                      setFormData({ ...formData, borrowDate: e.target.value })
+                      handleInputChange("borrowDate", e.target.value)
                     }
-                    required
+                    disabled={isSubmitting}
+                    min={new Date().toISOString().split("T")[0]}
                   />
+                  {errors.borrowDate && (
+                    <p
+                      style={{
+                        color: "var(--error)",
+                        fontSize: "0.85rem",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      {errors.borrowDate}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -324,20 +468,32 @@ const Services: React.FC = () => {
                       fontWeight: "500",
                     }}
                   >
-                    Expected Return
+                    Expected Return *
                   </label>
                   <input
                     type="date"
                     className="input"
                     value={formData.expectedReturnDate}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        expectedReturnDate: e.target.value,
-                      })
+                      handleInputChange("expectedReturnDate", e.target.value)
                     }
-                    required
+                    disabled={isSubmitting}
+                    min={
+                      formData.borrowDate ||
+                      new Date().toISOString().split("T")[0]
+                    }
                   />
+                  {errors.expectedReturnDate && (
+                    <p
+                      style={{
+                        color: "var(--error)",
+                        fontSize: "0.85rem",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      {errors.expectedReturnDate}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
@@ -348,7 +504,7 @@ const Services: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Quantity
+                  Quantity *
                 </label>
                 <input
                   type="number"
@@ -356,13 +512,21 @@ const Services: React.FC = () => {
                   min="1"
                   value={formData.quantity}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      quantity: parseInt(e.target.value),
-                    })
+                    handleInputChange("quantity", parseInt(e.target.value) || 1)
                   }
-                  required
+                  disabled={isSubmitting}
                 />
+                {errors.quantity && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    {errors.quantity}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -372,17 +536,27 @@ const Services: React.FC = () => {
                     fontWeight: "500",
                   }}
                 >
-                  Purpose
+                  Purpose *
                 </label>
                 <textarea
                   className="input"
                   rows={3}
                   value={formData.purpose}
-                  onChange={(e) =>
-                    setFormData({ ...formData, purpose: e.target.value })
-                  }
-                  required
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="Describe the purpose of borrowing"
                 />
+                {errors.purpose && (
+                  <p
+                    style={{
+                      color: "var(--error)",
+                      fontSize: "0.85rem",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    {errors.purpose}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -398,9 +572,9 @@ const Services: React.FC = () => {
                   className="input"
                   rows={2}
                   value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="Any additional information"
                 />
               </div>
               <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
@@ -408,14 +582,16 @@ const Services: React.FC = () => {
                   type="submit"
                   className="btn btn-primary"
                   style={{ flex: 1 }}
+                  disabled={isSubmitting}
                 >
-                  Submit Request
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
                 </button>
                 <button
                   type="button"
                   className="btn btn-outline"
                   style={{ flex: 1 }}
                   onClick={() => setShowModal(false)}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
