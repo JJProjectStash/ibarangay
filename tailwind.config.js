@@ -20,6 +20,8 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--primary-light))",
+          dark: "hsl(var(--primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -36,6 +38,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          light: "hsl(var(--accent-light))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -45,6 +48,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        error: "hsl(var(--error))",
+        info: "hsl(var(--info))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -80,6 +87,14 @@ export default {
           "0%": { backgroundPosition: "-1000px 0" },
           "100%": { backgroundPosition: "1000px 0" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.5 },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -89,6 +104,8 @@ export default {
         "slide-in-left": "slide-in-left 0.4s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         shimmer: "shimmer 2s infinite",
+        float: "float 3s ease-in-out infinite",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },

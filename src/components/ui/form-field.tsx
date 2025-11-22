@@ -1,32 +1,38 @@
-import * as React from "react";
-import { AlertCircle } from "lucide-react";
+import React from "react";
+import { Label } from "./label";
 import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
-  label: string;
+  label?: string;
   error?: string;
-  required?: boolean;
   children: React.ReactNode;
   className?: string;
+  required?: boolean;
+  description?: string;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
   label,
   error,
-  required,
   children,
   className,
+  required,
+  description,
 }) => {
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <label className="text-sm font-medium text-foreground">
-        {label}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </label>
+    <div className={cn("space-y-2", className)}>
+      {label && (
+        <Label className={cn(error && "text-destructive")}>
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </Label>
+      )}
       {children}
+      {description && !error && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
       {error && (
-        <p className="text-sm text-destructive flex items-center gap-1 animate-in slide-in-from-top-1">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <p className="text-xs font-medium text-destructive animate-in slide-in-from-top-1">
           {error}
         </p>
       )}

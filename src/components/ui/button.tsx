@@ -1,30 +1,35 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5",
+          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90 hover:shadow-lg",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md",
         outline:
-          "border-2 border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-primary/50",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-accent",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         gradient:
-          "bg-gradient-to-r from-primary to-primary-dark text-primary-foreground shadow-lg hover:shadow-xl hover:-translate-y-0.5",
+          "bg-gradient-to-r from-primary to-primary-dark text-primary-foreground hover:opacity-90 shadow-md hover:shadow-lg border-0",
+        glass:
+          "bg-white/20 backdrop-blur-md border border-white/30 text-foreground hover:bg-white/30 shadow-sm",
       },
       size: {
-        default: "h-11 px-5 py-2.5",
-        sm: "h-9 rounded-md px-3.5 text-xs",
-        lg: "h-12 rounded-lg px-8 text-base",
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8 text-base",
         icon: "h-10 w-10",
+        xl: "h-14 rounded-lg px-10 text-lg",
       },
     },
     defaultVariants: {
@@ -38,45 +43,39 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  loading?: boolean;
+  isLoading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, size, loading, children, disabled, ...props },
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading,
+      leftIcon,
+      rightIcon,
+      children,
+      ...props
+    },
     ref
   ) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        disabled={disabled || loading}
+        disabled={isLoading || props.disabled}
         {...props}
       >
-        {loading && (
-          <svg
-            className="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        )}
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
         {children}
-      </button>
+        {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
+      </Comp>
     );
   }
 );

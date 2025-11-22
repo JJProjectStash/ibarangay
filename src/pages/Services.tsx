@@ -1,764 +1,254 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Plus,
-  Package,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  Filter,
+  FileText,
+  Building2,
+  Users,
+  Gavel,
+  ArrowRight,
   Clock,
-  CheckCircle,
-  XCircle,
-  Settings,
+  CheckCircle2,
 } from "lucide-react";
-import api from "../services/api";
-import { Service } from "../types";
-import { format } from "date-fns";
-import { showSuccessToast, showErrorToast } from "../components/Toast";
-import { getErrorMessage } from "../utils/errorHandler";
-import { validators, getValidationMessage } from "../utils/validators";
-import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
-const Services: React.FC = () => {
-  const [services, setServices] = useState<Service[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [showItemTypeModal, setShowItemTypeModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [itemTypes, setItemTypes] = useState<string[]>([]);
-  const [newItemTypes, setNewItemTypes] = useState<string>("");
-  const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    itemName: "",
-    itemType: "",
-    borrowDate: "",
-    expectedReturnDate: "",
-    purpose: "",
-    quantity: 1,
-    notes: "",
+// Mock Data
+const servicesData = [
+  {
+    id: 1,
+    title: "Barangay Clearance",
+    description:
+      "Official document certifying that you are a law-abiding resident of the barangay with no derogatory record.",
+    category: "Documents",
+    processingTime: "1-2 Days",
+    fee: "₱50.00",
+    icon: FileText,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+  },
+  {
+    id: 2,
+    title: "Certificate of Indigency",
+    description:
+      "Certification issued to less fortunate residents for medical, financial, or scholarship assistance.",
+    category: "Social Services",
+    processingTime: "1 Day",
+    fee: "Free",
+    icon: Users,
+    color: "text-green-500",
+    bg: "bg-green-500/10",
+  },
+  {
+    id: 3,
+    title: "Business Permit",
+    description:
+      "Clearance required for operating a business within the barangay jurisdiction.",
+    category: "Business",
+    processingTime: "2-3 Days",
+    fee: "₱500.00",
+    icon: Building2,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+  },
+  {
+    id: 4,
+    title: "Barangay ID",
+    description:
+      "Official identification card for bonafide residents of the barangay.",
+    category: "Identification",
+    processingTime: "1 Day",
+    fee: "₱100.00",
+    icon: FileText,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+  },
+  {
+    id: 5,
+    title: "Complaint Filing",
+    description: "File a formal complaint for mediation or blotter purposes.",
+    category: "Legal",
+    processingTime: "Immediate",
+    fee: "Free",
+    icon: Gavel,
+    color: "text-red-500",
+    bg: "bg-red-500/10",
+  },
+  {
+    id: 6,
+    title: "Residency Certificate",
+    description:
+      "Proof of residency for bank opening, employment, or other legal purposes.",
+    category: "Documents",
+    processingTime: "1 Day",
+    fee: "₱50.00",
+    icon: FileText,
+    color: "text-indigo-500",
+    bg: "bg-indigo-500/10",
+  },
+];
+
+const categories = [
+  "All",
+  "Documents",
+  "Social Services",
+  "Business",
+  "Identification",
+  "Legal",
+];
+
+const Services = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const filteredServices = servicesData.filter((service) => {
+    const matchesSearch =
+      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || service.category === selectedCategory;
+    return matchesSearch && matchesCategory;
   });
 
-  useEffect(() => {
-    fetchServices();
-    fetchItemTypes();
-  }, []);
-
-  const fetchItemTypes = async () => {
-    try {
-      const response = await api.getServiceItemTypes();
-      setItemTypes(response.data || []);
-    } catch (error) {
-      console.error("Failed to fetch item types:", error);
-    }
+  const handleRequest = (serviceTitle: string) => {
+    toast.info(`Requesting ${serviceTitle}... (This is a demo)`);
   };
-
-  const fetchServices = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.getServiceRequests();
-      const servicesData = Array.isArray(response.data) ? response.data : [];
-      setServices(servicesData);
-    } catch (error) {
-      console.error("Failed to fetch services:", error);
-      showErrorToast(getErrorMessage(error));
-      setServices([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdateItemTypes = async () => {
-    try {
-      const itemTypeArray = newItemTypes
-        .split(",")
-        .map((type) => type.trim())
-        .filter((type) => type.length > 0);
-
-      if (itemTypeArray.length === 0) {
-        showErrorToast("Please enter at least one item type");
-        return;
-      }
-
-      await api.updateServiceItemTypes(itemTypeArray);
-      showSuccessToast("Item types updated successfully!");
-      setShowItemTypeModal(false);
-      setNewItemTypes("");
-      fetchItemTypes();
-    } catch (error) {
-      console.error("Failed to update item types:", error);
-      showErrorToast(getErrorMessage(error));
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!validators.required(formData.itemName)) {
-      newErrors.itemName = getValidationMessage("Item name", "required");
-    }
-
-    if (!validators.required(formData.itemType)) {
-      newErrors.itemType = getValidationMessage("Item type", "required");
-    }
-
-    if (!validators.required(formData.borrowDate)) {
-      newErrors.borrowDate = getValidationMessage("Borrow date", "required");
-    }
-
-    if (!validators.required(formData.expectedReturnDate)) {
-      newErrors.expectedReturnDate = getValidationMessage(
-        "Expected return date",
-        "required"
-      );
-    }
-
-    // Validate that expected return date is after borrow date
-    if (formData.borrowDate && formData.expectedReturnDate) {
-      const borrowDate = new Date(formData.borrowDate);
-      const returnDate = new Date(formData.expectedReturnDate);
-      if (returnDate <= borrowDate) {
-        newErrors.expectedReturnDate =
-          "Expected return date must be after borrow date";
-      }
-    }
-
-    if (!validators.required(formData.purpose)) {
-      newErrors.purpose = getValidationMessage("Purpose", "required");
-    }
-
-    if (!validators.isPositiveNumber(formData.quantity.toString())) {
-      newErrors.quantity = "Quantity must be a positive number";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      showErrorToast("Please fix the form errors");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await api.createServiceRequest(formData);
-      showSuccessToast("Service request submitted successfully!");
-      setShowModal(false);
-      setFormData({
-        itemName: "",
-        itemType: "",
-        borrowDate: "",
-        expectedReturnDate: "",
-        purpose: "",
-        quantity: 1,
-        notes: "",
-      });
-      setErrors({});
-      fetchServices();
-    } catch (error) {
-      console.error("Failed to create service request:", error);
-      showErrorToast(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData({ ...formData, [field]: value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { class: string; icon: JSX.Element }> = {
-      pending: {
-        class: "badge-pending",
-        icon: <Clock size={14} />,
-      },
-      approved: {
-        class: "badge-approved",
-        icon: <CheckCircle size={14} />,
-      },
-      borrowed: {
-        class: "badge-info",
-        icon: <Package size={14} />,
-      },
-      returned: {
-        class: "badge-success",
-        icon: <CheckCircle size={14} />,
-      },
-      rejected: {
-        class: "badge-rejected",
-        icon: <XCircle size={14} />,
-      },
-    };
-    return badges[status] || badges.pending;
-  };
-
-  const canEditItemTypes = user?.role === "admin" || user?.role === "staff";
-
-  if (isLoading) {
-    return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading services...
-        </p>
-      </div>
-    );
-  }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
-            Borrow & Return Services
-          </h1>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {canEditItemTypes && (
-              <button
-                className="btn btn-outline"
-                onClick={() => {
-                  setNewItemTypes(itemTypes.join(", "));
-                  setShowItemTypeModal(true);
-                }}
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <Settings size={18} /> Manage Item Types
-              </button>
-            )}
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowModal(true)}
-            >
-              <Plus size={20} /> New Request
-            </button>
-          </div>
+    <div className="container mx-auto px-4 py-8 min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 animate-in slide-in-from-top-4 duration-500">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-4xl font-bold tracking-tight">Our Services</h1>
+          <p className="text-muted-foreground text-lg">
+            Access a wide range of barangay services online. Fast, secure, and
+            convenient processing for all residents.
+          </p>
         </div>
 
-        <div style={{ display: "grid", gap: "1.5rem" }}>
-          {services.length === 0 ? (
-            <div
-              className="card"
-              style={{ textAlign: "center", padding: "3rem" }}
-            >
-              <Package
-                size={48}
-                style={{
-                  margin: "0 auto 1rem",
-                  color: "var(--text-secondary)",
-                }}
-              />
-              <p style={{ color: "var(--text-secondary)" }}>
-                No service requests yet
-              </p>
-            </div>
-          ) : (
-            services.map((service) => {
-              const statusBadge = getStatusBadge(service.status);
-              return (
-                <div key={service._id} className="card">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                      marginBottom: "1rem",
-                    }}
-                  >
-                    <div>
-                      <h3
-                        style={{
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        {service.itemName}
-                      </h3>
-                      <p
-                        style={{
-                          color: "var(--text-secondary)",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        {service.itemType}
-                      </p>
-                    </div>
-                    <span
-                      className={`badge ${statusBadge.class}`}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.25rem",
-                      }}
-                    >
-                      {statusBadge.icon}
-                      {service.status.charAt(0).toUpperCase() +
-                        service.status.slice(1)}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
-                      gap: "1rem",
-                      marginTop: "1rem",
-                    }}
-                  >
-                    <div>
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        Quantity
-                      </p>
-                      <p style={{ fontWeight: "500" }}>{service.quantity}</p>
-                    </div>
-                    <div>
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        Borrow Date
-                      </p>
-                      <p style={{ fontWeight: "500" }}>
-                        {format(new Date(service.borrowDate), "MMM dd, yyyy")}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        Expected Return
-                      </p>
-                      <p style={{ fontWeight: "500" }}>
-                        {format(
-                          new Date(service.expectedReturnDate),
-                          "MMM dd, yyyy"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: "1rem" }}>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Purpose
-                    </p>
-                    <p>{service.purpose}</p>
-                  </div>
-                  {service.notes && (
-                    <div
-                      style={{
-                        marginTop: "1rem",
-                        padding: "0.75rem",
-                        background: "var(--background)",
-                        borderRadius: "6px",
-                      }}
-                    >
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        Notes
-                      </p>
-                      <p style={{ fontSize: "0.9rem" }}>{service.notes}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
+        {/* Search & Filter */}
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-4">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search services..."
+              className="pl-9 bg-background/50 backdrop-blur-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Item Type Management Modal */}
-      {showItemTypeModal && (
-        <div
-          style={modalStyles.overlay}
-          onClick={() => setShowItemTypeModal(false)}
-        >
-          <div
-            className="card"
-            style={modalStyles.modal}
-            onClick={(e) => e.stopPropagation()}
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-2 mb-8 animate-in fade-in duration-700 delay-100">
+        {categories.map((category) => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategory(category)}
+            className="rounded-full transition-all"
           >
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: "bold",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Manage Service Item Types
-            </h2>
-            <div style={{ marginBottom: "1rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                Item Types (comma-separated)
-              </label>
-              <textarea
-                className="input"
-                rows={4}
-                value={newItemTypes}
-                onChange={(e) => setNewItemTypes(e.target.value)}
-                placeholder="e.g., equipment, facility, document, other"
-              />
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.5rem",
-                }}
-              >
-                Current item types: {itemTypes.join(", ")}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 1 }}
-                onClick={handleUpdateItemTypes}
-              >
-                Update Item Types
-              </button>
-              <button
-                className="btn btn-outline"
-                style={{ flex: 1 }}
-                onClick={() => setShowItemTypeModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            {category}
+          </Button>
+        ))}
+      </div>
 
-      {/* Create Service Request Modal */}
-      {showModal && (
-        <div
-          style={modalStyles.overlay}
-          onClick={() => !isSubmitting && setShowModal(false)}
-        >
-          <div
-            className="card"
-            style={modalStyles.modal}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: "bold",
-                marginBottom: "1.5rem",
-              }}
+      {/* Services Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-8 duration-700 delay-200">
+        {filteredServices.length > 0 ? (
+          filteredServices.map((service) => (
+            <Card
+              key={service.id}
+              className="card-hover flex flex-col h-full border-muted/60 hover:border-primary/30 overflow-hidden group"
             >
-              New Service Request
-            </h2>
-            <form
-              onSubmit={handleSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Item Name *
-                </label>
-                <input
-                  className="input"
-                  value={formData.itemName}
-                  onChange={(e) =>
-                    handleInputChange("itemName", e.target.value)
-                  }
-                  disabled={isSubmitting}
-                  placeholder="e.g., Folding Chairs, Sound System"
-                />
-                {errors.itemName && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                    }}
+              <div className={`h-2 w-full ${service.bg.replace("/10", "")}`} />
+              <CardHeader>
+                <div className="flex justify-between items-start mb-4">
+                  <div
+                    className={`p-3 rounded-xl ${service.bg} ${service.color} group-hover:scale-110 transition-transform duration-300`}
                   >
-                    {errors.itemName}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
+                    <service.icon className="h-6 w-6" />
+                  </div>
+                  <Badge variant="secondary" className="font-normal">
+                    {service.category}
+                  </Badge>
+                </div>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                  {service.title}
+                </CardTitle>
+                <CardDescription className="line-clamp-2 mt-2">
+                  {service.description}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="flex-1">
+                <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Processing:{" "}
+                      <span className="font-medium text-foreground">
+                        {service.processingTime}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>
+                      Fee:{" "}
+                      <span className="font-medium text-foreground">
+                        {service.fee}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+
+              <CardFooter className="pt-4 border-t bg-muted/10">
+                <Button
+                  className="w-full group-hover:shadow-lg group-hover:shadow-primary/20 transition-all"
+                  onClick={() => handleRequest(service.title)}
                 >
-                  Item Type *
-                </label>
-                <select
-                  className="input"
-                  value={formData.itemType}
-                  onChange={(e) =>
-                    handleInputChange("itemType", e.target.value)
-                  }
-                  disabled={isSubmitting}
-                >
-                  <option value="">Select an item type</option>
-                  {itemTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                {errors.itemType && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {errors.itemType}
-                  </p>
-                )}
+                  Request Now
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="p-4 rounded-full bg-muted">
+                <Search className="h-8 w-8 opacity-50" />
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
+              <p>No services found matching your criteria.</p>
+              <Button
+                variant="link"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("All");
                 }}
               >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "0.5rem",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Borrow Date *
-                  </label>
-                  <input
-                    type="date"
-                    className="input"
-                    value={formData.borrowDate}
-                    onChange={(e) =>
-                      handleInputChange("borrowDate", e.target.value)
-                    }
-                    disabled={isSubmitting}
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                  {errors.borrowDate && (
-                    <p
-                      style={{
-                        color: "var(--error)",
-                        fontSize: "0.85rem",
-                        marginTop: "0.25rem",
-                      }}
-                    >
-                      {errors.borrowDate}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "0.5rem",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Expected Return *
-                  </label>
-                  <input
-                    type="date"
-                    className="input"
-                    value={formData.expectedReturnDate}
-                    onChange={(e) =>
-                      handleInputChange("expectedReturnDate", e.target.value)
-                    }
-                    disabled={isSubmitting}
-                    min={
-                      formData.borrowDate ||
-                      new Date().toISOString().split("T")[0]
-                    }
-                  />
-                  {errors.expectedReturnDate && (
-                    <p
-                      style={{
-                        color: "var(--error)",
-                        fontSize: "0.85rem",
-                        marginTop: "0.25rem",
-                      }}
-                    >
-                      {errors.expectedReturnDate}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Quantity *
-                </label>
-                <input
-                  type="number"
-                  className="input"
-                  min="1"
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    handleInputChange("quantity", parseInt(e.target.value) || 1)
-                  }
-                  disabled={isSubmitting}
-                />
-                {errors.quantity && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {errors.quantity}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Purpose *
-                </label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  value={formData.purpose}
-                  onChange={(e) => handleInputChange("purpose", e.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="Describe the purpose of borrowing"
-                />
-                {errors.purpose && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {errors.purpose}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Notes (Optional)
-                </label>
-                <textarea
-                  className="input"
-                  rows={2}
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="Any additional information"
-                />
-              </div>
-              <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  style={{ flex: 1 }}
-                  onClick={() => setShowModal(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                Clear filters
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
-};
-
-const modalStyles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0,0,0,0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "1rem",
-  },
-  modal: {
-    maxWidth: "600px",
-    width: "100%",
-    maxHeight: "90vh",
-    overflow: "auto",
-  },
 };
 
 export default Services;

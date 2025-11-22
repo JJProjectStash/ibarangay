@@ -1,155 +1,191 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// Components
+import Layout from "./components/Layout";
+import RoleGuard from "./components/RoleGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
-import LoadingSpinner from "./components/LoadingSpinner";
-import Navbar from "./components/Navbar";
-import ToastProvider from "./components/Toast";
-import socketService from "./services/socket";
-import { useEffect } from "react";
+
+// Pages
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Services from "./pages/Services";
-import Complaints from "./pages/Complaints";
 import Events from "./pages/Events";
+import Complaints from "./pages/Complaints";
 import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import StaffDashboard from "./pages/staff/StaffDashboard";
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+// Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminResidents from "./pages/admin/Residents";
+import AdminServices from "./pages/admin/Services";
+import AdminEvents from "./pages/admin/Events";
+import AdminComplaints from "./pages/admin/Complaints";
+import AdminDocuments from "./pages/admin/Documents";
+import AdminBlotter from "./pages/admin/Blotter";
 
-  if (isLoading) {
-    return <LoadingSpinner fullScreen />;
-  }
+// Staff Pages
+import StaffDashboard from "./pages/staff/Dashboard";
+import StaffServices from "./pages/staff/Services";
+import StaffEvents from "./pages/staff/Events";
+import StaffComplaints from "./pages/staff/Complaints";
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-};
+// Context
+import { AuthProvider } from "./context/AuthContext";
 
-const RoleBasedRoute = ({
-  children,
-  allowedRoles,
-}: {
-  children: React.ReactNode;
-  allowedRoles: Array<"admin" | "staff" | "resident">;
-}) => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <LoadingSpinner fullScreen />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" />;
-  }
-
-  return <>{children}</>;
-};
-
-function AppRoutes() {
-  const { token, isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      // Connect to WebSocket when user is authenticated
-      socketService.connect(token);
-
-      return () => {
-        // Disconnect when component unmounts or user logs out
-        socketService.disconnect();
-      };
-    }
-  }, [isAuthenticated, token]);
-
-  return (
-    <>
-      <Navbar />
-      <ToastProvider />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <RoleBasedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/staff"
-          element={
-            <RoleBasedRoute allowedRoles={["staff"]}>
-              <StaffDashboard />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/services"
-          element={
-            <PrivateRoute>
-              <Services />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/complaints"
-          element={
-            <PrivateRoute>
-              <Complaints />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/events"
-          element={
-            <PrivateRoute>
-              <Events />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <PrivateRoute>
-              <Notifications />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </>
-  );
-}
-
-function App() {
+const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <Router>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </Router>
+      <AuthProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/events" element={<Events />} />
+
+            {/* Protected Resident Routes */}
+            <Route
+              path="/complaints"
+              element={
+                <RoleGuard allowedRoles={["resident"]}>
+                  <Complaints />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <RoleGuard allowedRoles={["resident", "admin", "staff"]}>
+                  <Notifications />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <RoleGuard allowedRoles={["resident"]}>
+                  <Dashboard />
+                </RoleGuard>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/residents"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminResidents />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/services"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminServices />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/events"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminEvents />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/complaints"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminComplaints />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/documents"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminDocuments />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/admin/blotter"
+              element={
+                <RoleGuard allowedRoles={["admin"]}>
+                  <AdminBlotter />
+                </RoleGuard>
+              }
+            />
+
+            {/* Staff Routes */}
+            <Route
+              path="/staff"
+              element={
+                <RoleGuard allowedRoles={["staff"]}>
+                  <StaffDashboard />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/staff/services"
+              element={
+                <RoleGuard allowedRoles={["staff"]}>
+                  <StaffServices />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/staff/events"
+              element={
+                <RoleGuard allowedRoles={["staff"]}>
+                  <StaffEvents />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/staff/complaints"
+              element={
+                <RoleGuard allowedRoles={["staff"]}>
+                  <StaffComplaints />
+                </RoleGuard>
+              }
+            />
+
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </AuthProvider>
     </ErrorBoundary>
   );
-}
+};
 
 export default App;

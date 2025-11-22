@@ -1,28 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
-  LogOut,
+  Bell,
   User,
-  BarChart3,
-  Shield,
-  Briefcase,
+  LogOut,
+  Settings,
+  ChevronDown,
 } from "lucide-react";
-import { BarangayLogo } from "./CustomIcons";
-import NotificationBell from "./NotificationBell";
+import { useAuth } from "../context/AuthContext";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-const Navbar: React.FC = () => {
-  const { user, logout, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+const Navbar = () => {
+  const { user, logout } = useAuth();
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -33,435 +41,221 @@ const Navbar: React.FC = () => {
     navigate("/login");
   };
 
+  const navLinks = [
+    { path: "/", label: "Home" },
+    { path: "/services", label: "Services" },
+    { path: "/events", label: "Events" },
+    { path: "/complaints", label: "Complaints" },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
-  const getRoleBasedDashboard = () => {
-    if (!user) return "/dashboard";
-    switch (user.role) {
-      case "admin":
-        return "/admin";
-      case "staff":
-        return "/staff";
-      default:
-        return "/dashboard";
-    }
-  };
-
-  const getRoleBadge = () => {
-    if (!user) return null;
-    const badges = {
-      admin: { icon: Shield, color: "#ef4444", label: "Admin" },
-      staff: { icon: Briefcase, color: "#3b82f6", label: "Staff" },
-      resident: { icon: User, color: "#10b981", label: "Resident" },
-    };
-    const badge = badges[user.role];
-    const Icon = badge.icon;
-    return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.25rem",
-          padding: "0.25rem 0.75rem",
-          background: `${badge.color}20`,
-          color: badge.color,
-          borderRadius: "12px",
-          fontSize: "0.75rem",
-          fontWeight: "600",
-        }}
-      >
-        <Icon size={14} />
-        {badge.label}
-      </span>
-    );
-  };
-
   return (
-    <nav style={{ ...styles.nav, ...(scrolled ? styles.navScrolled : {}) }}>
-      <div className="container" style={styles.container}>
-        <Link to="/" style={styles.logo}>
-          <BarangayLogo size={36} />
-          <span style={styles.logoText}>iBarangay</span>
-        </Link>
-
-        {/* Desktop Menu */}
-        <div style={styles.desktopMenu}>
-          {isAuthenticated ? (
-            <>
-              <Link
-                to="/"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/") ? styles.navLinkActive : {}),
-                }}
-              >
-                Home
-              </Link>
-              <Link
-                to={getRoleBasedDashboard()}
-                style={{
-                  ...styles.navLink,
-                  ...(isActive(getRoleBasedDashboard())
-                    ? styles.navLinkActive
-                    : {}),
-                }}
-              >
-                <BarChart3 size={18} style={{ marginRight: "0.25rem" }} />
-                Dashboard
-              </Link>
-              {user?.role === "resident" && (
-                <>
-                  <Link
-                    to="/services"
-                    style={{
-                      ...styles.navLink,
-                      ...(isActive("/services") ? styles.navLinkActive : {}),
-                    }}
-                  >
-                    Services
-                  </Link>
-                  <Link
-                    to="/complaints"
-                    style={{
-                      ...styles.navLink,
-                      ...(isActive("/complaints") ? styles.navLinkActive : {}),
-                    }}
-                  >
-                    Complaints
-                  </Link>
-                  <Link
-                    to="/events"
-                    style={{
-                      ...styles.navLink,
-                      ...(isActive("/events") ? styles.navLinkActive : {}),
-                    }}
-                  >
-                    Events
-                  </Link>
-                </>
+    <nav
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md shadow-sm border-border/50 py-2"
+          : "bg-transparent py-4"
+      )}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-primary/50 transition-all duration-300 group-hover:scale-105">
+              iB
+            </div>
+            <span
+              className={cn(
+                "text-xl font-bold tracking-tight transition-colors",
+                isScrolled ? "text-foreground" : "text-foreground" // Adjust if using transparent header on dark bg
               )}
+            >
+              iBarangay
+            </span>
+          </Link>
 
-              <NotificationBell />
-
-              <div style={styles.userMenu}>
-                <div style={styles.userAvatar}>
-                  <User size={18} />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.125rem",
-                  }}
-                >
-                  <span style={styles.userName}>{user?.firstName}</span>
-                  {getRoleBadge()}
-                </div>
-                <button
-                  onClick={handleLogout}
-                  style={styles.logoutBtn}
-                  title="Logout"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/login" style={styles.navLink}>
-                Login
-              </Link>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => (
               <Link
-                to="/signup"
-                className="btn btn-primary"
-                style={styles.signupBtn}
+                key={link.path}
+                to={link.path}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                  isActive(link.path)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
               >
-                Sign Up
+                {link.label}
               </Link>
-            </>
-          )}
-        </div>
+            ))}
+          </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          style={styles.mobileMenuBtn}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Right Side Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative rounded-full hover:bg-accent"
+                >
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                  <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background" />
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-2 rounded-full pl-2 pr-4 hover:bg-accent border border-transparent hover:border-border"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white font-medium text-sm shadow-sm">
+                        {user.firstName?.[0] || "U"}
+                      </div>
+                      <div className="flex flex-col items-start text-xs">
+                        <span className="font-medium text-foreground">
+                          {user.firstName}
+                        </span>
+                        <span className="text-muted-foreground capitalize">
+                          {user.role}
+                        </span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 p-2">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate(
+                          user.role === "admin" ? "/admin" : "/dashboard"
+                        )
+                      }
+                      className="cursor-pointer"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                  <Button variant="ghost" className="rounded-full">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="rounded-full"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div style={styles.mobileMenu} className="slide-in-right">
-          {isAuthenticated ? (
-            <>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  borderBottom: "1px solid rgba(255,255,255,0.1)",
-                }}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg animate-in slide-in-from-top-5">
+          <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isActive(link.path)
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground hover:bg-accent"
+                )}
               >
-                <div style={{ fontWeight: "600", marginBottom: "0.25rem" }}>
-                  {user?.firstName} {user?.lastName}
-                </div>
-                {getRoleBadge()}
+                {link.label}
+              </Link>
+            ))}
+            <div className="h-px bg-border my-2" />
+            {user ? (
+              <>
+                <Button
+                  variant="ghost"
+                  className="justify-start w-full"
+                  onClick={() => {
+                    navigate(user.role === "admin" ? "/admin" : "/dashboard");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <div className="flex flex-col space-y-2 pt-2">
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full justify-center">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full justify-center">Get Started</Button>
+                </Link>
               </div>
-              <Link
-                to="/"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to={getRoleBasedDashboard()}
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              {user?.role === "resident" && (
-                <>
-                  <Link
-                    to="/services"
-                    style={styles.mobileLink}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Services
-                  </Link>
-                  <Link
-                    to="/complaints"
-                    style={styles.mobileLink}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Complaints
-                  </Link>
-                  <Link
-                    to="/events"
-                    style={styles.mobileLink}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Events
-                  </Link>
-                </>
-              )}
-              <Link
-                to="/notifications"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Notifications
-              </Link>
-              <button onClick={handleLogout} style={styles.mobileLogout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
+            )}
+          </div>
         </div>
       )}
     </nav>
   );
 };
-
-const styles: Record<string, React.CSSProperties> = {
-  nav: {
-    background: "var(--primary)",
-    color: "white",
-    padding: "1rem 0",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    position: "sticky",
-    top: 0,
-    zIndex: 1000,
-    transition: "all 0.3s ease",
-  },
-  navScrolled: {
-    padding: "0.75rem 0",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-  },
-  container: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    fontSize: "1.4rem",
-    fontWeight: "bold",
-    color: "white",
-    transition: "transform 0.2s ease",
-  },
-  logoText: {
-    display: "flex",
-    alignItems: "center",
-  },
-  desktopMenu: {
-    display: "flex",
-    alignItems: "center",
-    gap: "2rem",
-  },
-  navLink: {
-    color: "white",
-    fontWeight: "500",
-    transition: "all 0.2s",
-    opacity: 0.85,
-    position: "relative",
-    padding: "0.5rem 0",
-    display: "flex",
-    alignItems: "center",
-  },
-  navLinkActive: {
-    opacity: 1,
-    fontWeight: "600",
-  },
-  userMenu: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    padding: "0.5rem 1rem",
-    background: "rgba(255,255,255,0.15)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    transition: "all 0.2s ease",
-  },
-  userAvatar: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "50%",
-    background: "rgba(255,255,255,0.2)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  userName: {
-    fontWeight: "600",
-  },
-  logoutBtn: {
-    background: "transparent",
-    border: "none",
-    color: "white",
-    cursor: "pointer",
-    padding: "0.25rem",
-    display: "flex",
-    alignItems: "center",
-    transition: "transform 0.2s ease",
-  },
-  signupBtn: {
-    background: "white",
-    color: "var(--primary)",
-    padding: "0.6rem 1.5rem",
-  },
-  mobileMenuBtn: {
-    display: "none",
-    background: "transparent",
-    border: "none",
-    color: "white",
-    cursor: "pointer",
-  },
-  mobileMenu: {
-    display: "none",
-    flexDirection: "column",
-    gap: "1rem",
-    padding: "1.5rem",
-    background: "rgba(30, 58, 138, 0.98)",
-    backdropFilter: "blur(10px)",
-  },
-  mobileLink: {
-    color: "white",
-    padding: "0.75rem",
-    fontWeight: "500",
-    borderRadius: "8px",
-    transition: "background 0.2s ease",
-  },
-  mobileLogout: {
-    background: "var(--error)",
-    color: "white",
-    border: "none",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    fontWeight: "500",
-    cursor: "pointer",
-    marginTop: "0.5rem",
-    transition: "all 0.2s ease",
-  },
-};
-
-// Add enhanced animations and hover effects
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  nav a[style*="navLink"]:hover {
-    opacity: 1 !important;
-  }
-  
-  nav a[style*="navLink"]::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: white;
-    transition: width 0.3s ease;
-  }
-  
-  nav a[style*="navLink"]:hover::after,
-  nav a[style*="navLinkActive"]::after {
-    width: 100%;
-  }
-  
-  nav a[style*="logo"]:hover {
-    transform: scale(1.05);
-  }
-  
-  nav div[style*="userMenu"]:hover {
-    background: rgba(255,255,255,0.25);
-  }
-  
-  nav button[style*="logoutBtn"]:hover {
-    transform: scale(1.2);
-  }
-  
-  nav a[style*="mobileLink"]:hover {
-    background: rgba(255,255,255,0.1);
-  }
-  
-  nav button[style*="mobileLogout"]:hover {
-    background: #DC2626;
-    transform: translateY(-2px);
-  }
-  
-  @media (max-width: 768px) {
-    nav > div > div:nth-child(2) {
-      display: none !important;
-    }
-    nav button:last-of-type {
-      display: block !important;
-    }
-    nav > div:last-child {
-      display: flex !important;
-    }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Navbar;

@@ -1,864 +1,317 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/form-field";
 import {
-  Plus,
-  MessageSquare,
-  Filter,
-  Download,
-  Trash2,
-  AlertCircle,
-  Settings,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertTriangle,
+  Send,
+  FileText,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  UploadCloud,
 } from "lucide-react";
-import api from "../services/api";
-import socketService from "../services/socket";
-import { Complaint } from "../types";
-import { format } from "date-fns";
-import FileUpload from "../components/FileUpload";
-import { showSuccessToast, showErrorToast } from "../components/Toast";
-import { getErrorMessage } from "../utils/errorHandler";
-import { validators, getValidationMessage } from "../utils/validators";
-import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
-const Complaints: React.FC = () => {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [selectedComplaints, setSelectedComplaints] = useState<string[]>([]);
-  const [filterStatus, setFilterStatus] = useState<string>("");
-  const [filterPriority, setFilterPriority] = useState<string>("");
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+// Mock Data for Complaint History
+const complaintHistory = [
+  {
+    id: "CPL-2023-001",
+    subject: "Noise Complaint - Late Night Karaoke",
+    date: "Oct 15, 2023",
+    status: "Resolved",
+    statusColor: "text-green-500 bg-green-500/10",
+    description: "Neighbors singing loudly past 10 PM on a weekday.",
+  },
+  {
+    id: "CPL-2023-005",
+    subject: "Uncollected Garbage",
+    date: "Nov 02, 2023",
+    status: "Pending",
+    statusColor: "text-orange-500 bg-orange-500/10",
+    description: "Garbage truck missed our street for 2 consecutive schedules.",
+  },
+];
+
+const Complaints = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [categories, setCategories] = useState<string[]>([]);
-  const [newCategories, setNewCategories] = useState<string>("");
-  const { token, user } = useAuth();
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    priority: "medium",
-  });
+  const [activeTab, setActiveTab] = useState("new");
 
-  useEffect(() => {
-    fetchComplaints();
-    fetchCategories();
-
-    // Connect socket if authenticated
-    if (token) {
-      socketService.connect(token);
-
-      // Setup real-time listeners
-      socketService.onComplaintCreated((data) => {
-        setComplaints((prev) => [data.complaint, ...prev]);
-        showSuccessToast("New complaint created!");
-      });
-
-      socketService.onComplaintUpdated((data) => {
-        setComplaints((prev) =>
-          prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
-        );
-        showSuccessToast("Complaint updated!");
-      });
-
-      socketService.onComplaintStatusChanged((data) => {
-        setComplaints((prev) =>
-          prev.map((c) => (c._id === data.complaint._id ? data.complaint : c))
-        );
-        showSuccessToast(
-          `Complaint status changed to ${data.complaint.status}`
-        );
-      });
-
-      return () => {
-        socketService.offComplaintCreated();
-        socketService.offComplaintUpdated();
-        socketService.offComplaintStatusChanged();
-      };
-    }
-  }, [token]);
-
-  useEffect(() => {
-    fetchComplaints();
-  }, [filterStatus, filterPriority]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.getComplaintCategories();
-      setCategories(response.data || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  };
-
-  const fetchComplaints = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.getComplaints(filterStatus, filterPriority);
-      const complaintsData = Array.isArray(response.data) ? response.data : [];
-      setComplaints(complaintsData);
-    } catch (error) {
-      console.error("Failed to fetch complaints:", error);
-      showErrorToast(getErrorMessage(error));
-      setComplaints([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdateCategories = async () => {
-    try {
-      const categoryArray = newCategories
-        .split(",")
-        .map((cat) => cat.trim())
-        .filter((cat) => cat.length > 0);
-
-      if (categoryArray.length === 0) {
-        showErrorToast("Please enter at least one category");
-        return;
-      }
-
-      await api.updateComplaintCategories(categoryArray);
-      showSuccessToast("Categories updated successfully!");
-      setShowCategoryModal(false);
-      setNewCategories("");
-      fetchCategories();
-    } catch (error) {
-      console.error("Failed to update categories:", error);
-      showErrorToast(getErrorMessage(error));
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!validators.required(formData.title)) {
-      newErrors.title = getValidationMessage("Title", "required");
-    } else if (!validators.minLength(formData.title, 5)) {
-      newErrors.title = getValidationMessage("Title", "minLength", 5);
-    }
-
-    if (!validators.required(formData.category)) {
-      newErrors.category = getValidationMessage("Category", "required");
-    }
-
-    if (!validators.required(formData.description)) {
-      newErrors.description = getValidationMessage("Description", "required");
-    } else if (!validators.minLength(formData.description, 10)) {
-      newErrors.description = getValidationMessage(
-        "Description",
-        "minLength",
-        10
-      );
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      showErrorToast("Please fix the form errors");
-      return;
-    }
-
     setIsSubmitting(true);
 
-    try {
-      // Upload files first
-      const attachments: string[] = [];
-      if (uploadedFiles.length > 0) {
-        for (const file of uploadedFiles) {
-          try {
-            const uploadResponse = await api.uploadComplaintFile(file);
-            if (uploadResponse.data?.filePath) {
-              attachments.push(uploadResponse.data.filePath);
-            }
-          } catch (uploadError) {
-            console.error("Failed to upload file:", file.name, uploadError);
-            showErrorToast(`Failed to upload ${file.name}`);
-          }
-        }
-      }
-
-      // Create complaint with attachments
-      await api.createComplaint({
-        ...formData,
-        attachments,
-      });
-
-      setShowModal(false);
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        priority: "medium",
-      });
-      setUploadedFiles([]);
-      setErrors({});
-      showSuccessToast("Complaint submitted successfully!");
-      fetchComplaints();
-    } catch (error) {
-      console.error("Failed to create complaint:", error);
-      showErrorToast(getErrorMessage(error));
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedComplaints.length === 0) return;
-
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedComplaints.length} complaint(s)?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await api.bulkDeleteComplaints(selectedComplaints);
-      showSuccessToast(
-        `${selectedComplaints.length} complaint(s) deleted successfully`
+      toast.success(
+        "Complaint submitted successfully. Reference ID: CPL-2023-006"
       );
-      setSelectedComplaints([]);
-      fetchComplaints();
-    } catch (error) {
-      console.error("Failed to delete complaints:", error);
-      showErrorToast(getErrorMessage(error));
-    }
+      setActiveTab("history");
+    }, 1500);
   };
-
-  const handleExport = async (format: "csv" | "excel") => {
-    try {
-      const blob = await api.exportComplaints(format, {
-        status: filterStatus,
-        priority: filterPriority,
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `complaints-${Date.now()}.${
-        format === "csv" ? "csv" : "xlsx"
-      }`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      showSuccessToast(`Complaints exported as ${format.toUpperCase()}`);
-    } catch (error) {
-      console.error("Failed to export complaints:", error);
-      showErrorToast(getErrorMessage(error));
-    }
-  };
-
-  const toggleSelectComplaint = (id: string) => {
-    setSelectedComplaints((prev) =>
-      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
-    );
-  };
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, string> = {
-      pending: "badge-pending",
-      "in-progress": "badge-info",
-      resolved: "badge-success",
-      closed: "badge-error",
-    };
-    return badges[status] || "badge-info";
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const badges: Record<string, string> = {
-      low: "badge-info",
-      medium: "badge-warning",
-      high: "badge-error",
-    };
-    return badges[priority] || "badge-info";
-  };
-
-  const canEditCategories = user?.role === "admin" || user?.role === "staff";
-
-  if (isLoading) {
-    return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading complaints...
-        </p>
-      </div>
-    );
-  }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
-            Complaint Center
+    <div className="container mx-auto px-4 py-8 min-h-screen max-w-5xl">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-in slide-in-from-top-4 duration-500">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Complaints & Reports
           </h1>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {canEditCategories && (
-              <button
-                className="btn btn-outline"
-                onClick={() => {
-                  setNewCategories(categories.join(", "));
-                  setShowCategoryModal(true);
-                }}
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <Settings size={18} /> Manage Categories
-              </button>
-            )}
-            {selectedComplaints.length > 0 && (
-              <button
-                className="btn btn-outline"
-                onClick={handleBulkDelete}
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <Trash2 size={18} /> Delete ({selectedComplaints.length})
-              </button>
-            )}
-            <button
-              className="btn btn-outline"
-              onClick={() => handleExport("csv")}
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-            >
-              <Download size={18} /> CSV
-            </button>
-            <button
-              className="btn btn-outline"
-              onClick={() => handleExport("excel")}
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-            >
-              <Download size={18} /> Excel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowModal(true)}
-            >
-              <Plus size={20} /> New Complaint
-            </button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            marginBottom: "1.5rem",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Filter size={18} />
-            <select
-              className="input"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{ width: "auto" }}
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-          <select
-            className="input"
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-            style={{ width: "auto" }}
-          >
-            <option value="">All Priority</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        <div style={{ display: "grid", gap: "1.5rem" }}>
-          {complaints.length === 0 ? (
-            <div
-              className="card"
-              style={{ textAlign: "center", padding: "3rem" }}
-            >
-              <MessageSquare
-                size={48}
-                style={{
-                  margin: "0 auto 1rem",
-                  color: "var(--text-secondary)",
-                }}
-              />
-              <p style={{ color: "var(--text-secondary)" }}>
-                No complaints found
-              </p>
-            </div>
-          ) : (
-            complaints.map((complaint) => (
-              <div key={complaint._id} className="card">
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "1rem",
-                    alignItems: "start",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedComplaints.includes(complaint._id)}
-                    onChange={() => toggleSelectComplaint(complaint._id)}
-                    style={{ marginTop: "0.25rem" }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "start",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <h3
-                          style={{
-                            fontSize: "1.25rem",
-                            fontWeight: "bold",
-                            marginBottom: "0.5rem",
-                          }}
-                        >
-                          {complaint.title}
-                        </h3>
-                        <p
-                          style={{
-                            color: "var(--text-secondary)",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          {complaint.category}
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "0.5rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span
-                          className={`badge ${getStatusBadge(
-                            complaint.status
-                          )}`}
-                        >
-                          {complaint.status.replace("-", " ").toUpperCase()}
-                        </span>
-                        <span
-                          className={`badge ${getPriorityBadge(
-                            complaint.priority
-                          )}`}
-                        >
-                          {complaint.priority.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-                    <p style={{ marginBottom: "1rem", lineHeight: "1.6" }}>
-                      {complaint.description}
-                    </p>
-                    {complaint.attachments &&
-                      complaint.attachments.length > 0 && (
-                        <div style={{ marginBottom: "1rem" }}>
-                          <p
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "var(--text-secondary)",
-                              marginBottom: "0.5rem",
-                            }}
-                          >
-                            Attachments ({complaint.attachments.length})
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "0.5rem",
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            {complaint.attachments.map((_, idx) => (
-                              <span
-                                key={idx}
-                                style={{
-                                  fontSize: "0.85rem",
-                                  padding: "0.25rem 0.5rem",
-                                  background: "var(--background)",
-                                  borderRadius: "4px",
-                                }}
-                              >
-                                📎 File {idx + 1}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <span>
-                        Submitted:{" "}
-                        {format(new Date(complaint.createdAt), "MMM dd, yyyy")}
-                      </span>
-                      {complaint.resolvedAt && (
-                        <span>
-                          Resolved:{" "}
-                          {format(
-                            new Date(complaint.resolvedAt),
-                            "MMM dd, yyyy"
-                          )}
-                        </span>
-                      )}
-                    </div>
-                    {complaint.response && (
-                      <div
-                        style={{
-                          marginTop: "1rem",
-                          padding: "1rem",
-                          background: "var(--background)",
-                          borderRadius: "6px",
-                          borderLeft: "4px solid var(--accent)",
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: "600",
-                            marginBottom: "0.5rem",
-                            color: "var(--accent)",
-                          }}
-                        >
-                          Response:
-                        </p>
-                        <p style={{ fontSize: "0.95rem" }}>
-                          {complaint.response}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+          <p className="text-muted-foreground">
+            File a complaint or report an incident securely. Track the status of
+            your reports here.
+          </p>
         </div>
       </div>
 
-      {/* Category Management Modal */}
-      {showCategoryModal && (
-        <div
-          style={modalStyles.overlay}
-          onClick={() => setShowCategoryModal(false)}
-        >
-          <div
-            className="card"
-            style={modalStyles.modal}
-            onClick={(e) => e.stopPropagation()}
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px] p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsTrigger
+            value="new"
+            className="data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
           >
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: "bold",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Manage Complaint Categories
-            </h2>
-            <div style={{ marginBottom: "1rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                Categories (comma-separated)
-              </label>
-              <textarea
-                className="input"
-                rows={4}
-                value={newCategories}
-                onChange={(e) => setNewCategories(e.target.value)}
-                placeholder="e.g., infrastructure, sanitation, security, noise"
-              />
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.5rem",
-                }}
-              >
-                Current categories: {categories.join(", ")}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 1 }}
-                onClick={handleUpdateCategories}
-              >
-                Update Categories
-              </button>
-              <button
-                className="btn btn-outline"
-                style={{ flex: 1 }}
-                onClick={() => setShowCategoryModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            File New Complaint
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            History & Status
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Create Complaint Modal */}
-      {showModal && (
-        <div
-          style={modalStyles.overlay}
-          onClick={() => !isSubmitting && setShowModal(false)}
+        <TabsContent
+          value="new"
+          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
         >
-          <div
-            className="card"
-            style={modalStyles.modal}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: "bold",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Submit Complaint
-            </h2>
-            <form
-              onSubmit={handleSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Title *
-                </label>
-                <input
-                  className="input"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  placeholder="Brief description of the issue"
-                  disabled={isSubmitting}
-                />
-                {errors.title && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card className="border-none shadow-lg">
+                <CardHeader>
+                  <CardTitle>Complaint Form</CardTitle>
+                  <CardDescription>
+                    Please provide detailed information about the incident. Your
+                    identity will be kept confidential if requested.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form
+                    id="complaint-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
                   >
-                    <AlertCircle size={14} /> {errors.title}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Category *
-                </label>
-                <select
-                  className="input"
-                  value={formData.category}
-                  onChange={(e) =>
-                    handleInputChange("category", e.target.value)
-                  }
-                  disabled={isSubmitting}
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField label="Type of Complaint" required>
+                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                          <option value="">Select type...</option>
+                          <option value="noise">Noise Disturbance</option>
+                          <option value="sanitation">
+                            Sanitation / Garbage
+                          </option>
+                          <option value="security">Security Concern</option>
+                          <option value="dispute">Neighbor Dispute</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </FormField>
+
+                      <FormField label="Date of Incident" required>
+                        <Input type="date" className="bg-background" />
+                      </FormField>
+                    </div>
+
+                    <FormField label="Subject" required>
+                      <Input
+                        placeholder="Brief summary of the issue"
+                        className="bg-background"
+                      />
+                    </FormField>
+
+                    <FormField label="Detailed Description" required>
+                      <textarea
+                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Please describe what happened, including time, location, and persons involved..."
+                      />
+                    </FormField>
+
+                    <FormField label="Evidence / Attachments (Optional)">
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:bg-muted/20 transition-colors cursor-pointer">
+                        <UploadCloud className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Drag and drop files here, or click to select files
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Supports JPG, PNG, PDF (Max 5MB)
+                        </p>
+                      </div>
+                    </FormField>
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="confidential"
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label
+                        htmlFor="confidential"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Keep my identity confidential
+                      </label>
+                    </div>
+                  </form>
+                </CardContent>
+                <CardFooter className="flex justify-end border-t bg-muted/10 p-6">
+                  <Button
+                    type="submit"
+                    form="complaint-form"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="shadow-lg shadow-primary/20"
                   >
-                    <AlertCircle size={14} /> {errors.category}
+                    {isSubmitting ? "Submitting..." : "Submit Complaint"}
+                    {!isSubmitting && <Send className="ml-2 h-4 w-4" />}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card className="bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/50">
+                <CardHeader>
+                  <CardTitle className="text-blue-700 dark:text-blue-400 text-lg flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5" />
+                    Important Note
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground space-y-2">
+                  <p>
+                    Please ensure all information provided is accurate. False
+                    reporting may lead to legal consequences.
                   </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Priority *
-                </label>
-                <select
-                  className="input"
-                  value={formData.priority}
-                  onChange={(e) =>
-                    handleInputChange("priority", e.target.value)
-                  }
-                  disabled={isSubmitting}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Description *
-                </label>
-                <textarea
-                  className="input"
-                  rows={5}
-                  value={formData.description}
-                  onChange={(e) =>
-                    handleInputChange("description", e.target.value)
-                  }
-                  placeholder="Provide detailed information about your complaint"
-                  disabled={isSubmitting}
-                />
-                {errors.description && (
-                  <p
-                    style={{
-                      color: "var(--error)",
-                      fontSize: "0.85rem",
-                      marginTop: "0.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    <AlertCircle size={14} /> {errors.description}
+                  <p>
+                    For emergencies requiring immediate police or medical
+                    assistance, please call <strong>911</strong> or the Barangay
+                    Emergency Hotline: <strong>(02) 8123-4567</strong>.
                   </p>
-                )}
-              </div>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  Attachments (Optional)
-                </label>
-                <FileUpload
-                  onFilesSelected={setUploadedFiles}
-                  maxFiles={5}
-                  maxSizeMB={5}
-                />
-              </div>
-              <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Complaint"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  style={{ flex: 1 }}
-                  onClick={() => setShowModal(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Process Flow</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative pl-6 border-l-2 border-muted space-y-6">
+                    <div className="relative">
+                      <div className="absolute -left-[31px] top-0 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                        1
+                      </div>
+                      <h4 className="font-medium text-sm">Submission</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Fill out the form with details and evidence.
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[31px] top-0 h-6 w-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">
+                        2
+                      </div>
+                      <h4 className="font-medium text-sm">Review</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Barangay officials will review your complaint within 24
+                        hours.
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[31px] top-0 h-6 w-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">
+                        3
+                      </div>
+                      <h4 className="font-medium text-sm">Action/Mediation</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Schedule for mediation or appropriate action will be
+                        taken.
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[31px] top-0 h-6 w-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">
+                        4
+                      </div>
+                      <h4 className="font-medium text-sm">Resolution</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Case closed upon agreement or escalation.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      )}
+        </TabsContent>
+
+        <TabsContent
+          value="history"
+          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+        >
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle>My Complaints</CardTitle>
+              <CardDescription>
+                Track the status of your submitted reports.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {complaintHistory.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors gap-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">
+                          {item.subject}
+                        </span>
+                        <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-muted">
+                          {item.id}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {item.description}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+                        <Clock className="h-3 w-3" />
+                        <span>Filed on {item.date}</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${item.statusColor}`}
+                    >
+                      {item.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-const modalStyles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0,0,0,0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "1rem",
-  },
-  modal: {
-    maxWidth: "600px",
-    width: "100%",
-    maxHeight: "90vh",
-    overflow: "auto",
-  },
 };
 
 export default Complaints;
