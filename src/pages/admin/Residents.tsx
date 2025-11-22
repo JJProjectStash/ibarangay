@@ -8,8 +8,17 @@ import UserManagementTable from "@/components/admin/UserManagementTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import adminApi from "@/services/adminApi";
 
+interface ResidentData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isVerified: boolean;
+}
+
 const AdminResidents = () => {
-  const [residents, setResidents] = useState([]);
+  const [residents, setResidents] = useState<ResidentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -22,7 +31,7 @@ const AdminResidents = () => {
       setLoading(true);
       const response = await adminApi.getAllUsers();
       setResidents(
-        response.data.filter((user: any) => user.role === "resident")
+        response.data.filter((user: ResidentData) => user.role === "resident")
       );
     } catch (error) {
       console.error("Failed to fetch residents:", error);
@@ -58,7 +67,7 @@ const AdminResidents = () => {
     }
   };
 
-  const filteredResidents = residents.filter((resident: any) =>
+  const filteredResidents = residents.filter((resident) =>
     `${resident.firstName} ${resident.lastName} ${resident.email}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
@@ -77,7 +86,6 @@ const AdminResidents = () => {
       <PageHeader
         title="Resident Management"
         description="Manage and monitor all registered residents"
-        icon={<Users className="h-8 w-8 text-primary" />}
       />
 
       <div className="max-w-7xl mx-auto space-y-6 mt-6">

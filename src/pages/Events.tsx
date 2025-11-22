@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, MapPin, Users, CheckCircle, XCircle } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Sparkles,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import api from "../services/api";
 import { Event } from "../types";
 import { format } from "date-fns";
@@ -7,6 +18,8 @@ import { useAuth } from "../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import EventAttendeesModal from "../components/events/EventAttendeesModal";
+import LoadingSpinner from "../components/LoadingSpinner";
+import EmptyState from "../components/EmptyState";
 
 const Events: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -50,9 +63,10 @@ const Events: React.FC = () => {
       await api.registerForEvent(eventId);
       showSuccessToast("Successfully registered for the event!");
       fetchEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to register for event:", error);
-      showErrorToast(error.response?.data?.message || getErrorMessage(error));
+      const err = error as { response?: { data?: { message?: string } } };
+      showErrorToast(err.response?.data?.message || getErrorMessage(error));
     } finally {
       setProcessingEventId(null);
     }
@@ -75,9 +89,10 @@ const Events: React.FC = () => {
       await api.unregisterFromEvent(eventId);
       showSuccessToast("Successfully unregistered from the event");
       fetchEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to unregister from event:", error);
-      showErrorToast(error.response?.data?.message || getErrorMessage(error));
+      const err = error as { response?: { data?: { message?: string } } };
+      showErrorToast(err.response?.data?.message || getErrorMessage(error));
     } finally {
       setProcessingEventId(null);
     }
@@ -89,7 +104,7 @@ const Events: React.FC = () => {
 
   const isRegistered = (event: Event) => {
     if (!user) return false;
-    return event.attendees.some((attendee: any) =>
+    return event.attendees.some((attendee: string | { _id: string }) =>
       typeof attendee === "string"
         ? attendee === user.id
         : attendee._id === user.id
@@ -97,68 +112,47 @@ const Events: React.FC = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { class: string; icon: JSX.Element }> = {
-      upcoming: {
-        class: "badge-info",
-        icon: <Calendar size={14} />,
-      },
-      ongoing: {
-        class: "badge-warning",
-        icon: <Calendar size={14} />,
-      },
-      completed: {
-        class: "badge-success",
-        icon: <CheckCircle size={14} />,
-      },
-      cancelled: {
-        class: "badge-error",
-        icon: <XCircle size={14} />,
-      },
+    const badges: Record<
+      string,
+      { variant: "default" | "secondary" | "destructive"; label: string }
+    > = {
+      upcoming: { variant: "default", label: "Upcoming" },
+      ongoing: { variant: "secondary", label: "Ongoing" },
+      completed: { variant: "secondary", label: "Completed" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
     };
     return badges[status] || badges.upcoming;
   };
 
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading events...
-        </p>
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container">
-        <h1
-          style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "2rem" }}
-        >
-          Barangay Events
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="animate-in slide-in-from-top-4 duration-500">
+          <h1 className="text-4xl font-bold tracking-tight mb-2">
+            Barangay Events
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Join community events and stay connected with your neighbors
+          </p>
+        </div>
 
         {events.length === 0 ? (
-          <div
-            className="card"
-            style={{ padding: "3rem", textAlign: "center" }}
-          >
-            <Calendar
-              size={64}
-              style={{ margin: "0 auto 1rem", color: "var(--text-secondary)" }}
-            />
-            <p style={{ fontSize: "1.25rem", color: "var(--text-secondary)" }}>
-              No events available at the moment
-            </p>
-          </div>
+          <EmptyState
+            icon={Calendar}
+            title="No events available"
+            description="Check back later for upcoming community events"
+          />
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-700 delay-100">
             {events.map((event) => {
               const registered = isRegistered(event);
               const statusBadge = getStatusBadge(event.status);
@@ -168,109 +162,69 @@ const Events: React.FC = () => {
                 : null;
 
               return (
-                <div key={event._id} className="card" style={{ padding: "0" }}>
+                <Card
+                  key={event._id}
+                  className="glass-card card-hover overflow-hidden group flex flex-col"
+                >
                   {event.imageUrl && (
-                    <img
-                      src={event.imageUrl}
-                      alt={event.title}
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        objectFit: "cover",
-                        borderRadius: "12px 12px 0 0",
-                      }}
-                    />
-                  )}
-                  <div style={{ padding: "1.5rem" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "start",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          fontSize: "1.25rem",
-                          fontWeight: "600",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        {event.title}
-                      </h3>
-                      <span
-                        className={statusBadge.class}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.25rem",
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: "12px",
-                          fontSize: "0.875rem",
-                          fontWeight: "600",
-                        }}
-                      >
-                        {statusBadge.icon}
-                        {event.status.charAt(0).toUpperCase() +
-                          event.status.slice(1)}
-                      </span>
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={event.imageUrl}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge variant={statusBadge.variant}>
+                          {statusBadge.label}
+                        </Badge>
+                      </div>
+                      {registered && (
+                        <div className="absolute top-4 left-4">
+                          <Badge className="bg-green-500 text-white">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Registered
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-
-                    <p
-                      style={{
-                        color: "var(--text-secondary)",
-                        marginBottom: "1rem",
-                        lineHeight: "1.6",
-                      }}
-                    >
+                  )}
+                  <CardHeader>
+                    <div className="flex justify-between items-start gap-2">
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                        {event.title}
+                      </CardTitle>
+                      {!event.imageUrl && (
+                        <Badge variant={statusBadge.variant}>
+                          {statusBadge.label}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
                       {event.description}
                     </p>
+                  </CardHeader>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.75rem",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        <Calendar size={18} />
-                        <span style={{ fontSize: "0.875rem" }}>
+                  <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span>
                           {format(new Date(event.eventDate), "MMM dd, yyyy")}
                         </span>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        <MapPin size={18} />
-                        <span style={{ fontSize: "0.875rem" }}>
-                          {event.location}
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <span>
+                          {format(new Date(event.eventDate), "h:mm a")}
                         </span>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        <Users size={18} />
-                        <span style={{ fontSize: "0.875rem" }}>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="h-4 w-4 text-primary" />
+                        <span>
                           {attendeeCount} registered
                           {event.maxAttendees && ` / ${event.maxAttendees} max`}
                         </span>
@@ -280,100 +234,68 @@ const Events: React.FC = () => {
                     {spotsRemaining !== null &&
                       spotsRemaining <= 5 &&
                       spotsRemaining > 0 && (
-                        <div
-                          style={{
-                            padding: "0.5rem",
-                            background: "rgba(245, 158, 11, 0.1)",
-                            color: "#f59e0b",
-                            borderRadius: "6px",
-                            fontSize: "0.875rem",
-                            marginBottom: "1rem",
-                            textAlign: "center",
-                          }}
-                        >
-                          Only {spotsRemaining} spot
-                          {spotsRemaining !== 1 ? "s" : ""} left!
+                        <div className="flex items-center gap-2 p-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-lg text-sm">
+                          <Sparkles className="h-4 w-4" />
+                          <span>
+                            Only {spotsRemaining} spot
+                            {spotsRemaining !== 1 ? "s" : ""} left!
+                          </span>
                         </div>
                       )}
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "0.75rem",
-                        marginTop: "1rem",
-                      }}
-                    >
+                    <div className="flex gap-2 pt-2 border-t">
                       {user &&
                         (user.role === "admin" || user.role === "staff") && (
-                          <button
-                            className="btn btn-outline"
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() =>
                               handleViewAttendees(event._id, event.title)
                             }
-                            style={{
-                              flex: 1,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "0.5rem",
-                            }}
+                            className="flex-1 hover-lift"
                           >
-                            <Users size={18} />
-                            View Attendees
-                          </button>
+                            <Users className="h-4 w-4 mr-2" />
+                            Attendees
+                          </Button>
                         )}
                       {event.status === "upcoming" && (
                         <>
                           {registered ? (
-                            <button
-                              className="btn"
+                            <Button
+                              variant="destructive"
+                              size="sm"
                               onClick={() => handleUnregister(event._id)}
                               disabled={processingEventId === event._id}
-                              style={{
-                                flex: 1,
-                                background: "rgba(239, 68, 68, 0.1)",
-                                color: "#ef4444",
-                                border: "none",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "0.5rem",
-                              }}
+                              className="flex-1 hover-lift"
                             >
-                              <XCircle size={18} />
+                              <XCircle className="h-4 w-4 mr-2" />
                               {processingEventId === event._id
                                 ? "Processing..."
                                 : "Unregister"}
-                            </button>
+                            </Button>
                           ) : (
-                            <button
-                              className="btn btn-primary"
+                            <Button
+                              size="sm"
                               onClick={() => handleRegister(event._id)}
                               disabled={
                                 processingEventId === event._id ||
                                 (spotsRemaining !== null && spotsRemaining <= 0)
                               }
-                              style={{
-                                flex: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "0.5rem",
-                              }}
+                              className="flex-1 hover-lift shadow-lg shadow-primary/20"
                             >
-                              <CheckCircle size={18} />
+                              <CheckCircle className="h-4 w-4 mr-2" />
                               {processingEventId === event._id
                                 ? "Processing..."
                                 : spotsRemaining !== null && spotsRemaining <= 0
                                 ? "Event Full"
                                 : "Register"}
-                            </button>
+                            </Button>
                           )}
                         </>
                       )}
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

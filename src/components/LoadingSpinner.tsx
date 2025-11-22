@@ -4,29 +4,36 @@ import { cn } from "@/lib/utils";
 interface LoadingSpinnerProps {
   size?: "small" | "medium" | "large";
   className?: string;
+  text?: string;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "medium",
   className,
+  text,
 }) => {
   const sizeClasses = {
-    small: "h-4 w-4 border-2",
-    medium: "h-8 w-8 border-3",
-    large: "h-12 w-12 border-4",
+    small: "h-6 w-6 border-2",
+    medium: "h-10 w-10 border-3",
+    large: "h-16 w-16 border-4",
   };
 
   return (
     <div
       className={cn(
-        "inline-block animate-spin rounded-full border-solid border-primary border-t-transparent",
-        sizeClasses[size],
+        "flex flex-col items-center justify-center gap-4",
         className
       )}
-      role="status"
-      aria-label="Loading"
     >
-      <span className="sr-only">Loading...</span>
+      <div
+        className={cn(
+          "animate-spin rounded-full border-primary border-t-transparent",
+          sizeClasses[size]
+        )}
+      />
+      {text && (
+        <p className="text-sm text-muted-foreground animate-pulse">{text}</p>
+      )}
     </div>
   );
 };

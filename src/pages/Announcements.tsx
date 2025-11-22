@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Megaphone, Search, Calendar, Eye } from "lucide-react";
+import { Megaphone, Search, Calendar, Eye, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import EmptyState from "@/components/EmptyState";
 import api from "@/services/api";
 import { Announcement } from "@/types";
 import { format } from "date-fns";
@@ -15,6 +17,7 @@ const Announcements = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [priorityFilter, setPriorityFilter] = useState<string>("");
 
   useEffect(() => {
     fetchAnnouncements();
@@ -44,19 +47,21 @@ const Announcements = () => {
       announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       !categoryFilter || announcement.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesPriority =
+      !priorityFilter || announcement.priority === priorityFilter;
+    return matchesSearch && matchesCategory && matchesPriority;
   });
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800";
       case "high":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800";
       default:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800";
     }
   };
 
@@ -75,6 +80,14 @@ const Announcements = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setCategoryFilter("");
+    setPriorityFilter("");
+  };
+
+  const hasActiveFilters = searchTerm || categoryFilter || priorityFilter;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -85,15 +98,15 @@ const Announcements = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
-      <PageHeader
-        title="Announcements"
-        description="Stay updated with the latest news and announcements from your barangay"
-      />
+      <div className="max-w-7xl mx-auto space-y-6">
+        <PageHeader
+          title="Announcements"
+          description="Stay updated with the latest news and announcements from your barangay"
+        />
 
-      <div className="max-w-7xl mx-auto space-y-6 mt-6">
         {/* Search and Filter */}
-        <Card className="glass-card">
-          <CardContent className="pt-6">
+        <Card className="glass-card animate-in slide-in-from-top-4 duration-500">
+          <CardContent className="pt-6 space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -107,7 +120,7 @@ const Announcements = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                className="px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               >
                 <option value="">All Categories</option>
                 <option value="general">General</option>
@@ -116,21 +129,63 @@ const Announcements = () => {
                 <option value="service">Service</option>
                 <option value="maintenance">Maintenance</option>
               </select>
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              >
+                <option value="">All Priorities</option>
+                <option value="urgent">Urgent</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
             </div>
+
+            {hasActiveFilters && (
+              <div className="flex items-center justify-between pt-2 border-t">
+                <div className="flex flex-wrap gap-2">
+                  {searchTerm && (
+                    <Badge variant="secondary">Search: {searchTerm}</Badge>
+                  )}
+                  {categoryFilter && (
+                    <Badge variant="secondary" className="capitalize">
+                      Category: {categoryFilter}
+                    </Badge>
+                  )}
+                  {priorityFilter && (
+                    <Badge variant="secondary" className="capitalize">
+                      Priority: {priorityFilter}
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="hover-lift"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Announcements Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-700 delay-100">
           {filteredAnnouncements.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <Megaphone className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-                No announcements found
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Check back later for updates from your barangay
-              </p>
+            <div className="col-span-full">
+              <EmptyState
+                icon={Megaphone}
+                title="No announcements found"
+                description={
+                  hasActiveFilters
+                    ? "Try adjusting your filters"
+                    : "Check back later for updates from your barangay"
+                }
+              />
             </div>
           ) : (
             filteredAnnouncements.map((announcement) => (
@@ -147,7 +202,9 @@ const Announcements = () => {
                     />
                     <div className="absolute top-4 left-4">
                       <Badge
-                        className={getPriorityColor(announcement.priority)}
+                        className={`${getPriorityColor(
+                          announcement.priority
+                        )} border`}
                       >
                         {announcement.priority.toUpperCase()}
                       </Badge>
@@ -171,7 +228,9 @@ const Announcements = () => {
                     </div>
                     {!announcement.imageUrl && (
                       <Badge
-                        className={getPriorityColor(announcement.priority)}
+                        className={`${getPriorityColor(
+                          announcement.priority
+                        )} border`}
                       >
                         {announcement.priority.toUpperCase()}
                       </Badge>
@@ -184,7 +243,7 @@ const Announcements = () => {
                   </p>
                   <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 text-primary" />
                       <span>
                         {format(
                           new Date(
@@ -195,7 +254,7 @@ const Announcements = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 text-primary" />
                       <span>{announcement.viewCount || 0} views</span>
                     </div>
                   </div>

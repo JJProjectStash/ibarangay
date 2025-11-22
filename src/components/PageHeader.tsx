@@ -1,42 +1,41 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface PageHeaderProps {
-  title: string;
-  description?: string;
-  icon?: React.ReactNode;
-  action?: React.ReactNode;
-  actions?: React.ReactNode;
+interface LoadingSpinnerProps {
+  size?: "small" | "medium" | "large";
   className?: string;
+  text?: string;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({
-  title,
-  description,
-  icon,
-  action,
-  actions,
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = "medium",
   className,
+  text,
 }) => {
+  const sizeClasses = {
+    small: "h-6 w-6 border-2",
+    medium: "h-10 w-10 border-3",
+    large: "h-16 w-16 border-4",
+  };
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8",
+        "flex flex-col items-center justify-center gap-4",
         className
       )}
     >
-      <div className="space-y-1">
-        <div className="flex items-center gap-3">
-          {icon && <div className="flex-shrink-0">{icon}</div>}
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        </div>
-        {description && <p className="text-muted-foreground">{description}</p>}
-      </div>
-      {(actions || action) && (
-        <div className="flex items-center gap-2">{actions || action}</div>
+      <div
+        className={cn(
+          "animate-spin rounded-full border-primary border-t-transparent",
+          sizeClasses[size]
+        )}
+      />
+      {text && (
+        <p className="text-sm text-muted-foreground animate-pulse">{text}</p>
       )}
     </div>
   );
 };
 
-export default PageHeader;
+export default LoadingSpinner;

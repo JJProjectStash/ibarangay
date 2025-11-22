@@ -23,12 +23,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import api from "@/services/api";
 import { Announcement } from "@/types";
 import { format } from "date-fns";
 import { showToast } from "@/utils/toast";
+
+interface AnnouncementStats {
+  published: number;
+  draft: number;
+  totalViews: number;
+}
 
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -39,7 +45,7 @@ const AdminAnnouncements = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] =
     useState<Announcement | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AnnouncementStats | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -76,7 +82,7 @@ const AdminAnnouncements = () => {
   const fetchStats = async () => {
     try {
       const response = await api.getAnnouncementStats();
-      setStats(response.data);
+      setStats(response.data as AnnouncementStats);
     } catch (error) {
       console.error("Failed to fetch stats:", error);
     }
@@ -232,7 +238,7 @@ const AdminAnnouncements = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="large" />
       </div>
     );
   }
@@ -242,7 +248,6 @@ const AdminAnnouncements = () => {
       <PageHeader
         title="Manage Announcements"
         description="Create, edit, and publish announcements for residents"
-        icon={<Megaphone className="h-8 w-8 text-primary" />}
       />
 
       {/* Stats Cards */}
