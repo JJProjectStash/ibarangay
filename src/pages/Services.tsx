@@ -1,137 +1,231 @@
 import React, { useState, useEffect } from "react";
 import {
-  Calendar,
-  MapPin,
-  Users,
+  Plus,
+  Package,
+  Clock,
   CheckCircle,
   XCircle,
-  Clock,
-  Sparkles,
+  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import api from "../services/api";
-import { Event } from "../types";
+import { Service } from "../types";
 import { format } from "date-fns";
-import { useAuth } from "../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
-import EventAttendeesModal from "../components/events/EventAttendeesModal";
+import { validators, getValidationMessage } from "../utils/validators";
+import { useAuth } from "../context/AuthContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
 
-const Events: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+const Services: React.FC = () => {
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [processingEventId, setProcessingEventId] = useState<string | null>(
-    null
-  );
-  const [selectedEvent, setSelectedEvent] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showItemTypeModal, setShowItemTypeModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [itemTypes, setItemTypes] = useState<string[]>([]);
+  const [newItemTypes, setNewItemTypes] = useState<string>("");
   const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    itemName: "",
+    itemType: "",
+    borrowDate: "",
+    expectedReturnDate: "",
+    purpose: "",
+    quantity: 1,
+    notes: "",
+  });
 
   useEffect(() => {
-    fetchEvents();
+    fetchServices();
+    fetchItemTypes();
   }, []);
 
-  const fetchEvents = async () => {
+  const fetchItemTypes = async () => {
+    try {
+      const response = await api.getServiceItemTypes();
+      setItemTypes(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch item types:", error);
+    }
+  };
+
+  const fetchServices = async () => {
     try {
       setIsLoading(true);
-      const response = await api.getEvents();
-      const eventsData = Array.isArray(response.data) ? response.data : [];
-      setEvents(eventsData);
+      const response = await api.getServiceRequests();
+      const servicesData = Array.isArray(response.data) ? response.data : [];
+      setServices(servicesData);
     } catch (error) {
-      console.error("Failed to fetch events:", error);
+      console.error("Failed to fetch services:", error);
       showErrorToast(getErrorMessage(error));
-      setEvents([]);
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRegister = async (eventId: string) => {
-    if (!user) {
-      showErrorToast("Please login to register for events");
-      return;
-    }
-
-    setProcessingEventId(eventId);
+  const handleUpdateItemTypes = async () => {
     try {
-      await api.registerForEvent(eventId);
-      showSuccessToast("Successfully registered for the event!");
-      fetchEvents();
-    } catch (error: unknown) {
-      console.error("Failed to register for event:", error);
-      const errorMessage =
-        error && typeof error === "object" && "response" in error
-          ? (error as { response?: { data?: { message?: string } } }).response
-              ?.data?.message || getErrorMessage(error)
-          : getErrorMessage(error);
-      showErrorToast(errorMessage);
-    } finally {
-      setProcessingEventId(null);
+      const itemTypeArray = newItemTypes
+        .split(",")
+        .map((type) => type.trim())
+        .filter((type) => type.length > 0);
+
+      if (itemTypeArray.length === 0) {
+        showErrorToast("Please enter at least one item type");
+        return;
+      }
+
+      await api.updateServiceItemTypes(itemTypeArray);
+      showSuccessToast("Item types updated successfully!");
+      setShowItemTypeModal(false);
+      setNewItemTypes("");
+      fetchItemTypes();
+    } catch (error) {
+      console.error("Failed to update item types:", error);
+      showErrorToast(getErrorMessage(error));
     }
   };
 
-  const handleUnregister = async (eventId: string) => {
-    if (!user) {
-      showErrorToast("Please login first");
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!validators.required(formData.itemName)) {
+      newErrors.itemName = getValidationMessage("Item name", "required");
+    }
+
+    if (!validators.required(formData.itemType)) {
+      newErrors.itemType = getValidationMessage("Item type", "required");
+    }
+
+    if (!validators.required(formData.borrowDate)) {
+      newErrors.borrowDate = getValidationMessage("Borrow date", "required");
+    }
+
+    if (!validators.required(formData.expectedReturnDate)) {
+      newErrors.expectedReturnDate = getValidationMessage(
+        "Expected return date",
+        "required"
+      );
+    }
+
+    // Validate that expected return date is after borrow date
+    if (formData.borrowDate && formData.expectedReturnDate) {
+      const borrowDate = new Date(formData.borrowDate);
+      const returnDate = new Date(formData.expectedReturnDate);
+      if (returnDate <= borrowDate) {
+        newErrors.expectedReturnDate =
+          "Expected return date must be after borrow date";
+      }
+    }
+
+    if (!validators.required(formData.purpose)) {
+      newErrors.purpose = getValidationMessage("Purpose", "required");
+    }
+
+    if (!validators.isPositiveNumber(formData.quantity.toString())) {
+      newErrors.quantity = "Quantity must be a positive number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      showErrorToast("Please fix the form errors");
       return;
     }
 
-    if (
-      !window.confirm("Are you sure you want to unregister from this event?")
-    ) {
-      return;
-    }
-
-    setProcessingEventId(eventId);
+    setIsSubmitting(true);
     try {
-      await api.unregisterFromEvent(eventId);
-      showSuccessToast("Successfully unregistered from the event");
-      fetchEvents();
-    } catch (error: unknown) {
-      console.error("Failed to unregister from event:", error);
-      const errorMessage =
-        error && typeof error === "object" && "response" in error
-          ? (error as { response?: { data?: { message?: string } } }).response
-              ?.data?.message || getErrorMessage(error)
-          : getErrorMessage(error);
-      showErrorToast(errorMessage);
+      await api.createServiceRequest(formData);
+      showSuccessToast("Service request submitted successfully!");
+      setShowModal(false);
+      setFormData({
+        itemName: "",
+        itemType: "",
+        borrowDate: "",
+        expectedReturnDate: "",
+        purpose: "",
+        quantity: 1,
+        notes: "",
+      });
+      setErrors({});
+      fetchServices();
+    } catch (error) {
+      console.error("Failed to create service request:", error);
+      showErrorToast(getErrorMessage(error));
     } finally {
-      setProcessingEventId(null);
+      setIsSubmitting(false);
     }
   };
 
-  const handleViewAttendees = (eventId: string, eventTitle: string) => {
-    setSelectedEvent({ id: eventId, title: eventTitle });
-  };
-
-  // Fixed isRegistered function - restored working logic from commit 771bfd6
-  const isRegistered = (event: Event) => {
-    if (!user) return false;
-    return event.attendees.some((attendee: unknown) =>
-      typeof attendee === "string"
-        ? attendee === user.id
-        : (attendee as { _id: string })._id === user.id
-    );
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
   };
 
   const getStatusBadge = (status: string) => {
     const badges: Record<
       string,
-      { variant: "default" | "secondary" | "destructive"; label: string }
+      {
+        variant: "default" | "secondary" | "destructive" | "outline";
+        icon: JSX.Element;
+      }
     > = {
-      upcoming: { variant: "default", label: "Upcoming" },
-      ongoing: { variant: "secondary", label: "Ongoing" },
-      completed: { variant: "secondary", label: "Completed" },
-      cancelled: { variant: "destructive", label: "Cancelled" },
+      pending: {
+        variant: "outline",
+        icon: <Clock className="h-3 w-3" />,
+      },
+      approved: {
+        variant: "default",
+        icon: <CheckCircle className="h-3 w-3" />,
+      },
+      borrowed: {
+        variant: "secondary",
+        icon: <Package className="h-3 w-3" />,
+      },
+      returned: {
+        variant: "default",
+        icon: <CheckCircle className="h-3 w-3" />,
+      },
+      rejected: {
+        variant: "destructive",
+        icon: <XCircle className="h-3 w-3" />,
+      },
     };
-    return badges[status] || badges.upcoming;
+    return badges[status] || badges.pending;
   };
+
+  const canEditItemTypes = user?.role === "admin" || user?.role === "staff";
 
   if (isLoading) {
     return (
@@ -146,163 +240,117 @@ const Events: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="animate-in slide-in-from-top-4 duration-500">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            Barangay Events
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Join community events and stay connected with your neighbors
-          </p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight mb-2">
+                Borrow & Return Services
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Request to borrow barangay equipment and facilities
+              </p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {canEditItemTypes && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setNewItemTypes(itemTypes.join(", "));
+                    setShowItemTypeModal(true);
+                  }}
+                  className="hover-lift"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Item Types
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowModal(true)}
+                className="shadow-lg shadow-primary/20 hover-lift"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Request
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {events.length === 0 ? (
+        {/* Services Grid */}
+        {services.length === 0 ? (
           <EmptyState
-            icon={Calendar}
-            title="No events available"
-            description="Check back later for upcoming community events"
+            icon={Package}
+            title="No service requests yet"
+            description="Create your first service request to get started"
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-700 delay-100">
-            {events.map((event) => {
-              const registered = isRegistered(event);
-              const statusBadge = getStatusBadge(event.status);
-              const attendeeCount = event.attendees.length;
-              const spotsRemaining = event.maxAttendees
-                ? event.maxAttendees - attendeeCount
-                : null;
-
+          <div className="grid gap-6 animate-in fade-in duration-700 delay-100">
+            {services.map((service) => {
+              const statusBadge = getStatusBadge(service.status);
               return (
                 <Card
-                  key={event._id}
-                  className="glass-card card-hover overflow-hidden group flex flex-col"
+                  key={service._id}
+                  className="glass-card card-hover overflow-hidden group"
                 >
-                  {event.imageUrl && (
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={event.imageUrl}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant={statusBadge.variant}>
-                          {statusBadge.label}
-                        </Badge>
-                      </div>
-                      {registered && (
-                        <div className="absolute top-4 left-4">
-                          <Badge className="bg-green-500 text-white">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Registered
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  )}
                   <CardHeader>
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                        {event.title}
-                      </CardTitle>
-                      {!event.imageUrl && (
-                        <Badge variant={statusBadge.variant}>
-                          {statusBadge.label}
-                        </Badge>
-                      )}
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                          {service.itemName}
+                        </CardTitle>
+                        <p className="text-muted-foreground mt-1">
+                          {service.itemType}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={statusBadge.variant}
+                        className="flex items-center gap-1"
+                      >
+                        {statusBadge.icon}
+                        {service.status.charAt(0).toUpperCase() +
+                          service.status.slice(1)}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                      {event.description}
-                    </p>
                   </CardHeader>
 
-                  <CardContent className="flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span>
-                          {format(new Date(event.eventDate), "MMM dd, yyyy")}
-                        </span>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Quantity
+                        </p>
+                        <p className="font-medium">{service.quantity}</p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span>
-                          {format(new Date(event.eventDate), "h:mm a")}
-                        </span>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Borrow Date
+                        </p>
+                        <p className="font-medium">
+                          {format(new Date(service.borrowDate), "MMM dd, yyyy")}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span className="line-clamp-1">{event.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span>
-                          {attendeeCount} registered
-                          {event.maxAttendees && ` / ${event.maxAttendees} max`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {spotsRemaining !== null &&
-                      spotsRemaining <= 5 &&
-                      spotsRemaining > 0 && (
-                        <div className="flex items-center gap-2 p-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-lg text-sm">
-                          <Sparkles className="h-4 w-4" />
-                          <span>
-                            Only {spotsRemaining} spot
-                            {spotsRemaining !== 1 ? "s" : ""} left!
-                          </span>
-                        </div>
-                      )}
-
-                    <div className="flex gap-2 pt-2 border-t">
-                      {user &&
-                        (user.role === "admin" || user.role === "staff") && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleViewAttendees(event._id, event.title)
-                            }
-                            className="flex-1 hover-lift"
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Attendees
-                          </Button>
-                        )}
-                      {event.status === "upcoming" && (
-                        <>
-                          {registered ? (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleUnregister(event._id)}
-                              disabled={processingEventId === event._id}
-                              className="flex-1 hover-lift"
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              {processingEventId === event._id
-                                ? "Processing..."
-                                : "Unregister"}
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              onClick={() => handleRegister(event._id)}
-                              disabled={
-                                processingEventId === event._id ||
-                                (spotsRemaining !== null && spotsRemaining <= 0)
-                              }
-                              className="flex-1 hover-lift shadow-lg shadow-primary/20"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              {processingEventId === event._id
-                                ? "Processing..."
-                                : spotsRemaining !== null && spotsRemaining <= 0
-                                ? "Event Full"
-                                : "Register"}
-                            </Button>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Expected Return
+                        </p>
+                        <p className="font-medium">
+                          {format(
+                            new Date(service.expectedReturnDate),
+                            "MMM dd, yyyy"
                           )}
-                        </>
-                      )}
+                        </p>
+                      </div>
                     </div>
+
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Purpose</p>
+                      <p className="text-sm">{service.purpose}</p>
+                    </div>
+
+                    {service.notes && (
+                      <div className="p-3 bg-muted/50 rounded-lg space-y-1">
+                        <p className="text-sm text-muted-foreground">Notes</p>
+                        <p className="text-sm">{service.notes}</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -310,18 +358,201 @@ const Events: React.FC = () => {
           </div>
         )}
 
-        {/* Event Attendees Modal */}
-        {selectedEvent && (
-          <EventAttendeesModal
-            isOpen={true}
-            onClose={() => setSelectedEvent(null)}
-            eventId={selectedEvent.id}
-            eventTitle={selectedEvent.title}
-          />
-        )}
+        {/* Item Type Management Modal */}
+        <Dialog open={showItemTypeModal} onOpenChange={setShowItemTypeModal}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Manage Service Item Types</DialogTitle>
+              <DialogDescription>
+                Update the available item types for service requests
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="itemTypes">Item Types (comma-separated)</Label>
+                <Textarea
+                  id="itemTypes"
+                  rows={4}
+                  value={newItemTypes}
+                  onChange={(e) => setNewItemTypes(e.target.value)}
+                  placeholder="e.g., equipment, facility, document, other"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Current item types: {itemTypes.join(", ")}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowItemTypeModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateItemTypes}>Update Item Types</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Service Request Modal */}
+        <Dialog
+          open={showModal}
+          onOpenChange={(open) => !isSubmitting && setShowModal(open)}
+        >
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>New Service Request</DialogTitle>
+              <DialogDescription>
+                Submit a request to borrow barangay equipment or facilities
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="itemName">Item Name *</Label>
+                <Input
+                  id="itemName"
+                  value={formData.itemName}
+                  onChange={(e) =>
+                    handleInputChange("itemName", e.target.value)
+                  }
+                  disabled={isSubmitting}
+                  placeholder="e.g., Folding Chairs, Sound System"
+                />
+                {errors.itemName && (
+                  <p className="text-sm text-destructive">{errors.itemName}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="itemType">Item Type *</Label>
+                <Select
+                  value={formData.itemType}
+                  onValueChange={(value) =>
+                    handleInputChange("itemType", value)
+                  }
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an item type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {itemTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.itemType && (
+                  <p className="text-sm text-destructive">{errors.itemType}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="borrowDate">Borrow Date *</Label>
+                  <Input
+                    id="borrowDate"
+                    type="date"
+                    value={formData.borrowDate}
+                    onChange={(e) =>
+                      handleInputChange("borrowDate", e.target.value)
+                    }
+                    disabled={isSubmitting}
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                  {errors.borrowDate && (
+                    <p className="text-sm text-destructive">
+                      {errors.borrowDate}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expectedReturnDate">Expected Return *</Label>
+                  <Input
+                    id="expectedReturnDate"
+                    type="date"
+                    value={formData.expectedReturnDate}
+                    onChange={(e) =>
+                      handleInputChange("expectedReturnDate", e.target.value)
+                    }
+                    disabled={isSubmitting}
+                    min={
+                      formData.borrowDate ||
+                      new Date().toISOString().split("T")[0]
+                    }
+                  />
+                  {errors.expectedReturnDate && (
+                    <p className="text-sm text-destructive">
+                      {errors.expectedReturnDate}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    handleInputChange("quantity", parseInt(e.target.value) || 1)
+                  }
+                  disabled={isSubmitting}
+                />
+                {errors.quantity && (
+                  <p className="text-sm text-destructive">{errors.quantity}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="purpose">Purpose *</Label>
+                <Textarea
+                  id="purpose"
+                  rows={3}
+                  value={formData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="Describe the purpose of borrowing"
+                />
+                {errors.purpose && (
+                  <p className="text-sm text-destructive">{errors.purpose}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  rows={2}
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="Any additional information"
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 };
 
-export default Events;
+export default Services;

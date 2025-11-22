@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Check, Trash2, RefreshCw } from "lucide-react";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import api from "../services/api";
 import socketService from "../services/socket";
 import { Notification } from "../types";
@@ -7,6 +10,8 @@ import { format } from "date-fns";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import { useAuth } from "../context/AuthContext";
+import LoadingSpinner from "../components/LoadingSpinner";
+import EmptyState from "../components/EmptyState";
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -93,202 +98,148 @@ const Notifications: React.FC = () => {
     fetchNotifications(false);
   };
 
-  const getTypeStyles = (type: string) => {
-    const styles: Record<string, { bg: string; color: string }> = {
-      info: { bg: "#DBEAFE", color: "#1E40AF" },
-      success: { bg: "#D1FAE5", color: "#065F46" },
-      warning: { bg: "#FEF3C7", color: "#92400E" },
-      error: { bg: "#FEE2E2", color: "#991B1B" },
+  const getTypeVariant = (type: string) => {
+    const variants: Record<
+      string,
+      "default" | "secondary" | "destructive" | "outline"
+    > = {
+      info: "default",
+      success: "default",
+      warning: "secondary",
+      error: "destructive",
     };
-    return styles[type] || styles.info;
+    return variants[type] || "default";
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading notifications...
-        </p>
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container" style={{ maxWidth: "800px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
-              Notifications
-            </h1>
-            {unreadCount > 0 && (
-              <p
-                style={{ color: "var(--text-secondary)", marginTop: "0.25rem" }}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="animate-in slide-in-from-top-4 duration-500">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight mb-2">
+                Notifications
+              </h1>
+              {unreadCount > 0 && (
+                <p className="text-muted-foreground">
+                  {unreadCount} unread notification
+                  {unreadCount !== 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="hover-lift"
               >
-                {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              className="btn btn-outline"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-            >
-              <RefreshCw size={18} className={isRefreshing ? "spinning" : ""} />
-              {isRefreshing ? "Refreshing..." : "Refresh"}
-            </button>
-            {unreadCount > 0 && (
-              <button
-                className="btn btn-outline"
-                onClick={handleMarkAllAsRead}
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <Check size={18} /> Mark All as Read
-              </button>
-            )}
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${
+                    isRefreshing ? "animate-spin" : ""
+                  }`}
+                />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={handleMarkAllAsRead}
+                  className="hover-lift"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Mark All as Read
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {notifications.length === 0 ? (
-            <div
-              className="card"
-              style={{ textAlign: "center", padding: "3rem" }}
-            >
-              <Bell
-                size={48}
-                style={{
-                  margin: "0 auto 1rem",
-                  color: "var(--text-secondary)",
-                }}
-              />
-              <p style={{ color: "var(--text-secondary)" }}>No notifications</p>
-            </div>
-          ) : (
-            notifications.map((notification) => {
-              const typeStyles = getTypeStyles(notification.type);
-              return (
-                <div
-                  key={notification._id}
-                  className="card"
-                  style={{
-                    opacity: notification.isRead ? 0.7 : 1,
-                    borderLeft: `4px solid ${typeStyles.color}`,
-                    transition: "opacity 0.2s ease",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                      gap: "1rem",
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          marginBottom: "0.5rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
+        {/* Notifications List */}
+        {notifications.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="No notifications"
+            description="You're all caught up! Check back later for updates."
+          />
+        ) : (
+          <div className="space-y-4 animate-in fade-in duration-700 delay-100">
+            {notifications.map((notification) => (
+              <Card
+                key={notification._id}
+                className={`glass-card card-hover overflow-hidden group transition-all duration-300 ${
+                  !notification.isRead
+                    ? "border-l-4 border-l-primary bg-primary/5"
+                    : "opacity-75"
+                }`}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <div
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            background: notification.isRead
-                              ? "var(--border)"
-                              : typeStyles.color,
-                            flexShrink: 0,
-                          }}
+                          className={`w-2 h-2 rounded-full ${
+                            notification.isRead
+                              ? "bg-muted"
+                              : "bg-primary animate-pulse"
+                          }`}
                         />
-                        <h3 style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+                        <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
                           {notification.title}
                         </h3>
-                        <span
-                          style={{
-                            padding: "0.25rem 0.5rem",
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                            background: typeStyles.bg,
-                            color: typeStyles.color,
-                          }}
-                        >
+                        <Badge variant={getTypeVariant(notification.type)}>
                           {notification.type.toUpperCase()}
-                        </span>
+                        </Badge>
                       </div>
-                      <p style={{ marginBottom: "0.75rem", lineHeight: "1.6" }}>
+                      <p className="text-muted-foreground leading-relaxed">
                         {notification.message}
                       </p>
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
+                      <p className="text-sm text-muted-foreground">
                         {format(
                           new Date(notification.createdAt),
                           "MMM dd, yyyy - h:mm a"
                         )}
                       </p>
                     </div>
-                    <div
-                      style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}
-                    >
+                    <div className="flex gap-2 flex-shrink-0">
                       {!notification.isRead && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleMarkAsRead(notification._id)}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: "0.5rem",
-                            color: "var(--accent)",
-                          }}
+                          className="hover:bg-primary/10 hover:text-primary"
                           title="Mark as read"
                         >
-                          <Check size={20} />
-                        </button>
+                          <Check className="h-4 w-4" />
+                        </Button>
                       )}
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleDelete(notification._id)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "0.5rem",
-                          color: "var(--error)",
-                        }}
+                        className="hover:bg-destructive/10 hover:text-destructive"
                         title="Delete"
                       >
-                        <Trash2 size={20} />
-                      </button>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

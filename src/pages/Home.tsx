@@ -21,6 +21,7 @@ import {
   ServiceIcon,
   ComplaintIcon,
   EventIcon,
+  NotificationIcon,
 } from "@/components/CustomIcons";
 import {
   AnimatedCheckIcon,
@@ -32,8 +33,46 @@ import {
   FloatingParticles,
   GlassOrb,
 } from "@/components/AnimatedSVGIcons";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
+  const { isAuthenticated, user } = useAuth();
+
+  const services = [
+    {
+      icon: <ServiceIcon size={48} />,
+      title: "Borrow & Return",
+      description: "Request to borrow barangay equipment and facilities",
+      link: "/services",
+      color: "#3B82F6",
+      gradient: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
+    },
+    {
+      icon: <ComplaintIcon size={48} />,
+      title: "Complaint Center",
+      description: "Submit and track your complaints and concerns",
+      link: "/complaints",
+      color: "#EF4444",
+      gradient: "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
+    },
+    {
+      icon: <EventIcon size={48} />,
+      title: "Events",
+      description: "View and register for barangay events and activities",
+      link: "/events",
+      color: "#10B981",
+      gradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+    },
+    {
+      icon: <NotificationIcon size={48} />,
+      title: "Notifications",
+      description: "Stay updated with important announcements",
+      link: "/notifications",
+      color: "#F59E0B",
+      gradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -72,38 +111,51 @@ const Home = () => {
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1]">
-                Your Barangay, <br />
-                <span className="gradient-text-primary inline-block animate-in slide-in-from-bottom-4 delay-200">
-                  Digitally Connected
-                </span>
+                {isAuthenticated ? (
+                  <>
+                    Welcome back, <br />
+                    <span className="gradient-text-primary inline-block animate-in slide-in-from-bottom-4 delay-200">
+                      {user?.firstName}!
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Your Barangay, <br />
+                    <span className="gradient-text-primary inline-block animate-in slide-in-from-bottom-4 delay-200">
+                      Digitally Connected
+                    </span>
+                  </>
+                )}
               </h1>
 
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-in slide-in-from-bottom-4 delay-300">
-                Experience seamless access to barangay services, real-time
-                updates, and community engagement right at your fingertips.
-                Fast, secure, and convenient.
+                {isAuthenticated
+                  ? "Access all barangay services in one place. Fast, secure, and convenient."
+                  : "Experience seamless access to barangay services, real-time updates, and community engagement right at your fingertips."}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 animate-in slide-in-from-bottom-4 delay-400">
-                <Link to="/services">
+                <Link to={isAuthenticated ? "/services" : "/signup"}>
                   <Button
                     size="xl"
                     className="w-full sm:w-auto shadow-xl shadow-primary/20 group btn-glow relative overflow-hidden"
                   >
                     <AnimatedRocketIcon className="w-5 h-5 mr-2" />
-                    Explore Services
+                    {isAuthenticated ? "Explore Services" : "Get Started"}
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link to="/signup">
-                  <Button
-                    size="xl"
-                    variant="outline"
-                    className="w-full sm:w-auto glass-button"
-                  >
-                    Create Account
-                  </Button>
-                </Link>
+                {!isAuthenticated && (
+                  <Link to="/login">
+                    <Button
+                      size="xl"
+                      variant="outline"
+                      className="w-full sm:w-auto glass-button"
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <div className="pt-8 flex items-center justify-center lg:justify-start gap-8 text-sm text-muted-foreground animate-in slide-in-from-bottom-4 delay-500">
@@ -140,9 +192,7 @@ const Home = () => {
                       <div className="mb-2 flex items-center justify-center">
                         <ServiceIcon size={48} />
                       </div>
-                      <CardTitle className="text-lg">
-                        Clearance Request
-                      </CardTitle>
+                      <CardTitle className="text-lg">Service Request</CardTitle>
                       <CardDescription className="flex items-center gap-2">
                         <span className="relative flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -191,17 +241,63 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Grid using EnhancedCard */}
+      {/* Services Grid */}
       <section className="py-24 bg-muted/30 relative">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4 animate-in slide-in-from-bottom-4">
             <div className="inline-flex items-center gap-2 mb-4">
               <AnimatedSparkleIcon className="w-8 h-8 text-primary" />
-              <h2 className="text-3xl md:text-4xl font-bold">
-                Everything you need in one place
-              </h2>
+              <h2 className="text-3xl md:text-4xl font-bold">Our Services</h2>
               <AnimatedSparkleIcon className="w-8 h-8 text-accent" />
             </div>
+            <p className="text-lg text-muted-foreground">
+              Everything you need for barangay services, all in one place
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service, index) => (
+              <Link
+                key={index}
+                to={isAuthenticated ? service.link : "/login"}
+                className="block"
+              >
+                <EnhancedCard
+                  hover={true}
+                  gradient={true}
+                  className="border-none shadow-lg group overflow-hidden animate-in slide-in-from-bottom-4 h-full"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                  <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative z-10 p-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-all duration-500 group-hover:rotate-6">
+                      {service.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-base leading-relaxed text-muted-foreground">
+                      {service.description}
+                    </p>
+                    <div className="mt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+                </EnhancedCard>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid using EnhancedCard */}
+      <section className="py-24 relative">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4 animate-in slide-in-from-bottom-4">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Why Choose Our Platform?
+            </h2>
             <p className="text-lg text-muted-foreground">
               Streamline your interactions with the barangay through our
               comprehensive suite of digital tools designed for efficiency and
@@ -209,39 +305,31 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 icon: <FileText className="h-8 w-8" />,
-                title: "Document Requests",
-                desc: "Request clearances, permits, and certifications online without the long queues.",
+                title: "Quick & Easy",
+                desc: "Access barangay services anytime, anywhere. No need to visit the office for simple requests.",
                 color: "text-blue-500",
                 bg: "bg-blue-500/10",
                 delay: "0ms",
               },
               {
                 icon: <AlertTriangle className="h-8 w-8" />,
-                title: "Incident Reporting",
-                desc: "Report community concerns or emergencies directly to barangay officials.",
+                title: "Track Your Requests",
+                desc: "Monitor the status of your service requests and complaints in real-time.",
                 color: "text-red-500",
                 bg: "bg-red-500/10",
                 delay: "100ms",
               },
               {
                 icon: <Calendar className="h-8 w-8" />,
-                title: "Events & Updates",
-                desc: "Stay informed about barangay activities, schedules, and announcements.",
+                title: "Stay Informed",
+                desc: "Get instant notifications about events, announcements, and updates from your barangay.",
                 color: "text-green-500",
                 bg: "bg-green-500/10",
                 delay: "200ms",
-              },
-              {
-                icon: <Users className="h-8 w-8" />,
-                title: "Resident Profiling",
-                desc: "Manage your resident information and family records securely.",
-                color: "text-purple-500",
-                bg: "bg-purple-500/10",
-                delay: "300ms",
               },
             ].map((feature, index) => (
               <EnhancedCard
@@ -273,13 +361,13 @@ const Home = () => {
       </section>
 
       {/* Stats Section using EnhancedStatCard */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-24 relative overflow-hidden bg-muted/30">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 skew-y-3 transform origin-bottom-right -z-10" />
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <EnhancedStatCard
-              title="Active Residents"
-              value="2,500+"
+              title="Active Users"
+              value="1,000+"
               icon={Users}
               description="Growing community"
               trend={{ value: 12, isPositive: true }}
@@ -287,8 +375,8 @@ const Home = () => {
               className="animate-in slide-in-from-bottom-4"
             />
             <EnhancedStatCard
-              title="Documents Processed"
-              value="15k+"
+              title="Services Completed"
+              value="500+"
               icon={FileText}
               description="This year"
               trend={{ value: 8, isPositive: true }}
@@ -296,13 +384,22 @@ const Home = () => {
               className="animate-in slide-in-from-bottom-4 delay-100"
             />
             <EnhancedStatCard
-              title="Satisfaction Rate"
-              value="98%"
-              icon={TrendingUp}
-              description="User feedback"
+              title="Events Hosted"
+              value="50+"
+              icon={Calendar}
+              description="Community events"
               trend={{ value: 5, isPositive: true }}
               color="purple"
               className="animate-in slide-in-from-bottom-4 delay-200"
+            />
+            <EnhancedStatCard
+              title="Support Available"
+              value="24/7"
+              icon={TrendingUp}
+              description="Always here"
+              trend={{ value: 100, isPositive: true }}
+              color="orange"
+              className="animate-in slide-in-from-bottom-4 delay-300"
             />
           </div>
         </div>
@@ -327,33 +424,38 @@ const Home = () => {
                 <AnimatedRocketIcon className="w-16 h-16 text-white" />
               </div>
               <h2 className="text-3xl md:text-5xl font-bold animate-in slide-in-from-bottom-4 delay-100">
-                Ready to get started?
+                {isAuthenticated
+                  ? "Explore More Services"
+                  : "Ready to get started?"}
               </h2>
               <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 delay-200">
-                Join thousands of residents who are already enjoying the
-                convenience of digital barangay services.
+                {isAuthenticated
+                  ? "Discover all the digital services available to make your barangay experience seamless."
+                  : "Join thousands of residents who are already enjoying the convenience of digital barangay services."}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center animate-in slide-in-from-bottom-4 delay-300">
-                <Link to="/signup">
+                <Link to={isAuthenticated ? "/services" : "/signup"}>
                   <Button
                     size="xl"
                     variant="secondary"
                     className="w-full sm:w-auto text-primary font-bold shadow-lg hover:shadow-xl transition-all btn-glow"
                   >
                     <AnimatedSparkleIcon className="w-5 h-5 mr-2" />
-                    Register Now
+                    {isAuthenticated ? "View Services" : "Register Now"}
                   </Button>
                 </Link>
-                <Link to="/services">
-                  <Button
-                    size="xl"
-                    variant="outline"
-                    className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white glass-button"
-                  >
-                    View Services
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
+                {!isAuthenticated && (
+                  <Link to="/login">
+                    <Button
+                      size="xl"
+                      variant="outline"
+                      className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white glass-button"
+                    >
+                      Login
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

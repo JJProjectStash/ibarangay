@@ -12,12 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
-import { toast } from "react-toastify";
+import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { showSuccessToast, showErrorToast } from "../components/Toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
@@ -30,14 +31,15 @@ const Login = () => {
 
     try {
       await login(email, password);
-      toast.success("Welcome back!");
+      showSuccessToast("Login successful! Welcome back!");
       navigate("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Invalid email or password";
+          ?.message ||
+        (err instanceof Error ? err.message : "Invalid email or password");
       setError(errorMessage);
-      toast.error("Login failed. Please check your credentials.");
+      showErrorToast("Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -84,20 +86,34 @@ const Login = () => {
                 required
                 icon={<Mail className="h-4 w-4" />}
                 className="bg-background/50"
+                disabled={isLoading}
               />
             </FormField>
 
             <FormField label="Password">
               <div className="relative">
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   icon={<Lock className="h-4 w-4" />}
-                  className="bg-background/50"
+                  className="bg-background/50 pr-10"
+                  disabled={isLoading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
                 <Link
                   to="/forgot-password"
                   className="absolute right-0 top-0 -mt-7 text-xs font-medium text-primary hover:underline"
@@ -148,6 +164,15 @@ const Login = () => {
               Sign up
             </Link>
           </p>
+
+          {/* Demo Accounts Section */}
+          <div className="w-full p-4 bg-muted/50 rounded-lg border text-left space-y-2">
+            <p className="font-semibold text-foreground">🎯 Demo Accounts:</p>
+            <p className="text-xs">👨‍💼 Admin: admin@barangay.com / admin123</p>
+            <p className="text-xs">
+              👤 Resident: resident@barangay.com / resident123
+            </p>
+          </div>
         </CardFooter>
       </Card>
     </div>
