@@ -118,13 +118,6 @@ const Events: React.FC = () => {
     return badges[status] || badges.upcoming;
   };
 
-  const isEventFull = (event: Event) => {
-    return (
-      event.maxAttendees !== undefined &&
-      event.attendees.length >= event.maxAttendees
-    );
-  };
-
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
