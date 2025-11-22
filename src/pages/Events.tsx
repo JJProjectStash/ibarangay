@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import api from "../services/api";
-import { Event, User } from "../types";
+import { Event } from "../types";
 import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
@@ -63,9 +63,14 @@ const Events: React.FC = () => {
       await api.registerForEvent(eventId);
       showSuccessToast("Successfully registered for the event!");
       fetchEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to register for event:", error);
-      showErrorToast(error.response?.data?.message || getErrorMessage(error));
+      const errorMessage =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message || getErrorMessage(error)
+          : getErrorMessage(error);
+      showErrorToast(errorMessage);
     } finally {
       setProcessingEventId(null);
     }
@@ -88,9 +93,14 @@ const Events: React.FC = () => {
       await api.unregisterFromEvent(eventId);
       showSuccessToast("Successfully unregistered from the event");
       fetchEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to unregister from event:", error);
-      showErrorToast(error.response?.data?.message || getErrorMessage(error));
+      const errorMessage =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message || getErrorMessage(error)
+          : getErrorMessage(error);
+      showErrorToast(errorMessage);
     } finally {
       setProcessingEventId(null);
     }
@@ -103,10 +113,10 @@ const Events: React.FC = () => {
   // Fixed isRegistered function - restored working logic from commit 771bfd6
   const isRegistered = (event: Event) => {
     if (!user) return false;
-    return event.attendees.some((attendee: any) =>
+    return event.attendees.some((attendee: unknown) =>
       typeof attendee === "string"
         ? attendee === user.id
-        : attendee._id === user.id
+        : (attendee as { _id: string })._id === user.id
     );
   };
 

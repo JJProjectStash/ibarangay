@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LoadingSpinner from "../components/LoadingSpinner";
 import {
   Card,
   CardContent,
@@ -32,8 +34,43 @@ import {
 } from "recharts";
 import { EnhancedStatCard } from "@/components/EnhancedStatCard";
 import api from "@/services/api";
+import { useState } from "react";
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      // Redirect to role-specific dashboard
+      switch (user.role) {
+        case "admin":
+          navigate("/admin", { replace: true });
+          break;
+        case "staff":
+          navigate("/staff", { replace: true });
+          break;
+        default:
+          // Keep residents on this dashboard
+          break;
+      }
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="large" />
+      </div>
+    );
+  }
+
+  // Only residents will see this dashboard
+  return <ResidentDashboard />;
+};
+
+// Original Dashboard content for residents
+const ResidentDashboard: React.FC = () => {
   const { user } = useAuth();
   const [dashboardStats, setDashboardStats] = useState({
     activeRequests: 0,

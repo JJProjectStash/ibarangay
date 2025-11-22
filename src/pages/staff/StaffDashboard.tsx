@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ClipboardList, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "../../services/api";
 import RequestManagement from "../../components/staff/RequestManagement";
 import { Service, Complaint } from "../../types";
 import { showToast } from "../../utils/toast";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import { StatCard } from "../../components/StatCard";
 
 const StaffDashboard: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -83,161 +86,78 @@ const StaffDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <p>Loading staff dashboard...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container">
-        <h1
-          style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "2rem" }}
-        >
-          Staff Dashboard
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="animate-in slide-in-from-top-4 duration-500">
+          <h1 className="text-4xl font-bold tracking-tight mb-2">
+            Staff Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage service requests and complaints
+          </p>
+        </div>
 
         {/* Stats Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1.5rem",
-            marginBottom: "2rem",
-          }}
-        >
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(245, 158, 11, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <Clock size={24} style={{ color: "#f59e0b" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Pending Services
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {pendingServices.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(239, 68, 68, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <AlertCircle size={24} style={{ color: "#ef4444" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Pending Complaints
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {pendingComplaints.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(59, 130, 246, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <ClipboardList size={24} style={{ color: "#3b82f6" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  In Progress
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {inProgressComplaints.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(16, 185, 129, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <CheckCircle size={24} style={{ color: "#10b981" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Resolved
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {resolvedComplaints.length}
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-700 delay-100">
+          <StatCard
+            title="Pending Services"
+            value={pendingServices.length}
+            icon={Clock}
+            color="yellow"
+            description="Awaiting processing"
+            className="card-hover"
+          />
+          <StatCard
+            title="Pending Complaints"
+            value={pendingComplaints.length}
+            icon={AlertCircle}
+            color="red"
+            description="Requires attention"
+            className="card-hover"
+          />
+          <StatCard
+            title="In Progress"
+            value={inProgressComplaints.length}
+            icon={ClipboardList}
+            color="blue"
+            description="Currently handling"
+            className="card-hover"
+          />
+          <StatCard
+            title="Resolved"
+            value={resolvedComplaints.length}
+            icon={CheckCircle}
+            color="green"
+            description="Successfully completed"
+            className="card-hover"
+          />
         </div>
 
         {/* Request Management */}
-        <div className="card" style={{ padding: "1.5rem" }}>
-          <h2
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: "600",
-              marginBottom: "1.5rem",
-            }}
-          >
-            Request Management
-          </h2>
-          <RequestManagement
-            services={services}
-            complaints={complaints}
-            onUpdateServiceStatus={handleUpdateServiceStatus}
-            onUpdateComplaintStatus={handleUpdateComplaintStatus}
-          />
-        </div>
+        <Card className="glass-card animate-in slide-in-from-bottom-8 duration-700 delay-200">
+          <CardHeader>
+            <CardTitle>Request Management</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Review and process service requests and complaints
+            </p>
+          </CardHeader>
+          <CardContent>
+            <RequestManagement
+              services={services}
+              complaints={complaints}
+              onUpdateServiceStatus={handleUpdateServiceStatus}
+              onUpdateComplaintStatus={handleUpdateComplaintStatus}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
