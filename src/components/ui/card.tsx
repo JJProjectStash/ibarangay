@@ -12,7 +12,7 @@ const Card = React.forwardRef<
     className={cn(
       "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200",
       variant === "glass" &&
-        "bg-white/80 backdrop-blur-md border-white/20 shadow-lg",
+        "bg-white/10 backdrop-blur-2xl border-white/30 shadow-2xl dark:bg-gray-900/10 dark:border-gray-700/30",
       variant === "elevated" &&
         "shadow-md hover:shadow-xl hover:-translate-y-1",
       variant === "outline" && "bg-transparent border-2",

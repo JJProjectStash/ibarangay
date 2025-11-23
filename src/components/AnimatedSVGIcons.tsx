@@ -350,7 +350,6 @@ export const FloatingParticles: React.FC = () => {
 
 export const GlassOrb: React.FC<{ className?: string; color?: string }> = ({
   className = "w-32 h-32",
-  color = "primary",
 }) => (
   <div
     className={`${className} rounded-full relative`}
