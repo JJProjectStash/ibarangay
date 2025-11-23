@@ -47,13 +47,13 @@ const Announcements = () => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-500/20 text-red-300 border-red-400/50";
+        return "bg-gray-800/20 text-gray-200 border-gray-700/50";
       case "high":
-        return "bg-orange-500/20 text-orange-300 border-orange-400/50";
+        return "bg-gray-700/20 text-gray-300 border-gray-600/50";
       case "medium":
-        return "bg-yellow-500/20 text-yellow-300 border-yellow-400/50";
+        return "bg-gray-600/20 text-gray-300 border-gray-500/50";
       default:
-        return "bg-blue-500/20 text-blue-300 border-blue-400/50";
+        return "bg-gray-500/20 text-gray-300 border-gray-400/50";
     }
   };
 
@@ -72,15 +72,19 @@ const Announcements = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Unified Background */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Unified Background - Same as Home page */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
+          style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
 
@@ -92,7 +96,7 @@ const Announcements = () => {
               title="Announcements"
               description="Stay updated with the latest barangay news and important announcements"
               icon={
-                <Megaphone className="h-8 w-8 text-purple-400 animate-pulse" />
+                <Megaphone className="h-8 w-8 text-gray-400 animate-pulse" />
               }
             />
           </div>
@@ -107,7 +111,7 @@ const Announcements = () => {
                   placeholder="Search announcements by title..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                  className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                 />
               </div>
 
@@ -136,7 +140,7 @@ const Announcements = () => {
                         }
                         className={`capitalize ${
                           selectedPriority === priority
-                            ? "bg-purple-500 hover:bg-purple-600 text-white border-0"
+                            ? "bg-gray-600 hover:bg-gray-700 text-white border-0"
                             : "bg-white/10 hover:bg-white/20 text-white border-white/20"
                         }`}
                       >
@@ -169,7 +173,7 @@ const Announcements = () => {
                         }
                         className={`capitalize ${
                           selectedCategory === category
-                            ? "bg-purple-500 hover:bg-purple-600 text-white border-0"
+                            ? "bg-gray-600 hover:bg-gray-700 text-white border-0"
                             : "bg-white/10 hover:bg-white/20 text-white border-white/20"
                         }`}
                       >
@@ -211,7 +215,7 @@ const Announcements = () => {
               filteredAnnouncements.map((announcement, index) => (
                 <Card
                   key={announcement._id}
-                  className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.02] group animate-in slide-in-from-bottom-4"
+                  className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-[1.02] group animate-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <CardContent className="p-6">
@@ -241,7 +245,7 @@ const Announcements = () => {
                             {announcement.category}
                           </Badge>
                         </div>
-                        <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">
+                        <h3 className="text-2xl font-bold text-white group-hover:text-gray-300 transition-colors">
                           {announcement.title}
                         </h3>
                         <p className="text-white/80 leading-relaxed">
@@ -249,13 +253,13 @@ const Announcements = () => {
                         </p>
                         <div className="flex items-center gap-6 text-sm text-white/60 pt-4 border-t border-white/20">
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-purple-400" />
+                            <Calendar className="h-4 w-4 text-gray-400" />
                             <span>
                               {format(new Date(announcement.createdAt), "PPP")}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Eye className="h-4 w-4 text-purple-400" />
+                            <Eye className="h-4 w-4 text-gray-400" />
                             <span>{announcement.viewCount || 0} views</span>
                           </div>
                         </div>

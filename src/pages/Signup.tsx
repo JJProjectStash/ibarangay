@@ -100,22 +100,22 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Enhanced Background with Gradient Orbs */}
+      {/* Enhanced Background with Gradient Orbs - Monochrome */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#312e81] to-[#5b21b6]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
 
         {/* Large blur orbs */}
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-gray-600/30 to-gray-800/30 blur-3xl animate-pulse"
           style={{ animationDuration: "10s" }}
         />
         <div
-          className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-gray-700/30 to-gray-500/30 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "3s" }}
         />
         <div
-          className="absolute top-[30%] left-[40%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 blur-3xl animate-pulse"
+          className="absolute top-[30%] left-[40%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-gray-500/20 to-gray-700/20 blur-3xl animate-pulse"
           style={{ animationDuration: "14s", animationDelay: "5s" }}
         />
       </div>
@@ -125,7 +125,7 @@ const Signup = () => {
         className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-700 border-2 border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
       >
         <CardHeader className="space-y-1 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-2xl backdrop-blur-sm border-2 border-white/30">
+          <div className="w-16 h-16 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-2xl backdrop-blur-sm border-2 border-white/30">
             iB
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight text-white">
@@ -140,14 +140,14 @@ const Signup = () => {
             <div
               className={`h-2 rounded-full transition-all duration-300 ${
                 step === 1
-                  ? "bg-gradient-to-r from-pink-500 to-purple-500 w-8"
+                  ? "bg-gradient-to-r from-gray-700 to-gray-500 w-8"
                   : "bg-white/20 w-2"
               }`}
             />
             <div
               className={`h-2 rounded-full transition-all duration-300 ${
                 step === 2
-                  ? "bg-gradient-to-r from-purple-500 to-blue-500 w-8"
+                  ? "bg-gradient-to-r from-gray-600 to-gray-800 w-8"
                   : "bg-white/20 w-2"
               }`}
             />
@@ -157,7 +157,7 @@ const Signup = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/50 text-red-200 text-sm p-3 rounded-lg flex items-center gap-2 animate-in fade-in">
+              <div className="bg-gray-800/20 backdrop-blur-sm border border-gray-400/50 text-gray-200 text-sm p-3 rounded-lg flex items-center gap-2 animate-in fade-in">
                 <AlertCircle className="h-4 w-4" />
                 {error}
               </div>
@@ -173,7 +173,7 @@ const Signup = () => {
                       value={formData.firstName}
                       onChange={handleChange}
                       icon={<User className="h-4 w-4 text-white/60" />}
-                      className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                      className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                     />
                   </FormField>
                   <FormField label="Last Name">
@@ -183,7 +183,7 @@ const Signup = () => {
                       value={formData.lastName}
                       onChange={handleChange}
                       icon={<User className="h-4 w-4 text-white/60" />}
-                      className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                      className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                     />
                   </FormField>
                 </div>
@@ -196,7 +196,7 @@ const Signup = () => {
                     value={formData.email}
                     onChange={handleChange}
                     icon={<Mail className="h-4 w-4 text-white/60" />}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                 </FormField>
 
@@ -208,7 +208,7 @@ const Signup = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     icon={<Phone className="h-4 w-4 text-white/60" />}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                 </FormField>
               </div>
@@ -223,7 +223,7 @@ const Signup = () => {
                     value={formData.address}
                     onChange={handleChange}
                     icon={<MapPin className="h-4 w-4 text-white/60" />}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                 </FormField>
 
@@ -235,7 +235,7 @@ const Signup = () => {
                     value={formData.password}
                     onChange={handleChange}
                     icon={<Lock className="h-4 w-4 text-white/60" />}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                   <p className="text-xs text-white/60 mt-1">
                     Must be at least 6 characters long
@@ -250,7 +250,7 @@ const Signup = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     icon={<CheckCircle2 className="h-4 w-4 text-white/60" />}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                 </FormField>
               </div>
@@ -272,7 +272,7 @@ const Signup = () => {
                 <Button
                   type="button"
                   onClick={handleNext}
-                  className="w-full font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:from-pink-600 hover:via-purple-600 hover:to-blue-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/60 hover:scale-[1.02]"
+                  className="w-full font-semibold bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg shadow-gray-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/60 hover:scale-[1.02]"
                 >
                   Next Step
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -280,7 +280,7 @@ const Signup = () => {
               ) : (
                 <Button
                   type="submit"
-                  className="w-full font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:from-pink-600 hover:via-purple-600 hover:to-blue-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/60 hover:scale-[1.02]"
+                  className="w-full font-semibold bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg shadow-gray-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/60 hover:scale-[1.02]"
                   disabled={isLoading}
                   isLoading={isLoading}
                 >
@@ -295,7 +295,7 @@ const Signup = () => {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium text-purple-300 hover:text-purple-200 hover:underline underline-offset-4 transition-colors"
+              className="font-medium text-gray-300 hover:text-gray-200 hover:underline underline-offset-4 transition-colors"
             >
               Sign in
             </Link>

@@ -100,10 +100,10 @@ const Notifications: React.FC = () => {
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      info: "bg-blue-500/20 text-blue-300 border-blue-400/50",
-      success: "bg-green-500/20 text-green-300 border-green-400/50",
-      warning: "bg-yellow-500/20 text-yellow-300 border-yellow-400/50",
-      error: "bg-red-500/20 text-red-300 border-red-400/50",
+      info: "bg-gray-500/20 text-gray-300 border-gray-400/50",
+      success: "bg-gray-600/20 text-gray-300 border-gray-500/50",
+      warning: "bg-gray-700/20 text-gray-300 border-gray-600/50",
+      error: "bg-gray-800/20 text-gray-200 border-gray-700/50",
     };
     return colors[type] || colors.info;
   };
@@ -120,18 +120,18 @@ const Notifications: React.FC = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Unified Background */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Unified Background - Same as Home page */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -194,9 +194,9 @@ const Notifications: React.FC = () => {
                   key={notification._id}
                   className={`bg-white/10 backdrop-blur-xl border-2 ${
                     !notification.isRead
-                      ? "border-purple-400/50 bg-purple-500/10"
+                      ? "border-gray-400/50 bg-gray-500/10"
                       : "border-white/20"
-                  } hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.01] animate-in slide-in-from-bottom-4`}
+                  } hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-[1.01] animate-in slide-in-from-bottom-4`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <CardHeader className="pb-3">
@@ -207,7 +207,7 @@ const Notifications: React.FC = () => {
                             className={`w-2 h-2 rounded-full ${
                               notification.isRead
                                 ? "bg-white/40"
-                                : "bg-purple-400 animate-pulse"
+                                : "bg-gray-400 animate-pulse"
                             }`}
                           />
                           <h3 className="text-lg font-semibold text-white">
@@ -237,7 +237,7 @@ const Notifications: React.FC = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleMarkAsRead(notification._id)}
-                            className="hover:bg-purple-500/20 hover:text-purple-300 text-white"
+                            className="hover:bg-gray-500/20 hover:text-gray-300 text-white"
                             title="Mark as read"
                           >
                             <Check className="h-4 w-4" />
@@ -247,7 +247,7 @@ const Notifications: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(notification._id)}
-                          className="hover:bg-red-500/20 hover:text-red-300 text-white"
+                          className="hover:bg-gray-800/20 hover:text-gray-300 text-white"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
