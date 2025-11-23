@@ -130,19 +130,19 @@ const StaffServices = () => {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { class: string; icon: JSX.Element }> = {
       pending: {
-        class: "bg-yellow-500/20 text-yellow-300 border-yellow-400/50",
+        class: "bg-gray-500/20 text-gray-300 border-gray-400/50",
         icon: <Clock size={14} />,
       },
       approved: {
-        class: "bg-green-500/20 text-green-300 border-green-400/50",
+        class: "bg-gray-600/20 text-gray-300 border-gray-500/50",
         icon: <CheckCircle size={14} />,
       },
       rejected: {
-        class: "bg-red-500/20 text-red-300 border-red-400/50",
+        class: "bg-gray-700/20 text-gray-300 border-gray-600/50",
         icon: <XCircle size={14} />,
       },
       borrowed: {
-        class: "bg-blue-500/20 text-blue-300 border-blue-400/50",
+        class: "bg-gray-400/20 text-gray-300 border-gray-300/50",
         icon: <AlertCircle size={14} />,
       },
       returned: {
@@ -181,18 +181,18 @@ const StaffServices = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Unified Background - Same as other staff pages */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Unified Background - Same as Home page */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -204,84 +204,82 @@ const StaffServices = () => {
             <PageHeader
               title="Service Management"
               description="Manage service requests from residents"
-              icon={
-                <Wrench className="h-8 w-8 text-purple-400 animate-pulse" />
-              }
+              icon={<Wrench className="h-8 w-8 text-gray-400 animate-pulse" />}
             />
           </div>
 
-          {/* Stats - IMPROVED READABILITY */}
+          {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 animate-in fade-in duration-700 delay-100">
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white">
                   Total Requests
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-purple-400">
+                <div className="text-4xl font-bold text-gray-400">
                   {statusCounts.total}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-yellow-400/30 hover:border-yellow-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(234,179,8,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-400/30 hover:border-gray-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-yellow-400" />
+                  <Clock className="h-4 w-4 text-gray-400" />
                   Pending
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-yellow-400">
+                <div className="text-4xl font-bold text-gray-400">
                   {statusCounts.pending}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-green-400/30 hover:border-green-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(34,197,94,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-500/30 hover:border-gray-500/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <CheckCircle className="h-4 w-4 text-gray-400" />
                   Approved
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-green-400">
+                <div className="text-4xl font-bold text-gray-400">
                   {statusCounts.approved}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-red-400/30 hover:border-red-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(239,68,68,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-600/30 hover:border-gray-600/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-red-400" />
+                  <XCircle className="h-4 w-4 text-gray-400" />
                   Rejected
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-red-400">
+                <div className="text-4xl font-bold text-gray-400">
                   {statusCounts.rejected}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-blue-400/30 hover:border-blue-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(59,130,246,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-400/30 hover:border-gray-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-blue-400" />
+                  <AlertCircle className="h-4 w-4 text-gray-400" />
                   Borrowed
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-blue-400">
+                <div className="text-4xl font-bold text-gray-400">
                   {statusCounts.borrowed}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/15 backdrop-blur-xl border-2 border-gray-400/30 hover:border-gray-400/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(107,114,128,0.4)] transition-all duration-300 hover:scale-105">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-500/30 hover:border-gray-500/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-gray-400" />
@@ -296,8 +294,8 @@ const StaffServices = () => {
             </Card>
           </div>
 
-          {/* Filters - IMPROVED CONTRAST */}
-          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl animate-in fade-in duration-700 delay-200">
+          {/* Filters */}
+          <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in fade-in duration-700 delay-200">
             <CardContent className="pt-6">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1 relative">
@@ -306,16 +304,16 @@ const StaffServices = () => {
                     placeholder="Search service requests..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-purple-400/50"
+                    className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div className="flex gap-2 flex-wrap">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                    <SelectTrigger className="w-[140px] bg-white/10 backdrop-blur-xl border-white/20 text-white">
                       <SelectValue placeholder="All Status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
@@ -329,10 +327,10 @@ const StaffServices = () => {
                     value={itemTypeFilter}
                     onValueChange={setItemTypeFilter}
                   >
-                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                    <SelectTrigger className="w-[140px] bg-white/10 backdrop-blur-xl border-white/20 text-white">
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
                       <SelectItem value="all">All Types</SelectItem>
                       {itemTypes.map((type) => (
                         <SelectItem key={type} value={type}>
@@ -346,7 +344,7 @@ const StaffServices = () => {
             </CardContent>
           </Card>
 
-          {/* Service Requests List - IMPROVED READABILITY */}
+          {/* Service Requests List */}
           {filteredRequests.length === 0 ? (
             <EmptyState
               icon={Wrench}
@@ -365,13 +363,13 @@ const StaffServices = () => {
                 return (
                   <Card
                     key={request._id}
-                    className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.01] animate-in slide-in-from-bottom-4"
+                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-[1.01] group animate-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <CardContent className="pt-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-2">
+                          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gray-300 transition-colors">
                             {request.itemName}
                           </h3>
                           <p className="text-sm text-white/80 mb-3 font-medium">
@@ -416,8 +414,8 @@ const StaffServices = () => {
                       </div>
 
                       {request.notes && (
-                        <div className="mb-3 p-4 bg-green-500/20 rounded-lg border-l-4 border-green-400">
-                          <p className="text-sm font-semibold text-green-300 mb-2">
+                        <div className="mb-3 p-4 bg-gray-500/20 backdrop-blur-sm rounded-lg border-l-4 border-gray-400">
+                          <p className="text-sm font-semibold text-gray-300 mb-2">
                             Admin Notes:
                           </p>
                           <p className="text-sm text-white/90">
@@ -427,8 +425,8 @@ const StaffServices = () => {
                       )}
 
                       {request.rejectionReason && (
-                        <div className="mb-3 p-4 bg-red-500/20 rounded-lg border-l-4 border-red-400">
-                          <p className="text-sm font-semibold text-red-300 mb-2">
+                        <div className="mb-3 p-4 bg-gray-700/20 backdrop-blur-sm rounded-lg border-l-4 border-gray-600">
+                          <p className="text-sm font-semibold text-gray-400 mb-2">
                             Rejection Reason:
                           </p>
                           <p className="text-sm text-white/90">
@@ -462,7 +460,7 @@ const StaffServices = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleViewDetails(request)}
-                            className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                            className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20 text-white transition-all duration-300 hover:scale-105"
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             Details
@@ -473,12 +471,12 @@ const StaffServices = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20 text-white transition-all duration-300 hover:scale-105"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
+                            <DropdownMenuContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleStatusUpdate(request._id, "borrowed")
@@ -505,62 +503,62 @@ const StaffServices = () => {
           )}
         </div>
 
-        {/* Details Modal - IMPROVED CONTRAST */}
+        {/* Details Modal */}
         {showDetailsModal && selectedRequest && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-white/95 backdrop-blur-xl border-2 border-white/30 shadow-2xl">
-              <CardHeader className="border-b border-gray-200">
-                <CardTitle className="text-gray-900">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
+              <CardHeader className="border-b border-white/20">
+                <CardTitle className="text-white">
                   Service Request Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Item Name
                     </label>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-white/70">
                       {selectedRequest.itemName}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Item Type
                     </label>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-white/70">
                       {selectedRequest.itemType}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Quantity
                     </label>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-white/70">
                       {selectedRequest.quantity}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Status
                     </label>
-                    <p className="text-sm text-gray-700 capitalize">
+                    <p className="text-sm text-white/70 capitalize">
                       {selectedRequest.status}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Borrow Date
                     </label>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-white/70">
                       {format(new Date(selectedRequest.borrowDate), "PPP")}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    <label className="text-sm font-semibold mb-1 block text-white/90">
                       Expected Return
                     </label>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-white/70">
                       {format(
                         new Date(selectedRequest.expectedReturnDate),
                         "PPP"
@@ -569,18 +567,18 @@ const StaffServices = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold mb-1 block text-gray-900">
+                  <label className="text-sm font-semibold mb-1 block text-white/90">
                     Purpose
                   </label>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-white/70">
                     {selectedRequest.purpose}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold mb-1 block text-gray-900">
+                  <label className="text-sm font-semibold mb-1 block text-white/90">
                     Requested By
                   </label>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-white/70">
                     {selectedRequest.userId.firstName}{" "}
                     {selectedRequest.userId.lastName} (
                     {selectedRequest.userId.email})
@@ -589,7 +587,7 @@ const StaffServices = () => {
                 <div className="flex gap-2 pt-4">
                   <Button
                     onClick={() => setShowDetailsModal(false)}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                    className="flex-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white"
                   >
                     Close
                   </Button>

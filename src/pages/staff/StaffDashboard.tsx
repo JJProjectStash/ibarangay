@@ -102,63 +102,63 @@ const StaffDashboard: React.FC = () => {
       title: "Pending Services",
       value: pendingServices.length,
       icon: Clock,
-      color: "yellow",
-      gradient: "from-yellow-500 to-orange-500",
+      color: "gray-500",
+      gradient: "from-gray-700 to-gray-500",
       description: "Awaiting processing",
-      bgColor: "bg-yellow-500/20",
-      textColor: "text-yellow-400",
-      borderColor: "border-yellow-400/30",
+      bgColor: "bg-gray-500/20",
+      textColor: "text-gray-400",
+      borderColor: "border-gray-400/30",
     },
     {
       title: "Pending Complaints",
       value: pendingComplaints.length,
       icon: AlertCircle,
-      color: "red",
-      gradient: "from-red-500 to-pink-500",
+      color: "gray-600",
+      gradient: "from-gray-800 to-gray-600",
       description: "Requires attention",
-      bgColor: "bg-red-500/20",
-      textColor: "text-red-400",
-      borderColor: "border-red-400/30",
+      bgColor: "bg-gray-600/20",
+      textColor: "text-gray-400",
+      borderColor: "border-gray-400/30",
     },
     {
       title: "In Progress",
       value: inProgressComplaints.length,
       icon: ClipboardList,
-      color: "blue",
-      gradient: "from-blue-500 to-cyan-500",
+      color: "gray-400",
+      gradient: "from-gray-600 to-gray-400",
       description: "Currently handling",
-      bgColor: "bg-blue-500/20",
-      textColor: "text-blue-400",
-      borderColor: "border-blue-400/30",
+      bgColor: "bg-gray-400/20",
+      textColor: "text-gray-300",
+      borderColor: "border-gray-300/30",
     },
     {
       title: "Resolved",
       value: resolvedComplaints.length,
       icon: CheckCircle,
-      color: "green",
-      gradient: "from-green-500 to-emerald-500",
+      color: "gray-500",
+      gradient: "from-gray-700 to-gray-500",
       description: "Successfully completed",
-      bgColor: "bg-green-500/20",
-      textColor: "text-green-400",
-      borderColor: "border-green-400/30",
+      bgColor: "bg-gray-500/20",
+      textColor: "text-gray-400",
+      borderColor: "border-gray-400/30",
     },
   ];
 
   return (
     <div className="min-h-screen relative">
       {/* Unified Background - Same as Home page */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -167,27 +167,27 @@ const StaffDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="animate-in slide-in-from-top-4 duration-500">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-500/10 px-4 py-2 text-sm font-medium text-gray-200 backdrop-blur-sm mb-3">
               <ClipboardList className="h-4 w-4" />
               Staff Dashboard
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
               Request{" "}
-              <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent">
                 Management
               </span>
             </h1>
-            <p className="text-white/90 text-lg font-medium">
+            <p className="text-white/80 text-lg">
               Manage service requests and complaints
             </p>
           </div>
 
-          {/* Stats Cards - IMPROVED READABILITY */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-700 delay-100">
             {statCards.map((stat, index) => (
               <Card
                 key={index}
-                className={`bg-white/15 backdrop-blur-xl border-2 ${stat.borderColor} hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden`}
+                className={`bg-white/10 backdrop-blur-xl border-2 ${stat.borderColor} hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Gradient overlay on hover */}
@@ -216,11 +216,11 @@ const StaffDashboard: React.FC = () => {
             ))}
           </div>
 
-          {/* Request Management - IMPROVED CONTRAST */}
-          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-200">
+          {/* Request Management */}
+          <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-200">
             <CardHeader className="border-b border-white/20">
               <CardTitle className="text-white text-xl flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-400" />
+                <Sparkles className="h-5 w-5 text-gray-400" />
                 Request Management
               </CardTitle>
               <p className="text-sm text-white/80 mt-2 font-medium">
