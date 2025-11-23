@@ -82,6 +82,10 @@ const StaffAnnouncements = () => {
           className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
+        <div
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          style={{ animationDuration: "12s", animationDelay: "4s" }}
+        />
       </div>
 
       <div className="relative z-10 p-6 page-transition">
@@ -97,8 +101,8 @@ const StaffAnnouncements = () => {
             />
           </div>
 
-          {/* Search and Filters - IMPROVED CONTRAST */}
-          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl animate-in fade-in duration-700 delay-100">
+          {/* Search and Filters */}
+          <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in fade-in duration-700 delay-100">
             <CardContent className="pt-6 space-y-4">
               {/* Search Bar */}
               <div className="relative">
@@ -107,7 +111,7 @@ const StaffAnnouncements = () => {
                   placeholder="Search announcements by title..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/10 backdrop-blur-xl border-white/30 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/50"
+                  className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
                 />
               </div>
 
@@ -117,7 +121,7 @@ const StaffAnnouncements = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Filter className="h-4 w-4 text-white/70" />
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-medium text-white/90">
                       Priority
                     </span>
                   </div>
@@ -134,10 +138,10 @@ const StaffAnnouncements = () => {
                             selectedPriority === priority ? null : priority
                           )
                         }
-                        className={`capitalize font-medium ${
+                        className={`capitalize ${
                           selectedPriority === priority
                             ? "bg-purple-500 hover:bg-purple-600 text-white border-0"
-                            : "bg-white/10 hover:bg-white/20 text-white border-white/30"
+                            : "bg-white/10 hover:bg-white/20 text-white border-white/20"
                         }`}
                       >
                         {priority}
@@ -150,7 +154,7 @@ const StaffAnnouncements = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Filter className="h-4 w-4 text-white/70" />
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-medium text-white/90">
                       Category
                     </span>
                   </div>
@@ -167,10 +171,10 @@ const StaffAnnouncements = () => {
                             selectedCategory === category ? null : category
                           )
                         }
-                        className={`capitalize font-medium ${
+                        className={`capitalize ${
                           selectedCategory === category
                             ? "bg-purple-500 hover:bg-purple-600 text-white border-0"
-                            : "bg-white/10 hover:bg-white/20 text-white border-white/30"
+                            : "bg-white/10 hover:bg-white/20 text-white border-white/20"
                         }`}
                       >
                         {category}
@@ -190,7 +194,7 @@ const StaffAnnouncements = () => {
                     setSelectedCategory(null);
                     setSearchTerm("");
                   }}
-                  className="text-white/80 hover:text-white hover:bg-white/10 font-medium"
+                  className="text-white/70 hover:text-white hover:bg-white/10"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Clear all filters
@@ -200,24 +204,24 @@ const StaffAnnouncements = () => {
           </Card>
 
           {/* Results Count */}
-          <div className="text-white/80 text-sm font-medium animate-in fade-in duration-700 delay-200">
+          <div className="text-white/70 text-sm animate-in fade-in duration-700 delay-200">
             Showing {filteredAnnouncements.length} of {announcements.length}{" "}
             announcements
           </div>
 
-          {/* Announcements Grid - IMPROVED READABILITY */}
+          {/* Announcements Grid */}
           <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-700 delay-300">
             {filteredAnnouncements.length > 0 ? (
               filteredAnnouncements.map((announcement, index) => (
                 <Card
                   key={announcement._id}
-                  className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.01] group animate-in slide-in-from-bottom-4"
+                  className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.02] group animate-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
                       {announcement.imageUrl && (
-                        <div className="w-full md:w-64 h-48 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
+                        <div className="w-full md:w-64 h-48 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/20 group-hover:border-white/40 transition-all duration-300">
                           <img
                             src={announcement.imageUrl}
                             alt={announcement.title}
@@ -236,7 +240,7 @@ const StaffAnnouncements = () => {
                           </Badge>
                           <Badge
                             variant="outline"
-                            className="capitalize bg-white/10 text-white border-white/30 backdrop-blur-sm font-medium"
+                            className="capitalize bg-white/10 text-white border-white/30 backdrop-blur-sm"
                           >
                             {announcement.category}
                           </Badge>
@@ -244,21 +248,19 @@ const StaffAnnouncements = () => {
                         <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">
                           {announcement.title}
                         </h3>
-                        <p className="text-white/90 leading-relaxed">
+                        <p className="text-white/80 leading-relaxed">
                           {announcement.content}
                         </p>
-                        <div className="flex items-center gap-6 text-sm text-white/70 pt-4 border-t border-white/30">
+                        <div className="flex items-center gap-6 text-sm text-white/60 pt-4 border-t border-white/20">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-purple-400" />
-                            <span className="font-medium">
+                            <span>
                               {format(new Date(announcement.createdAt), "PPP")}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Eye className="h-4 w-4 text-purple-400" />
-                            <span className="font-medium">
-                              {announcement.viewCount || 0} views
-                            </span>
+                            <span>{announcement.viewCount || 0} views</span>
                           </div>
                         </div>
                       </div>
@@ -267,13 +269,13 @@ const StaffAnnouncements = () => {
                 </Card>
               ))
             ) : (
-              <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl">
+              <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
                 <CardContent className="p-12 text-center">
                   <Megaphone className="h-16 w-16 text-white/40 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">
                     No announcements found
                   </h3>
-                  <p className="text-white/70 font-medium">
+                  <p className="text-white/60">
                     Try adjusting your search or filters
                   </p>
                 </CardContent>
