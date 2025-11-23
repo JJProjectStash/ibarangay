@@ -10,7 +10,7 @@ import adminApi from "@/services/adminApi";
 import { format, isValid, parseISO } from "date-fns";
 
 interface Event {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   date: string;
@@ -39,9 +39,12 @@ const StaffEvents = () => {
     }
   };
 
-  // Safe date formatting function
-  const formatEventDate = (dateString: string) => {
+  // Safe date formatting function with null/undefined check
+  const formatEventDate = (dateString: string | null | undefined) => {
     try {
+      if (!dateString) {
+        return "Date not set";
+      }
       const date = parseISO(dateString);
       if (isValid(date)) {
         return format(date, "PPP");
@@ -138,7 +141,7 @@ const StaffEvents = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-700 delay-300">
               {filteredEvents.map((event, index) => (
                 <Card
-                  key={event.id}
+                  key={event._id}
                   className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.02] group animate-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >

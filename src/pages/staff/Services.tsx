@@ -63,8 +63,8 @@ const StaffServices = () => {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [itemTypeFilter, setItemTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [itemTypeFilter, setItemTypeFilter] = useState("all");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(
     null
@@ -75,13 +75,13 @@ const StaffServices = () => {
     try {
       setLoading(true);
       const response = await api.getServiceRequests({
-        status: statusFilter,
+        status: statusFilter === "all" ? "" : statusFilter,
         search: searchTerm,
       });
       let requestsData = Array.isArray(response.data) ? response.data : [];
 
       // Apply item type filter
-      if (itemTypeFilter) {
+      if (itemTypeFilter && itemTypeFilter !== "all") {
         requestsData = requestsData.filter(
           (r: ServiceRequest) => r.itemType === itemTypeFilter
         );
@@ -316,7 +316,7 @@ const StaffServices = () => {
                       <SelectValue placeholder="All Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
@@ -333,7 +333,7 @@ const StaffServices = () => {
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       {itemTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.charAt(0).toUpperCase() + type.slice(1)}
