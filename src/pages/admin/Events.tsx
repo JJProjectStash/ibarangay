@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/PageHeader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import adminApi from "@/services/adminApi";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface Event {
   id: string;
@@ -35,6 +35,28 @@ const AdminEvents = () => {
       console.error("Failed to fetch events:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const formatEventDate = (dateString: string | undefined | null) => {
+    try {
+      // Check if dateString exists and is not empty
+      if (!dateString || dateString.trim() === "") {
+        return "Date not set";
+      }
+
+      // Try to parse the date
+      const date = parseISO(dateString);
+
+      // Check if the parsed date is valid
+      if (isValid(date)) {
+        return format(date, "PPP");
+      }
+
+      return "Invalid Date";
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid Date";
     }
   };
 
@@ -120,7 +142,7 @@ const AdminEvents = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-white/85">
                       <Calendar className="h-4 w-4 text-purple-400" />
-                      <span>{format(new Date(event.date), "PPP")}</span>
+                      <span>{formatEventDate(event.date)}</span>
                     </div>
                     <div className="text-white/70">{event.location}</div>
                   </div>

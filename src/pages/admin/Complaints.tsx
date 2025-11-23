@@ -141,7 +141,25 @@ const AdminComplaints = () => {
 
     setIsSubmitting(true);
     try {
-      await api.respondToComplaint(selectedComplaint._id, responseText);
+      // Try the response endpoint first
+      try {
+        await api.respondToComplaint(selectedComplaint._id, responseText);
+      } catch (responseError: any) {
+        // If the response endpoint doesn't exist (404), try updating status with response
+        if (responseError?.response?.status === 404) {
+          console.warn(
+            "Response endpoint not found, using status update endpoint"
+          );
+          await api.updateComplaintStatus(
+            selectedComplaint._id,
+            "in-progress",
+            responseText
+          );
+        } else {
+          throw responseError;
+        }
+      }
+
       showSuccessToast("Response sent successfully");
       setShowResponseModal(false);
       setResponseText("");
