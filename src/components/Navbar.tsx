@@ -119,7 +119,7 @@ const Navbar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-[#1e1b4b]/80 backdrop-blur-xl border-b border-white/10 shadow-lg py-3"
+          ? "bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg py-3"
           : "bg-transparent py-4"
       )}
     >
@@ -131,11 +131,11 @@ const Navbar = () => {
             className="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
           >
             <div className="relative">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl shadow-lg transition-all duration-300 group-hover:shadow-purple-500/50">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 flex items-center justify-center text-white font-bold text-xl shadow-lg transition-all duration-300 group-hover:shadow-gray-500/50">
                 iB
               </div>
             </div>
-            <span className="text-xl font-bold tracking-tight text-white transition-all duration-300 group-hover:text-purple-300">
+            <span className="text-xl font-bold tracking-tight text-white transition-all duration-300 group-hover:text-gray-300">
               iBarangay
             </span>
           </Link>
@@ -173,7 +173,7 @@ const Navbar = () => {
                       variant="ghost"
                       className="flex items-center space-x-3 rounded-full pl-2 pr-4 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl transition-all duration-300 hover:scale-105"
                     >
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium text-sm shadow-md">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-500 flex items-center justify-center text-white font-medium text-sm shadow-md">
                         {user.firstName?.[0] || "U"}
                       </div>
                       <div className="flex flex-col items-start text-xs">
@@ -189,7 +189,7 @@ const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 p-2 bg-[#1e1b4b]/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl"
+                    className="w-56 p-2 bg-black/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl"
                   >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
@@ -217,7 +217,7 @@ const Navbar = () => {
                       <span>Complaints</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-colors"
+                      className="cursor-pointer text-gray-300 hover:text-gray-200 hover:bg-gray-500/20 transition-colors"
                       onClick={handleLogout}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -237,7 +237,7 @@ const Navbar = () => {
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button className="rounded-full font-semibold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                  <Button className="rounded-full font-semibold bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg shadow-gray-500/50 transition-all duration-300 hover:shadow-xl hover:scale-105">
                     Get Started
                   </Button>
                 </Link>
@@ -265,7 +265,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1e1b4b]/95 backdrop-blur-xl border-b border-white/10 shadow-lg animate-in slide-in-from-top-4 duration-300">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-xl border-b border-white/10 shadow-lg animate-in slide-in-from-top-4 duration-300">
           <div className="container mx-auto px-4 py-6 flex flex-col space-y-3">
             {navLinks.map((link) => (
               <Link
@@ -309,7 +309,7 @@ const Navbar = () => {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="justify-start w-full text-red-300 hover:text-red-200 hover:bg-red-500/20 rounded-xl"
+                  className="justify-start w-full text-gray-300 hover:text-gray-200 hover:bg-gray-500/20 rounded-xl"
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
@@ -330,7 +330,7 @@ const Navbar = () => {
                   </Button>
                 </Link>
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full justify-center rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg">
+                  <Button className="w-full justify-center rounded-xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg">
                     Get Started
                   </Button>
                 </Link>

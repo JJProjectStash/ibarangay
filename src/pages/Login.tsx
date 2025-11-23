@@ -69,19 +69,19 @@ const Login = () => {
       {/* Enhanced Background with Gradient Orbs */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#5b21b6]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
 
         {/* Large blur orbs */}
         <div
-          className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 blur-3xl animate-pulse"
+          className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-gray-700/30 to-gray-500/30 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-gray-600/30 to-gray-800/30 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-gray-500/20 to-gray-700/20 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -91,7 +91,7 @@ const Login = () => {
         className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 border-2 border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
       >
         <CardHeader className="space-y-1 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-2xl backdrop-blur-sm border-2 border-white/30">
+          <div className="w-16 h-16 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-2xl backdrop-blur-sm border-2 border-white/30">
             iB
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight text-white">
@@ -104,7 +104,7 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/50 text-red-200 text-sm p-3 rounded-lg flex items-center gap-2 animate-in fade-in">
+              <div className="bg-gray-800/20 backdrop-blur-sm border border-gray-400/50 text-gray-200 text-sm p-3 rounded-lg flex items-center gap-2 animate-in fade-in">
                 <AlertCircle className="h-4 w-4" />
                 {error}
               </div>
@@ -118,7 +118,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 icon={<Mail className="h-4 w-4 text-white/60" />}
-                className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                 disabled={isLoading}
               />
             </FormField>
@@ -132,7 +132,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   icon={<Lock className="h-4 w-4 text-white/60" />}
-                  className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40 pr-10"
+                  className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40 pr-10"
                   disabled={isLoading}
                 />
                 <button
@@ -149,7 +149,7 @@ const Login = () => {
                 </button>
                 <Link
                   to="/forgot-password"
-                  className="absolute right-0 top-0 -mt-7 text-xs font-medium text-purple-300 hover:text-purple-200 hover:underline"
+                  className="absolute right-0 top-0 -mt-7 text-xs font-medium text-gray-300 hover:text-gray-200 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -158,7 +158,7 @@ const Login = () => {
 
             <Button
               type="submit"
-              className="w-full font-semibold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/60 hover:scale-[1.02]"
+              className="w-full font-semibold bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg shadow-gray-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/60 hover:scale-[1.02]"
               disabled={isLoading}
               isLoading={isLoading}
             >
@@ -173,7 +173,7 @@ const Login = () => {
               <span className="w-full border-t border-white/20" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#1e1b4b]/50 backdrop-blur-xl px-3 py-1 rounded-full text-white/60 border border-white/20">
+              <span className="bg-black/50 backdrop-blur-xl px-3 py-1 rounded-full text-white/60 border border-white/20">
                 Or continue with
               </span>
             </div>
@@ -200,7 +200,7 @@ const Login = () => {
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="font-medium text-purple-300 hover:text-purple-200 hover:underline underline-offset-4 transition-colors"
+              className="font-medium text-gray-300 hover:text-gray-200 hover:underline underline-offset-4 transition-colors"
             >
               Sign up
             </Link>

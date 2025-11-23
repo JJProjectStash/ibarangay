@@ -143,51 +143,51 @@ const ResidentDashboard: React.FC = () => {
       title: "Barangay Clearance",
       desc: "Get your clearance online",
       icon: FileText,
-      color: "text-blue-400",
-      bg: "bg-blue-500/20",
-      gradient: "from-blue-500 to-cyan-500",
+      color: "text-gray-400",
+      bg: "bg-gray-500/20",
+      gradient: "from-gray-700 to-gray-500",
     },
     {
       title: "Business Permit",
       desc: "Apply for business permit",
       icon: Building2,
-      color: "text-purple-400",
-      bg: "bg-purple-500/20",
-      gradient: "from-purple-500 to-pink-500",
+      color: "text-gray-500",
+      bg: "bg-gray-600/20",
+      gradient: "from-gray-800 to-gray-600",
     },
     {
       title: "Indigency",
       desc: "Certificate of Indigency",
       icon: FileText,
-      color: "text-green-400",
-      bg: "bg-green-500/20",
-      gradient: "from-green-500 to-emerald-500",
+      color: "text-gray-600",
+      bg: "bg-gray-700/20",
+      gradient: "from-gray-600 to-gray-400",
     },
     {
       title: "Residency",
       desc: "Proof of Residency",
       icon: Users,
-      color: "text-orange-400",
-      bg: "bg-orange-500/20",
-      gradient: "from-orange-500 to-red-500",
+      color: "text-gray-400",
+      bg: "bg-gray-500/20",
+      gradient: "from-gray-700 to-gray-500",
     },
   ];
 
   return (
     <div className="min-h-screen relative">
       {/* Unified Background - Same as Home page */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -197,13 +197,13 @@ const ResidentDashboard: React.FC = () => {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in slide-in-from-top-4 duration-500">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-200 backdrop-blur-sm mb-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-500/10 px-4 py-2 text-sm font-medium text-gray-200 backdrop-blur-sm mb-3">
                 <Sparkles className="h-4 w-4" />
                 Resident Dashboard
               </div>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
                 Welcome back,{" "}
-                <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent">
                   {user?.firstName}!
                 </span>
               </h1>
@@ -213,7 +213,7 @@ const ResidentDashboard: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <Link to="/services">
-                <Button className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-2xl shadow-purple-500/50 transition-all duration-300 hover:scale-105">
+                <Button className="bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-2xl shadow-gray-500/50 transition-all duration-300 hover:scale-105">
                   <FileText className="mr-2 h-4 w-4" />
                   New Request
                 </Button>
@@ -232,12 +232,12 @@ const ResidentDashboard: React.FC = () => {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-700 delay-100">
-            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-white/90">
                   Active Requests
                 </CardTitle>
-                <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+                <div className="p-2 rounded-xl bg-gray-500/20 text-gray-400 group-hover:scale-110 transition-transform">
                   <FileText className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -249,12 +249,12 @@ const ResidentDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-white/90">
                   Upcoming Events
                 </CardTitle>
-                <div className="p-2 rounded-xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+                <div className="p-2 rounded-xl bg-gray-600/20 text-gray-400 group-hover:scale-110 transition-transform">
                   <Calendar className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -266,12 +266,12 @@ const ResidentDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group">
+            <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-white/90">
                   Pending Reports
                 </CardTitle>
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400 group-hover:scale-110 transition-transform">
+                <div className="p-2 rounded-xl bg-gray-700/20 text-gray-400 group-hover:scale-110 transition-transform">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -289,7 +289,7 @@ const ResidentDashboard: React.FC = () => {
             <Card className="lg:col-span-2 bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <TrendingUp className="h-5 w-5 text-purple-400" />
+                  <TrendingUp className="h-5 w-5 text-gray-400" />
                   Request Activity
                 </CardTitle>
                 <CardDescription className="text-white/70">
@@ -324,9 +324,9 @@ const ResidentDashboard: React.FC = () => {
                         }}
                       />
                       <Tooltip
-                        cursor={{ fill: "rgba(139,92,246,0.1)" }}
+                        cursor={{ fill: "rgba(128,128,128,0.1)" }}
                         contentStyle={{
-                          backgroundColor: "rgba(30,27,75,0.95)",
+                          backgroundColor: "rgba(30,30,30,0.95)",
                           border: "1px solid rgba(255,255,255,0.2)",
                           borderRadius: "12px",
                           backdropFilter: "blur(12px)",
@@ -349,12 +349,12 @@ const ResidentDashboard: React.FC = () => {
                         >
                           <stop
                             offset="0%"
-                            stopColor="#a855f7"
+                            stopColor="#808080"
                             stopOpacity={0.8}
                           />
                           <stop
                             offset="100%"
-                            stopColor="#3b82f6"
+                            stopColor="#404040"
                             stopOpacity={0.8}
                           />
                         </linearGradient>
@@ -369,7 +369,7 @@ const ResidentDashboard: React.FC = () => {
             <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <Clock className="h-5 w-5 text-purple-400" />
+                  <Clock className="h-5 w-5 text-gray-400" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
@@ -380,7 +380,7 @@ const ResidentDashboard: React.FC = () => {
                       key={activity.id}
                       className="flex items-start gap-4 group"
                     >
-                      <div className="mt-1 p-2 rounded-full bg-white/10 group-hover:bg-purple-500/20 transition-all duration-300 text-white/80">
+                      <div className="mt-1 p-2 rounded-full bg-white/10 group-hover:bg-gray-500/20 transition-all duration-300 text-white/80">
                         {activity.icon}
                       </div>
                       <div className="flex-1 space-y-1">
@@ -413,7 +413,7 @@ const ResidentDashboard: React.FC = () => {
           <div className="space-y-4 animate-in fade-in duration-700 delay-300">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-purple-400" />
+                <Sparkles className="h-6 w-6 text-gray-400" />
                 Popular Services
               </h2>
               <Link to="/services">
@@ -428,7 +428,7 @@ const ResidentDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {popularServices.map((service, i) => (
                 <Link to="/services" key={i}>
-                  <Card className="h-full bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden">
+                  <Card className="h-full bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden">
                     {/* Gradient overlay on hover */}
                     <div
                       className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
@@ -457,12 +457,12 @@ const ResidentDashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <Card className="bg-white/10 backdrop-blur-xl border-2 border-purple-400/30 shadow-2xl animate-in scale-in duration-700 delay-400">
+          <Card className="bg-white/10 backdrop-blur-xl border-2 border-gray-400/30 shadow-2xl animate-in scale-in duration-700 delay-400">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-purple-500/20">
-                    <CheckCircle2 className="h-6 w-6 text-purple-400" />
+                  <div className="p-3 rounded-full bg-gray-500/20">
+                    <CheckCircle2 className="h-6 w-6 text-gray-400" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg text-white">
@@ -474,7 +474,7 @@ const ResidentDashboard: React.FC = () => {
                   </div>
                 </div>
                 <Link to="/complaints">
-                  <Button className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-2xl shadow-purple-500/50 transition-all duration-300 hover:scale-105">
+                  <Button className="bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-2xl shadow-gray-500/50 transition-all duration-300 hover:scale-105">
                     Contact Support
                   </Button>
                 </Link>
