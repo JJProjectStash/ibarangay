@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Select,
   SelectContent,
@@ -32,6 +31,9 @@ export function SelectField({
   className,
   required,
 }: SelectFieldProps) {
+  // Filter out options with empty string values to prevent Radix UI errors
+  const validOptions = options.filter((option) => option.value !== "");
+
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -45,18 +47,18 @@ export function SelectField({
           className={cn(
             "bg-white/10 backdrop-blur-xl border-white/20 text-white",
             "focus:border-purple-400/50 focus:ring-purple-400/20",
-            "hover:border-white/40 transition-all",
+            "hover:border-white/40 transition-all duration-300",
             error && "border-red-400/50 focus:border-red-400/50"
           )}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="bg-slate-900/95 backdrop-blur-xl border-white/20">
-          {options.map((option) => (
+          {validOptions.map((option) => (
             <SelectItem
               key={option.value}
               value={option.value}
-              className="text-white focus:bg-white/10 focus:text-white"
+              className="text-white focus:bg-white/10 focus:text-white cursor-pointer transition-colors duration-200"
             >
               {option.label}
             </SelectItem>

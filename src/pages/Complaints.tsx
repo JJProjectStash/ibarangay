@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Plus,
   MessageSquare,
-  Filter,
   Download,
   Trash2,
   AlertCircle,
@@ -24,7 +23,6 @@ import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import { validators, getValidationMessage } from "../utils/validators";
 import { useAuth } from "../context/AuthContext";
-import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
 import { SkeletonCard } from "../components/SkeletonCard";
 
