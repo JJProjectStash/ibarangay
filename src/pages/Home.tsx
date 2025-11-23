@@ -19,6 +19,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { ParticleBackground } from "@/components/ParticleBackground";
+import { FloatingElements } from "@/components/FloatingElements";
 
 const Home = () => {
   const { isAuthenticated, user } = useAuth();
@@ -95,8 +97,8 @@ const Home = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen relative">
-      {/* Unified Background - Single gradient for entire page */}
+    <div className="flex flex-col min-h-screen relative" id="main-content">
+      {/* Unified Background with Particles and Floating Elements */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         {/* Animated gradient orbs */}
         <div
@@ -112,6 +114,12 @@ const Home = () => {
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
+
+      {/* Particle Background */}
+      <ParticleBackground />
+
+      {/* Floating Elements */}
+      <FloatingElements />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 overflow-hidden">
@@ -330,7 +338,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative">
+      <section className="py-24 relative pb-32 md:pb-24">
         <div className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 shadow-2xl max-w-5xl mx-auto group hover:shadow-[0_20px_60px_rgba(139,92,246,0.6)] transition-all duration-500">
             {/* Animated gradient overlay */}
