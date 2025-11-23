@@ -16,12 +16,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
-      {!isAuthPage && !isDashboard && <Navbar />}
+      {/* Show navbar for all pages except auth pages */}
+      {!isAuthPage && <Navbar />}
 
       <main
         className={cn(
           "flex-1 w-full",
-          !isAuthPage && !isDashboard && "pt-16", // Offset for fixed navbar
+          !isAuthPage && "pt-16", // Offset for fixed navbar
           "animate-in fade-in duration-500"
         )}
       >

@@ -53,11 +53,10 @@ const Navbar = () => {
       ];
     }
 
-    // Role-based navigation
+    // Role-based navigation - Home removed for authenticated users
     switch (user.role) {
       case "admin":
         return [
-          { path: "/", label: "Home" },
           { path: "/admin", label: "Dashboard" },
           { path: "/admin/complaints", label: "Complaints" },
           { path: "/announcements", label: "Announcements" },
@@ -65,7 +64,6 @@ const Navbar = () => {
 
       case "staff":
         return [
-          { path: "/", label: "Home" },
           { path: "/staff", label: "Dashboard" },
           { path: "/staff/complaints", label: "Complaints" },
           { path: "/announcements", label: "Announcements" },
@@ -74,7 +72,6 @@ const Navbar = () => {
       case "resident":
       default:
         return [
-          { path: "/", label: "Home" },
           { path: "/dashboard", label: "Dashboard" },
           { path: "/services", label: "Services" },
           { path: "/events", label: "Events" },

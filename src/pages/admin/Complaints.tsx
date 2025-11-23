@@ -63,9 +63,9 @@ const AdminComplaints = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedComplaints, setSelectedComplaints] = useState<string[]>([]);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(
@@ -82,17 +82,17 @@ const AdminComplaints = () => {
       let complaintsData = Array.isArray(response) ? response : [];
 
       // Apply filters
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== "all") {
         complaintsData = complaintsData.filter(
           (c) => c.status === statusFilter
         );
       }
-      if (priorityFilter) {
+      if (priorityFilter && priorityFilter !== "all") {
         complaintsData = complaintsData.filter(
           (c) => c.priority === priorityFilter
         );
       }
-      if (categoryFilter) {
+      if (categoryFilter && categoryFilter !== "all") {
         complaintsData = complaintsData.filter(
           (c) => c.category === categoryFilter
         );
@@ -182,9 +182,9 @@ const AdminComplaints = () => {
   const handleExport = async (format: "csv" | "excel") => {
     try {
       const blob = await api.exportComplaints(format, {
-        status: statusFilter,
-        priority: priorityFilter,
-        category: categoryFilter,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        priority: priorityFilter !== "all" ? priorityFilter : undefined,
+        category: categoryFilter !== "all" ? categoryFilter : undefined,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -321,7 +321,7 @@ const AdminComplaints = () => {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="in-progress">In Progress</SelectItem>
                     <SelectItem value="resolved">Resolved</SelectItem>
@@ -337,7 +337,7 @@ const AdminComplaints = () => {
                     <SelectValue placeholder="All Priority" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Priority</SelectItem>
+                    <SelectItem value="all">All Priority</SelectItem>
                     <SelectItem value="high">High</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
@@ -352,7 +352,7 @@ const AdminComplaints = () => {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category.charAt(0).toUpperCase() + category.slice(1)}

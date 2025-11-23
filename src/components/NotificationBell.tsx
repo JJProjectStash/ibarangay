@@ -108,12 +108,14 @@ const NotificationBell: React.FC = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="relative rounded-full hover:bg-accent hover-scale"
+        className="relative rounded-full hover:bg-white/20 hover-scale bg-white/10 backdrop-blur-sm border border-white/20"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Bell className="h-5 w-5 text-muted-foreground" />
+        <Bell className="h-5 w-5 text-white" />
         {unreadCount > 0 && (
-          <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full ring-2 ring-background animate-pulse" />
+          <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center ring-2 ring-[#1e1b4b] font-semibold animate-pulse">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
         )}
       </Button>
 
