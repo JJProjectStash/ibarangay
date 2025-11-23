@@ -289,7 +289,7 @@ const StaffComplaints = () => {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all-status">All Status</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="in-progress">In Progress</SelectItem>
                     <SelectItem value="resolved">Resolved</SelectItem>
@@ -305,7 +305,7 @@ const StaffComplaints = () => {
                     <SelectValue placeholder="All Priority" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Priority</SelectItem>
+                    <SelectItem value="all-priority">All Priority</SelectItem>
                     <SelectItem value="high">High</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
@@ -320,7 +320,9 @@ const StaffComplaints = () => {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all-categories">
+                      All Categories
+                    </SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category.charAt(0).toUpperCase() + category.slice(1)}

@@ -120,15 +120,17 @@ const NotificationBell: React.FC = () => {
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden animate-in slide-in-from-top-2">
-          <div className="p-4 border-b border-border flex justify-between items-center">
-            <h3 className="text-sm font-semibold">Notifications</h3>
+        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 bg-white/95 dark:bg-[#1e1b4b]/95 backdrop-blur-xl border-2 border-white/30 dark:border-purple-500/30 rounded-lg shadow-2xl z-50 overflow-hidden animate-in slide-in-from-top-2">
+          <div className="p-4 border-b border-border/50 flex justify-between items-center bg-white/50 dark:bg-white/5">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Notifications
+            </h3>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={markAllAsRead}
-                className="text-xs text-primary hover:text-primary/80"
+                className="text-xs text-primary hover:text-primary/80 dark:text-purple-400 dark:hover:text-purple-300"
               >
                 Mark all as read
               </Button>
@@ -138,12 +140,14 @@ const NotificationBell: React.FC = () => {
           <div className="overflow-y-auto max-h-80">
             {isLoading ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-muted-foreground">Loading...</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Loading...
+                </p>
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
+                <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   No notifications yet
                 </p>
               </div>
@@ -155,8 +159,8 @@ const NotificationBell: React.FC = () => {
                     !notification.isRead && markAsRead(notification._id)
                   }
                   className={cn(
-                    "p-4 border-b border-border/50 cursor-pointer transition-colors hover:bg-accent/50",
-                    !notification.isRead && "bg-primary/5"
+                    "p-4 border-b border-border/50 cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-white/10",
+                    !notification.isRead && "bg-blue-50 dark:bg-purple-500/10"
                   )}
                 >
                   <div className="flex gap-3 items-start">
@@ -169,20 +173,20 @@ const NotificationBell: React.FC = () => {
                           className={cn(
                             "text-sm truncate",
                             notification.isRead
-                              ? "font-normal text-muted-foreground"
-                              : "font-medium text-foreground"
+                              ? "font-normal text-gray-600 dark:text-gray-300"
+                              : "font-medium text-gray-900 dark:text-white"
                           )}
                         >
                           {notification.title}
                         </p>
                         {!notification.isRead && (
-                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
+                          <span className="w-2 h-2 bg-primary dark:bg-purple-400 rounded-full flex-shrink-0 mt-1" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500 dark:text-gray-500">
                         {format(
                           new Date(notification.createdAt),
                           "MMM dd, yyyy 'at' h:mm a"
