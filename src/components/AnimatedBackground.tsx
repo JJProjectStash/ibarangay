@@ -33,48 +33,56 @@ const styles: Record<string, React.CSSProperties> = {
   shape: {
     position: "absolute",
     borderRadius: "50%",
-    opacity: 0.1,
+    opacity: 0.08,
+    filter: "blur(1px)",
   },
   shape1: {
-    width: "300px",
-    height: "300px",
+    width: "280px",
+    height: "280px",
     background: "linear-gradient(135deg, #3B82F6, #10B981)",
-    top: "10%",
+    top: "15%",
     left: "10%",
-    animation: "float 20s ease-in-out infinite",
+    animation: "gentleFloat 25s ease-in-out infinite",
   },
   shape2: {
-    width: "200px",
-    height: "200px",
+    width: "180px",
+    height: "180px",
     background: "linear-gradient(135deg, #F59E0B, #EF4444)",
-    top: "60%",
+    top: "65%",
     right: "15%",
-    animation: "float 15s ease-in-out infinite 5s",
+    animation: "gentleFloat 20s ease-in-out infinite 8s",
   },
   shape3: {
-    width: "250px",
-    height: "250px",
+    width: "220px",
+    height: "220px",
     background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-    bottom: "20%",
+    bottom: "25%",
     left: "50%",
-    animation: "float 18s ease-in-out infinite 10s",
+    animation: "gentleFloat 30s ease-in-out infinite 15s",
   },
 };
 
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes float {
-    0%, 100% {
-      transform: translate(0, 0) scale(1);
+// Create and inject styles only once
+if (!document.querySelector("#animated-background-styles")) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "animated-background-styles";
+  styleSheet.textContent = `
+    @keyframes gentleFloat {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      25% {
+        transform: translate(15px, -15px) scale(1.05);
+      }
+      50% {
+        transform: translate(-10px, -20px) scale(0.95);
+      }
+      75% {
+        transform: translate(-15px, 10px) scale(1.02);
+      }
     }
-    33% {
-      transform: translate(30px, -30px) scale(1.1);
-    }
-    66% {
-      transform: translate(-20px, 20px) scale(0.9);
-    }
-  }
-`;
-document.head.appendChild(styleSheet);
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default AnimatedBackground;

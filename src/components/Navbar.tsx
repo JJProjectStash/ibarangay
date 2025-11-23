@@ -23,7 +23,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -47,23 +47,27 @@ const Navbar = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out",
         isScrolled
-          ? "glass-nav shadow-sm border-border/50 py-2"
+          ? "glass-nav shadow-lg border-b border-border/30 py-3"
           : "bg-transparent py-4"
       )}
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-primary/50 transition-all duration-300 group-hover:scale-105 hover-lift">
-              iB
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary via-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105 hover-lift">
+                iB
+              </div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/20 to-blue-600/20 blur-md group-hover:blur-lg transition-all duration-300" />
             </div>
             <span
               className={cn(
-                "text-xl font-bold tracking-tight transition-colors",
-                isScrolled ? "text-foreground" : "text-foreground"
+                "text-xl font-bold tracking-tight transition-all duration-300",
+                isScrolled ? "text-foreground" : "text-foreground",
+                "group-hover:text-primary"
               )}
             >
               iBarangay
@@ -71,28 +75,31 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-2">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover-lift",
+                  "relative px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover-lift",
                   isActive(link.path)
                     ? "bg-primary/10 text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
                 )}
               >
                 {link.label}
+                {isActive(link.path) && (
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                )}
               </Link>
             ))}
           </div>
 
           {/* Right Side Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
-                {/* Notification Bell - only show for authenticated users */}
+                {/* Notification Bell */}
                 <div className="flex items-center">
                   <NotificationBell />
                 </div>
@@ -101,29 +108,32 @@ const Navbar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center space-x-2 rounded-full pl-2 pr-4 hover:bg-accent border border-transparent hover:border-border transition-all duration-300"
+                      className="flex items-center space-x-3 rounded-full pl-2 pr-4 hover:bg-accent/60 border border-transparent hover:border-border/50 transition-all duration-300 hover-lift"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white font-medium text-sm shadow-sm">
-                        {user.firstName?.[0] || "U"}
+                      <div className="relative">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-blue-500 flex items-center justify-center text-white font-medium text-sm shadow-md">
+                          {user.firstName?.[0] || "U"}
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/30 to-blue-500/30 blur-sm" />
                       </div>
                       <div className="flex flex-col items-start text-xs">
-                        <span className="font-medium text-foreground">
+                        <span className="font-semibold text-foreground">
                           {user.firstName}
                         </span>
                         <span className="text-muted-foreground capitalize">
                           {user.role}
                         </span>
                       </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 p-2 glass-card"
+                    className="w-56 p-2 glass-card animate-in slide-in-from-top-4"
                   >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
+                        <p className="text-sm font-semibold leading-none">
                           {user.firstName} {user.lastName}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
@@ -142,13 +152,13 @@ const Navbar = () => {
                             : "/dashboard"
                         )
                       }
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-accent/60 transition-colors"
                     >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer text-destructive focus:text-destructive"
+                      className="cursor-pointer text-destructive focus:text-destructive hover:bg-destructive/10 transition-colors"
                       onClick={handleLogout}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -158,14 +168,17 @@ const Navbar = () => {
                 </DropdownMenu>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Link to="/login">
-                  <Button variant="ghost" className="rounded-full hover-lift">
+                  <Button
+                    variant="ghost"
+                    className="rounded-full hover-lift font-medium"
+                  >
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button className="rounded-full btn-glow hover-lift">
+                  <Button className="rounded-full btn-glow hover-lift font-medium shadow-lg shadow-primary/20">
                     Get Started
                   </Button>
                 </Link>
@@ -193,29 +206,29 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 glass-nav border-b border-border/50 shadow-lg animate-in slide-in-from-top-4">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
+        <div className="md:hidden absolute top-full left-0 right-0 glass-nav border-b border-border/30 shadow-lg animate-in slide-in-from-top-4">
+          <div className="container mx-auto px-4 py-6 flex flex-col space-y-3">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
-                  "px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300",
+                  "px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300",
                   isActive(link.path)
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-accent"
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "text-foreground hover:bg-accent/60"
                 )}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="h-px bg-border my-2" />
+            <div className="h-px bg-border/50 my-3" />
             {user ? (
               <>
                 <Button
                   variant="ghost"
-                  className="justify-start w-full"
+                  className="justify-start w-full rounded-xl"
                   onClick={() => {
                     navigate("/notifications");
                     setIsMobileMenuOpen(false);
@@ -226,7 +239,7 @@ const Navbar = () => {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="justify-start w-full"
+                  className="justify-start w-full rounded-xl"
                   onClick={() => {
                     navigate(
                       user.role === "admin"
@@ -243,7 +256,7 @@ const Navbar = () => {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="justify-start w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="justify-start w-full text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl"
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
@@ -254,14 +267,19 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <div className="flex flex-col space-y-2 pt-2">
+              <div className="flex flex-col space-y-3 pt-2">
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full justify-center">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center rounded-xl"
+                  >
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full justify-center">Get Started</Button>
+                  <Button className="w-full justify-center rounded-xl">
+                    Get Started
+                  </Button>
                 </Link>
               </div>
             )}
