@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { ClipboardList, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import {
+  ClipboardList,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "../../services/api";
 import RequestManagement from "../../components/staff/RequestManagement";
 import { Service, Complaint } from "../../types";
 import { showToast } from "../../utils/toast";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { StatCard } from "../../components/StatCard";
 
 const StaffDashboard: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -92,72 +97,132 @@ const StaffDashboard: React.FC = () => {
     );
   }
 
+  const statCards = [
+    {
+      title: "Pending Services",
+      value: pendingServices.length,
+      icon: Clock,
+      color: "yellow",
+      gradient: "from-yellow-500 to-orange-500",
+      description: "Awaiting processing",
+    },
+    {
+      title: "Pending Complaints",
+      value: pendingComplaints.length,
+      icon: AlertCircle,
+      color: "red",
+      gradient: "from-red-500 to-pink-500",
+      description: "Requires attention",
+    },
+    {
+      title: "In Progress",
+      value: inProgressComplaints.length,
+      icon: ClipboardList,
+      color: "blue",
+      gradient: "from-blue-500 to-cyan-500",
+      description: "Currently handling",
+    },
+    {
+      title: "Resolved",
+      value: resolvedComplaints.length,
+      icon: CheckCircle,
+      color: "green",
+      gradient: "from-green-500 to-emerald-500",
+      description: "Successfully completed",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="animate-in slide-in-from-top-4 duration-500">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            Staff Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Manage service requests and complaints
-          </p>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Unified Background - Same as Home page */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        {/* Animated gradient orbs */}
+        <div
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
+        <div
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          style={{ animationDuration: "12s", animationDelay: "4s" }}
+        />
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-700 delay-100">
-          <StatCard
-            title="Pending Services"
-            value={pendingServices.length}
-            icon={Clock}
-            color="yellow"
-            description="Awaiting processing"
-            className="card-hover"
-          />
-          <StatCard
-            title="Pending Complaints"
-            value={pendingComplaints.length}
-            icon={AlertCircle}
-            color="red"
-            description="Requires attention"
-            className="card-hover"
-          />
-          <StatCard
-            title="In Progress"
-            value={inProgressComplaints.length}
-            icon={ClipboardList}
-            color="blue"
-            description="Currently handling"
-            className="card-hover"
-          />
-          <StatCard
-            title="Resolved"
-            value={resolvedComplaints.length}
-            icon={CheckCircle}
-            color="green"
-            description="Successfully completed"
-            className="card-hover"
-          />
-        </div>
-
-        {/* Request Management */}
-        <Card className="glass-card animate-in slide-in-from-bottom-8 duration-700 delay-200">
-          <CardHeader>
-            <CardTitle>Request Management</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Review and process service requests and complaints
+      <div className="relative z-10 p-6 page-transition">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="animate-in slide-in-from-top-4 duration-500">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm mb-3">
+              <ClipboardList className="h-4 w-4" />
+              Staff Dashboard
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+              Request{" "}
+              <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                Management
+              </span>
+            </h1>
+            <p className="text-white/80 text-lg">
+              Manage service requests and complaints
             </p>
-          </CardHeader>
-          <CardContent>
-            <RequestManagement
-              services={services}
-              complaints={complaints}
-              onUpdateServiceStatus={handleUpdateServiceStatus}
-              onUpdateComplaintStatus={handleUpdateComplaintStatus}
-            />
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-700 delay-100">
+            {statCards.map((stat, index) => (
+              <Card
+                key={index}
+                className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                {/* Gradient overlay on hover */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                />
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium text-white/90">
+                    {stat.title}
+                  </CardTitle>
+                  <div
+                    className={`p-2 rounded-xl bg-${stat.color}-500/20 text-${stat.color}-400 group-hover:scale-110 transition-transform`}
+                  >
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-white/70">{stat.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Request Management */}
+          <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-200">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-400" />
+                Request Management
+              </CardTitle>
+              <p className="text-sm text-white/70 mt-1">
+                Review and process service requests and complaints
+              </p>
+            </CardHeader>
+            <CardContent>
+              <RequestManagement
+                services={services}
+                complaints={complaints}
+                onUpdateServiceStatus={handleUpdateServiceStatus}
+                onUpdateComplaintStatus={handleUpdateComplaintStatus}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
