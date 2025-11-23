@@ -91,7 +91,7 @@ const StaffAnnouncements = () => {
       <div className="relative z-10 p-6 page-transition">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="animate-in slide-in-from-top-4 duration-500">
+          <div className="animate-in slide-in-from-top-4 duration-500 text-white">
             <PageHeader
               title="Announcements"
               description="Stay updated with the latest barangay news and important announcements"

@@ -88,7 +88,7 @@ const StaffEvents = () => {
       <div className="relative z-10 p-6 page-transition">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="animate-in slide-in-from-top-4 duration-500">
+          <div className="animate-in slide-in-from-top-4 duration-500 text-white">
             <PageHeader
               title="Event Management"
               description="Manage and organize community events"
