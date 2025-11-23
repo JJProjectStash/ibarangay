@@ -142,183 +142,218 @@ const Events: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="animate-in slide-in-from-top-4 duration-500">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            Barangay Events
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Join community events and stay connected with your neighbors
-          </p>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Unified Background - Same as Home page */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        {/* Animated gradient orbs */}
+        <div
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
+        <div
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          style={{ animationDuration: "12s", animationDelay: "4s" }}
+        />
+      </div>
 
-        {events.length === 0 ? (
-          <EmptyState
-            icon={Calendar}
-            title="No events available"
-            description="Check back later for upcoming community events"
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-700 delay-100">
-            {events.map((event) => {
-              const registered = isRegistered(event);
-              const statusBadge = getStatusBadge(event.status);
-              const attendeeCount = event.attendees.length;
-              const spotsRemaining = event.maxAttendees
-                ? event.maxAttendees - attendeeCount
-                : null;
+      <div className="relative z-10 p-6 page-transition">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="animate-in slide-in-from-top-4 duration-500">
+            <div className="inline-flex items-center gap-2 rounded-full border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-medium text-green-200 backdrop-blur-sm mb-3">
+              <Calendar className="h-4 w-4" />
+              Community Events
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+              Barangay{" "}
+              <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                Events
+              </span>
+            </h1>
+            <p className="text-white/80 text-lg">
+              Join community events and stay connected with your neighbors
+            </p>
+          </div>
 
-              return (
-                <Card
-                  key={event._id}
-                  className="glass-card card-hover overflow-hidden group flex flex-col"
-                >
-                  {event.imageUrl && (
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={event.imageUrl}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant={statusBadge.variant}>
-                          {statusBadge.label}
-                        </Badge>
-                      </div>
-                      {registered && (
-                        <div className="absolute top-4 left-4">
-                          <Badge className="bg-green-500 text-white">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Registered
+          {events.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title="No events available"
+              description="Check back later for upcoming community events"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-700 delay-100">
+              {events.map((event) => {
+                const registered = isRegistered(event);
+                const statusBadge = getStatusBadge(event.status);
+                const attendeeCount = event.attendees.length;
+                const spotsRemaining = event.maxAttendees
+                  ? event.maxAttendees - attendeeCount
+                  : null;
+
+                return (
+                  <Card
+                    key={event._id}
+                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group flex flex-col overflow-hidden"
+                  >
+                    {event.imageUrl && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={event.imageUrl}
+                          alt={event.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute top-4 right-4">
+                          <Badge
+                            variant={statusBadge.variant}
+                            className="backdrop-blur-sm"
+                          >
+                            {statusBadge.label}
                           </Badge>
                         </div>
-                      )}
-                    </div>
-                  )}
-                  <CardHeader>
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                        {event.title}
-                      </CardTitle>
-                      {!event.imageUrl && (
-                        <Badge variant={statusBadge.variant}>
-                          {statusBadge.label}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                      {event.description}
-                    </p>
-                  </CardHeader>
+                        {registered && (
+                          <div className="absolute top-4 left-4">
+                            <Badge className="bg-green-500 text-white backdrop-blur-sm">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Registered
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <CardHeader>
+                      <div className="flex justify-between items-start gap-2">
+                        <CardTitle className="text-xl text-white group-hover:text-purple-300 transition-colors">
+                          {event.title}
+                        </CardTitle>
+                        {!event.imageUrl && (
+                          <Badge
+                            variant={statusBadge.variant}
+                            className="backdrop-blur-sm"
+                          >
+                            {statusBadge.label}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-white/70 line-clamp-2 mt-2">
+                        {event.description}
+                      </p>
+                    </CardHeader>
 
-                  <CardContent className="flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span>
-                          {format(new Date(event.eventDate), "MMM dd, yyyy")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span>
-                          {format(new Date(event.eventDate), "h:mm a")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span className="line-clamp-1">{event.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span>
-                          {attendeeCount} registered
-                          {event.maxAttendees && ` / ${event.maxAttendees} max`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {spotsRemaining !== null &&
-                      spotsRemaining <= 5 &&
-                      spotsRemaining > 0 && (
-                        <div className="flex items-center gap-2 p-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-lg text-sm">
-                          <Sparkles className="h-4 w-4" />
+                    <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-white/80">
+                          <Calendar className="h-4 w-4 text-purple-400" />
                           <span>
-                            Only {spotsRemaining} spot
-                            {spotsRemaining !== 1 ? "s" : ""} left!
+                            {format(new Date(event.eventDate), "MMM dd, yyyy")}
                           </span>
                         </div>
-                      )}
+                        <div className="flex items-center gap-2 text-sm text-white/80">
+                          <Clock className="h-4 w-4 text-purple-400" />
+                          <span>
+                            {format(new Date(event.eventDate), "h:mm a")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/80">
+                          <MapPin className="h-4 w-4 text-purple-400" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/80">
+                          <Users className="h-4 w-4 text-purple-400" />
+                          <span>
+                            {attendeeCount} registered
+                            {event.maxAttendees &&
+                              ` / ${event.maxAttendees} max`}
+                          </span>
+                        </div>
+                      </div>
 
-                    <div className="flex gap-2 pt-2 border-t">
-                      {user &&
-                        (user.role === "admin" || user.role === "staff") && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleViewAttendees(event._id, event.title)
-                            }
-                            className="flex-1 hover-lift"
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Attendees
-                          </Button>
+                      {spotsRemaining !== null &&
+                        spotsRemaining <= 5 &&
+                        spotsRemaining > 0 && (
+                          <div className="flex items-center gap-2 p-2 bg-yellow-500/10 backdrop-blur-sm text-yellow-300 rounded-lg text-sm border border-yellow-400/30">
+                            <Sparkles className="h-4 w-4" />
+                            <span>
+                              Only {spotsRemaining} spot
+                              {spotsRemaining !== 1 ? "s" : ""} left!
+                            </span>
+                          </div>
                         )}
-                      {event.status === "upcoming" && (
-                        <>
-                          {registered ? (
+
+                      <div className="flex gap-2 pt-2 border-t border-white/20">
+                        {user &&
+                          (user.role === "admin" || user.role === "staff") && (
                             <Button
-                              variant="destructive"
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleUnregister(event._id)}
-                              disabled={processingEventId === event._id}
-                              className="flex-1 hover-lift"
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              {processingEventId === event._id
-                                ? "Processing..."
-                                : "Unregister"}
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              onClick={() => handleRegister(event._id)}
-                              disabled={
-                                processingEventId === event._id ||
-                                (spotsRemaining !== null && spotsRemaining <= 0)
+                              onClick={() =>
+                                handleViewAttendees(event._id, event.title)
                               }
-                              className="flex-1 hover-lift shadow-lg shadow-primary/20"
+                              className="flex-1 bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20 text-white transition-all duration-300 hover:scale-105"
                             >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              {processingEventId === event._id
-                                ? "Processing..."
-                                : spotsRemaining !== null && spotsRemaining <= 0
-                                ? "Event Full"
-                                : "Register"}
+                              <Users className="h-4 w-4 mr-2" />
+                              Attendees
                             </Button>
                           )}
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                        {event.status === "upcoming" && (
+                          <>
+                            {registered ? (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleUnregister(event._id)}
+                                disabled={processingEventId === event._id}
+                                className="flex-1 transition-all duration-300 hover:scale-105"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                {processingEventId === event._id
+                                  ? "Processing..."
+                                  : "Unregister"}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => handleRegister(event._id)}
+                                disabled={
+                                  processingEventId === event._id ||
+                                  (spotsRemaining !== null &&
+                                    spotsRemaining <= 0)
+                                }
+                                className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                {processingEventId === event._id
+                                  ? "Processing..."
+                                  : spotsRemaining !== null &&
+                                    spotsRemaining <= 0
+                                  ? "Event Full"
+                                  : "Register"}
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-        {/* Event Attendees Modal */}
-        {selectedEvent && (
-          <EventAttendeesModal
-            isOpen={true}
-            onClose={() => setSelectedEvent(null)}
-            eventId={selectedEvent.id}
-            eventTitle={selectedEvent.title}
-          />
-        )}
+          {/* Event Attendees Modal */}
+          {selectedEvent && (
+            <EventAttendeesModal
+              isOpen={true}
+              onClose={() => setSelectedEvent(null)}
+              eventId={selectedEvent.id}
+              eventTitle={selectedEvent.title}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
