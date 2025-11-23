@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,35 +7,47 @@ import "react-toastify/dist/ReactToastify.css";
 import Layout from "./components/Layout";
 import RoleGuard from "./components/RoleGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
-
-// Pages
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Services from "./pages/Services";
-import Events from "./pages/Events";
-import Complaints from "./pages/Complaints";
-import Notifications from "./pages/Notifications";
-import Dashboard from "./pages/Dashboard";
-import Announcements from "./pages/Announcements";
-
-// Admin Pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminResidents from "./pages/admin/Residents";
-import AdminServices from "./pages/admin/Services";
-import AdminEvents from "./pages/admin/Events";
-import AdminComplaints from "./pages/admin/Complaints";
-import AdminAnnouncements from "./pages/admin/Announcements";
-
-// Staff Pages
-import StaffDashboard from "./pages/staff/Dashboard";
-import StaffServices from "./pages/staff/Services";
-import StaffEvents from "./pages/staff/Events";
-import StaffComplaints from "./pages/staff/Complaints";
-import StaffAnnouncements from "./pages/staff/Announcements";
+import LoadingSpinner from "./components/LoadingSpinner";
+import LazyRoute from "./components/LazyWrapper";
 
 // Context
 import { AuthProvider } from "./context/AuthContext";
+
+// Lazy load all pages for better performance
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Services = lazy(() => import("./pages/Services"));
+const Events = lazy(() => import("./pages/Events"));
+const Complaints = lazy(() => import("./pages/Complaints"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Announcements = lazy(() => import("./pages/Announcements"));
+
+// Admin Pages
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminResidents = lazy(() => import("./pages/admin/Residents"));
+const AdminServices = lazy(() => import("./pages/admin/Services"));
+const AdminEvents = lazy(() => import("./pages/admin/Events"));
+const AdminComplaints = lazy(() => import("./pages/admin/Complaints"));
+const AdminAnnouncements = lazy(() => import("./pages/admin/Announcements"));
+
+// Staff Pages
+const StaffDashboard = lazy(() => import("./pages/staff/Dashboard"));
+const StaffServices = lazy(() => import("./pages/staff/Services"));
+const StaffEvents = lazy(() => import("./pages/staff/Events"));
+const StaffComplaints = lazy(() => import("./pages/staff/Complaints"));
+const StaffAnnouncements = lazy(() => import("./pages/staff/Announcements"));
+
+// Loading fallback component
+const PageLoadingFallback = () => (
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
+    <div className="relative z-10 flex items-center justify-center min-h-screen">
+      <LoadingSpinner size="large" />
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   return (
@@ -44,19 +56,63 @@ const App: React.FC = () => {
         <Routes>
           <Route element={<Layout />}>
             {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/announcements" element={<Announcements />} />
+            <Route
+              path="/"
+              element={
+                <LazyRoute skeleton>
+                  <Home />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <Suspense fallback={<PageLoadingFallback />}>
+                  <Login />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <Suspense fallback={<PageLoadingFallback />}>
+                  <Signup />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/services"
+              element={
+                <LazyRoute skeleton>
+                  <Services />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <LazyRoute skeleton>
+                  <Events />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/announcements"
+              element={
+                <LazyRoute skeleton>
+                  <Announcements />
+                </LazyRoute>
+              }
+            />
 
             {/* Protected Resident Routes */}
             <Route
               path="/complaints"
               element={
                 <RoleGuard allowedRoles={["resident"]}>
-                  <Complaints />
+                  <LazyRoute skeleton>
+                    <Complaints />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -64,7 +120,9 @@ const App: React.FC = () => {
               path="/notifications"
               element={
                 <RoleGuard allowedRoles={["resident", "admin", "staff"]}>
-                  <Notifications />
+                  <LazyRoute skeleton>
+                    <Notifications />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -72,7 +130,9 @@ const App: React.FC = () => {
               path="/dashboard"
               element={
                 <RoleGuard allowedRoles={["resident"]}>
-                  <Dashboard />
+                  <LazyRoute skeleton>
+                    <Dashboard />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -82,7 +142,9 @@ const App: React.FC = () => {
               path="/admin"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminDashboard />
+                  <LazyRoute skeleton>
+                    <AdminDashboard />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -90,7 +152,9 @@ const App: React.FC = () => {
               path="/admin/residents"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminResidents />
+                  <LazyRoute skeleton>
+                    <AdminResidents />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -98,7 +162,9 @@ const App: React.FC = () => {
               path="/admin/services"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminServices />
+                  <LazyRoute skeleton>
+                    <AdminServices />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -106,7 +172,9 @@ const App: React.FC = () => {
               path="/admin/events"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminEvents />
+                  <LazyRoute skeleton>
+                    <AdminEvents />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -114,7 +182,9 @@ const App: React.FC = () => {
               path="/admin/complaints"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminComplaints />
+                  <LazyRoute skeleton>
+                    <AdminComplaints />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -122,7 +192,9 @@ const App: React.FC = () => {
               path="/admin/announcements"
               element={
                 <RoleGuard allowedRoles={["admin"]}>
-                  <AdminAnnouncements />
+                  <LazyRoute skeleton>
+                    <AdminAnnouncements />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -132,7 +204,9 @@ const App: React.FC = () => {
               path="/staff"
               element={
                 <RoleGuard allowedRoles={["staff"]}>
-                  <StaffDashboard />
+                  <LazyRoute skeleton>
+                    <StaffDashboard />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -140,7 +214,9 @@ const App: React.FC = () => {
               path="/staff/services"
               element={
                 <RoleGuard allowedRoles={["staff"]}>
-                  <StaffServices />
+                  <LazyRoute skeleton>
+                    <StaffServices />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -148,7 +224,9 @@ const App: React.FC = () => {
               path="/staff/events"
               element={
                 <RoleGuard allowedRoles={["staff"]}>
-                  <StaffEvents />
+                  <LazyRoute skeleton>
+                    <StaffEvents />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -156,7 +234,9 @@ const App: React.FC = () => {
               path="/staff/complaints"
               element={
                 <RoleGuard allowedRoles={["staff"]}>
-                  <StaffComplaints />
+                  <LazyRoute skeleton>
+                    <StaffComplaints />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
@@ -164,7 +244,9 @@ const App: React.FC = () => {
               path="/staff/announcements"
               element={
                 <RoleGuard allowedRoles={["staff"]}>
-                  <StaffAnnouncements />
+                  <LazyRoute skeleton>
+                    <StaffAnnouncements />
+                  </LazyRoute>
                 </RoleGuard>
               }
             />
