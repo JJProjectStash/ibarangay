@@ -1,14 +1,18 @@
 import { motion } from "framer-motion";
 import { Sparkles, Zap, Star, Heart } from "lucide-react";
 
-const floatingVariants = {
+import type { Variants } from "framer-motion";
+
+const floatingVariants: Variants = {
   animate: {
     y: [0, -20, 0],
     rotate: [0, 5, -5, 0],
     transition: {
       duration: 6,
       repeat: Infinity,
-      ease: "easeInOut",
+      // Use a cubic-bezier easing array which matches framer-motion's Easing type
+      // and aligns with the project's other animations (similar to cubic-bezier(0.16,1,0.3,1)).
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
