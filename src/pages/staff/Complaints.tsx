@@ -203,353 +203,389 @@ const StaffComplaints = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
-      <PageHeader
-        title="Complaint Management"
-        description="Handle and respond to resident complaints"
-        icon={<AlertCircle className="h-8 w-8 text-primary" />}
-      />
+    <div className="min-h-screen relative">
+      {/* Unified Background */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
+        <div
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
+      </div>
 
-      <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Complaints
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold gradient-text-primary">
-                {complaints.length}
-              </div>
-            </CardContent>
-          </Card>
+      <div className="relative z-10 p-6 page-transition">
+        <PageHeader
+          title="Complaint Management"
+          description="Handle and respond to resident complaints"
+          icon={<AlertCircle className="h-8 w-8 text-primary" />}
+        />
 
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-warning">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="max-w-7xl mx-auto space-y-6 mt-6">
+          {/* Stats - IMPROVED READABILITY */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-lg transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white">
+                  Total Complaints
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-purple-400">
+                  {complaints.length}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {statusCounts.inProgress}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-yellow-400/30 hover:border-yellow-400/50 shadow-lg transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-yellow-400" />
+                  Pending
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-yellow-400">
+                  {statusCounts.pending}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Resolved
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {statusCounts.resolved}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-blue-400/30 hover:border-blue-400/50 shadow-lg transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-blue-400" />
+                  In Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-blue-400">
+                  {statusCounts.inProgress}
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Filters and Actions */}
-        <Card className="glass-card">
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search complaints..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-green-400/30 hover:border-green-400/50 shadow-lg transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  Resolved
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-green-400">
+                  {statusCounts.resolved}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="flex gap-2 flex-wrap">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-status">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
+          {/* Filters and Actions - IMPROVED CONTRAST */}
+          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  <Input
+                    placeholder="Search complaints..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-purple-400/50"
+                  />
+                </div>
 
-                <Select
-                  value={priorityFilter}
-                  onValueChange={setPriorityFilter}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-priority">All Priority</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2 flex-wrap">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all-status">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                <Select
-                  value={categoryFilter}
-                  onValueChange={setCategoryFilter}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-categories">
-                      All Categories
-                    </SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                  <Select
+                    value={priorityFilter}
+                    onValueChange={setPriorityFilter}
+                  >
+                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                      <SelectValue placeholder="All Priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all-priority">All Priority</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={categoryFilter}
+                    onValueChange={setCategoryFilter}
+                  >
+                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all-categories">
+                        All Categories
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                <Button variant="outline" onClick={() => handleExport("csv")}>
-                  <Download className="h-4 w-4 mr-2" />
-                  CSV
-                </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleExport("csv")}
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    CSV
+                  </Button>
 
-                <Button variant="outline" onClick={() => handleExport("excel")}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Excel
-                </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleExport("excel")}
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Excel
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Complaints List */}
-        {filteredComplaints.length === 0 ? (
-          <EmptyState
-            icon={MessageSquare}
-            title="No complaints found"
-            description={
-              searchTerm
-                ? "Try adjusting your search terms"
-                : "No complaints submitted yet"
-            }
-          />
-        ) : (
-          <div className="space-y-4">
-            {filteredComplaints.map((complaint) => (
-              <Card key={complaint._id} className="glass-card card-hover">
-                <CardContent className="pt-6">
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-1">
-                          {complaint.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          By {complaint.userId.firstName}{" "}
-                          {complaint.userId.lastName} • {complaint.category}
-                        </p>
-                        <p className="text-sm leading-relaxed mb-3">
-                          {complaint.description}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge
-                          variant={
-                            complaint.priority === "high"
-                              ? "destructive"
-                              : complaint.priority === "medium"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {complaint.priority.toUpperCase()}
-                        </Badge>
-                        <StatusBadge status={complaint.status} />
-                      </div>
-                    </div>
-
-                    {complaint.attachments &&
-                      complaint.attachments.length > 0 && (
-                        <div className="mb-3">
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Attachments ({complaint.attachments.length})
+          {/* Complaints List - IMPROVED READABILITY */}
+          {filteredComplaints.length === 0 ? (
+            <EmptyState
+              icon={MessageSquare}
+              title="No complaints found"
+              description={
+                searchTerm
+                  ? "Try adjusting your search terms"
+                  : "No complaints submitted yet"
+              }
+            />
+          ) : (
+            <div className="space-y-4">
+              {filteredComplaints.map((complaint) => (
+                <Card
+                  key={complaint._id}
+                  className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-lg transition-all duration-300 hover:scale-[1.01]"
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-white mb-2">
+                            {complaint.title}
+                          </h3>
+                          <p className="text-sm text-white/80 mb-3 font-medium">
+                            By {complaint.userId.firstName}{" "}
+                            {complaint.userId.lastName} • {complaint.category}
                           </p>
-                          <div className="flex gap-2 flex-wrap">
-                            {complaint.attachments.map((_, idx) => (
-                              <span
-                                key={idx}
-                                className="text-xs px-2 py-1 bg-muted rounded-md"
-                              >
-                                📎 File {idx + 1}
-                              </span>
-                            ))}
+                          <p className="text-sm leading-relaxed mb-3 text-white/90">
+                            {complaint.description}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          <Badge
+                            variant={
+                              complaint.priority === "high"
+                                ? "destructive"
+                                : complaint.priority === "medium"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="font-semibold"
+                          >
+                            {complaint.priority.toUpperCase()}
+                          </Badge>
+                          <StatusBadge status={complaint.status} />
+                        </div>
+                      </div>
+
+                      {complaint.attachments &&
+                        complaint.attachments.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-sm text-white/80 mb-2 font-medium">
+                              Attachments ({complaint.attachments.length})
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                              {complaint.attachments.map((_, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs px-2 py-1 bg-white/10 rounded-md text-white/80 border border-white/20"
+                                >
+                                  📎 File {idx + 1}
+                                </span>
+                              ))}
+                            </div>
                           </div>
+                        )}
+
+                      {complaint.response && (
+                        <div className="mb-3 p-4 bg-purple-500/20 rounded-lg border-l-4 border-purple-400">
+                          <p className="text-sm font-semibold text-purple-300 mb-2">
+                            Response:
+                          </p>
+                          <p className="text-sm text-white/90">
+                            {complaint.response}
+                          </p>
+                          {complaint.resolvedBy && (
+                            <p className="text-xs text-white/70 mt-2">
+                              Responded by {complaint.resolvedBy.firstName}{" "}
+                              {complaint.resolvedBy.lastName}
+                            </p>
+                          )}
                         </div>
                       )}
 
-                    {complaint.response && (
-                      <div className="mb-3 p-3 bg-muted/50 rounded-lg border-l-4 border-primary">
-                        <p className="text-sm font-medium text-primary mb-1">
-                          Response:
-                        </p>
-                        <p className="text-sm">{complaint.response}</p>
-                        {complaint.resolvedBy && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Responded by {complaint.resolvedBy.firstName}{" "}
-                            {complaint.resolvedBy.lastName}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-muted-foreground">
-                        <span>
-                          Submitted:{" "}
-                          {format(
-                            new Date(complaint.createdAt),
-                            "MMM dd, yyyy"
-                          )}
-                        </span>
-                        {complaint.resolvedAt && (
-                          <span className="ml-4">
-                            Resolved:{" "}
+                      <div className="flex justify-between items-center pt-3 border-t border-white/20">
+                        <div className="text-sm text-white/80 font-medium">
+                          <span>
+                            Submitted:{" "}
                             {format(
-                              new Date(complaint.resolvedAt),
+                              new Date(complaint.createdAt),
                               "MMM dd, yyyy"
                             )}
                           </span>
-                        )}
-                      </div>
+                          {complaint.resolvedAt && (
+                            <span className="ml-4">
+                              Resolved:{" "}
+                              {format(
+                                new Date(complaint.resolvedAt),
+                                "MMM dd, yyyy"
+                              )}
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedComplaint(complaint);
-                            setResponseText(complaint.response || "");
-                            setShowResponseModal(true);
-                          }}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          {complaint.response ? "Update Response" : "Respond"}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedComplaint(complaint);
+                              setResponseText(complaint.response || "");
+                              setShowResponseModal(true);
+                            }}
+                            className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            {complaint.response ? "Update Response" : "Respond"}
+                          </Button>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStatusUpdate(complaint._id, "in-progress")
-                              }
-                            >
-                              Set as In Progress
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStatusUpdate(complaint._id, "resolved")
-                              }
-                            >
-                              Mark as Resolved
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusUpdate(
+                                    complaint._id,
+                                    "in-progress"
+                                  )
+                                }
+                              >
+                                Set as In Progress
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusUpdate(complaint._id, "resolved")
+                                }
+                              >
+                                Mark as Resolved
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Response Modal */}
+        {showResponseModal && selectedComplaint && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-white/95 backdrop-blur-xl border-2 border-white/30 shadow-2xl">
+              <CardHeader className="border-b border-gray-200">
+                <CardTitle className="text-gray-900">
+                  {selectedComplaint.response
+                    ? "Update Response"
+                    : "Respond to Complaint"}
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  {selectedComplaint.title}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <label className="text-sm font-semibold mb-2 block text-gray-900">
+                    Response Message
+                  </label>
+                  <textarea
+                    className="w-full p-3 border-2 border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                    rows={6}
+                    value={responseText}
+                    onChange={(e) => setResponseText(e.target.value)}
+                    placeholder="Enter your response to this complaint..."
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleResponseSubmit}
+                    disabled={isSubmitting || !responseText.trim()}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    {isSubmitting
+                      ? "Sending..."
+                      : selectedComplaint.response
+                      ? "Update Response"
+                      : "Send Response"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowResponseModal(false);
+                      setResponseText("");
+                      setSelectedComplaint(null);
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
-
-      {/* Response Modal */}
-      {showResponseModal && selectedComplaint && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto">
-            <CardHeader>
-              <CardTitle>
-                {selectedComplaint.response
-                  ? "Update Response"
-                  : "Respond to Complaint"}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {selectedComplaint.title}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Response Message
-                </label>
-                <textarea
-                  className="w-full p-3 border rounded-md resize-none"
-                  rows={6}
-                  value={responseText}
-                  onChange={(e) => setResponseText(e.target.value)}
-                  placeholder="Enter your response to this complaint..."
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleResponseSubmit}
-                  disabled={isSubmitting || !responseText.trim()}
-                  className="flex-1"
-                >
-                  {isSubmitting
-                    ? "Sending..."
-                    : selectedComplaint.response
-                    ? "Update Response"
-                    : "Send Response"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowResponseModal(false);
-                    setResponseText("");
-                    setSelectedComplaint(null);
-                  }}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

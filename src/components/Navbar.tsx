@@ -58,15 +58,17 @@ const Navbar = () => {
       case "admin":
         return [
           { path: "/admin", label: "Dashboard" },
+          { path: "/admin/events", label: "Events" },
           { path: "/admin/complaints", label: "Complaints" },
-          { path: "/announcements", label: "Announcements" },
+          { path: "/admin/announcements", label: "Announcements" },
         ];
 
       case "staff":
         return [
           { path: "/staff", label: "Dashboard" },
+          { path: "/staff/events", label: "Events" },
           { path: "/staff/complaints", label: "Complaints" },
-          { path: "/announcements", label: "Announcements" },
+          { path: "/staff/announcements", label: "Announcements" },
         ];
 
       case "resident":

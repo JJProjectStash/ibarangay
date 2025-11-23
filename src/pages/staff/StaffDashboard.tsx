@@ -105,6 +105,9 @@ const StaffDashboard: React.FC = () => {
       color: "yellow",
       gradient: "from-yellow-500 to-orange-500",
       description: "Awaiting processing",
+      bgColor: "bg-yellow-500/20",
+      textColor: "text-yellow-400",
+      borderColor: "border-yellow-400/30",
     },
     {
       title: "Pending Complaints",
@@ -113,6 +116,9 @@ const StaffDashboard: React.FC = () => {
       color: "red",
       gradient: "from-red-500 to-pink-500",
       description: "Requires attention",
+      bgColor: "bg-red-500/20",
+      textColor: "text-red-400",
+      borderColor: "border-red-400/30",
     },
     {
       title: "In Progress",
@@ -121,6 +127,9 @@ const StaffDashboard: React.FC = () => {
       color: "blue",
       gradient: "from-blue-500 to-cyan-500",
       description: "Currently handling",
+      bgColor: "bg-blue-500/20",
+      textColor: "text-blue-400",
+      borderColor: "border-blue-400/30",
     },
     {
       title: "Resolved",
@@ -129,6 +138,9 @@ const StaffDashboard: React.FC = () => {
       color: "green",
       gradient: "from-green-500 to-emerald-500",
       description: "Successfully completed",
+      bgColor: "bg-green-500/20",
+      textColor: "text-green-400",
+      borderColor: "border-green-400/30",
     },
   ];
 
@@ -165,55 +177,57 @@ const StaffDashboard: React.FC = () => {
                 Management
               </span>
             </h1>
-            <p className="text-white/80 text-lg">
+            <p className="text-white/90 text-lg font-medium">
               Manage service requests and complaints
             </p>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - IMPROVED READABILITY */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-700 delay-100">
             {statCards.map((stat, index) => (
               <Card
                 key={index}
-                className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+                className={`bg-white/15 backdrop-blur-xl border-2 ${stat.borderColor} hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group relative overflow-hidden`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Gradient overlay on hover */}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
                 />
-                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium text-white/90">
+                <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+                  <CardTitle className="text-sm font-semibold text-white">
                     {stat.title}
                   </CardTitle>
                   <div
-                    className={`p-2 rounded-xl bg-${stat.color}-500/20 text-${stat.color}-400 group-hover:scale-110 transition-transform`}
+                    className={`p-2.5 rounded-xl ${stat.bgColor} ${stat.textColor} group-hover:scale-110 transition-transform border ${stat.borderColor}`}
                   >
                     <stat.icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <div className="text-3xl font-bold text-white mb-1">
+                  <div className={`text-4xl font-bold ${stat.textColor} mb-1`}>
                     {stat.value}
                   </div>
-                  <p className="text-xs text-white/70">{stat.description}</p>
+                  <p className="text-sm text-white/80 font-medium">
+                    {stat.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Request Management */}
-          <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-200">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+          {/* Request Management - IMPROVED CONTRAST */}
+          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-200">
+            <CardHeader className="border-b border-white/20">
+              <CardTitle className="text-white text-xl flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-purple-400" />
                 Request Management
               </CardTitle>
-              <p className="text-sm text-white/70 mt-1">
+              <p className="text-sm text-white/80 mt-2 font-medium">
                 Review and process service requests and complaints
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <RequestManagement
                 services={services}
                 complaints={complaints}

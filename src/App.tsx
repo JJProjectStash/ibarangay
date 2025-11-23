@@ -32,6 +32,7 @@ import StaffDashboard from "./pages/staff/Dashboard";
 import StaffServices from "./pages/staff/Services";
 import StaffEvents from "./pages/staff/Events";
 import StaffComplaints from "./pages/staff/Complaints";
+import StaffAnnouncements from "./pages/staff/Announcements";
 
 // Context
 import { AuthProvider } from "./context/AuthContext";
@@ -156,6 +157,14 @@ const App: React.FC = () => {
               element={
                 <RoleGuard allowedRoles={["staff"]}>
                   <StaffComplaints />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="/staff/announcements"
+              element={
+                <RoleGuard allowedRoles={["staff"]}>
+                  <StaffAnnouncements />
                 </RoleGuard>
               }
             />

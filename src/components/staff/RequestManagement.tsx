@@ -47,158 +47,105 @@ const RequestManagement: React.FC<RequestManagementProps> = ({
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, React.CSSProperties> = {
-      pending: { background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" },
-      approved: { background: "rgba(16, 185, 129, 0.1)", color: "#10b981" },
-      rejected: { background: "rgba(239, 68, 68, 0.1)", color: "#ef4444" },
-      "in-progress": {
-        background: "rgba(59, 130, 246, 0.1)",
-        color: "#3b82f6",
-      },
-      resolved: { background: "rgba(16, 185, 129, 0.1)", color: "#10b981" },
+    const styles: Record<string, string> = {
+      pending: "bg-yellow-500/20 text-yellow-300 border border-yellow-400/50",
+      approved: "bg-green-500/20 text-green-300 border border-green-400/50",
+      rejected: "bg-red-500/20 text-red-300 border border-red-400/50",
+      "in-progress": "bg-blue-500/20 text-blue-300 border border-blue-400/50",
+      resolved: "bg-green-500/20 text-green-300 border border-green-400/50",
     };
     return styles[status] || styles.pending;
   };
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-          borderBottom: "2px solid var(--border)",
-        }}
-      >
+      {/* Tab Navigation - IMPROVED CONTRAST */}
+      <div className="flex gap-4 mb-6 border-b-2 border-white/20">
         <button
           onClick={() => setActiveTab("services")}
-          style={{
-            padding: "1rem 1.5rem",
-            background: "transparent",
-            border: "none",
-            borderBottom:
-              activeTab === "services"
-                ? "3px solid var(--primary)"
-                : "3px solid transparent",
-            color:
-              activeTab === "services"
-                ? "var(--primary)"
-                : "var(--text-secondary)",
-            fontWeight: "600",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`px-6 py-3 font-semibold transition-all duration-200 border-b-3 ${
+            activeTab === "services"
+              ? "border-purple-400 text-white bg-white/10"
+              : "border-transparent text-white/70 hover:text-white hover:bg-white/5"
+          }`}
         >
           Service Requests ({pendingServices.length})
         </button>
         <button
           onClick={() => setActiveTab("complaints")}
-          style={{
-            padding: "1rem 1.5rem",
-            background: "transparent",
-            border: "none",
-            borderBottom:
-              activeTab === "complaints"
-                ? "3px solid var(--primary)"
-                : "3px solid transparent",
-            color:
-              activeTab === "complaints"
-                ? "var(--primary)"
-                : "var(--text-secondary)",
-            fontWeight: "600",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`px-6 py-3 font-semibold transition-all duration-200 border-b-3 ${
+            activeTab === "complaints"
+              ? "border-purple-400 text-white bg-white/10"
+              : "border-transparent text-white/70 hover:text-white hover:bg-white/5"
+          }`}
         >
           Complaints ({pendingComplaints.length})
         </button>
       </div>
 
+      {/* Service Requests Tab */}
       {activeTab === "services" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className="flex flex-col gap-4">
           {pendingServices.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "3rem",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <Clock
-                size={48}
-                style={{ margin: "0 auto 1rem", opacity: 0.5 }}
-              />
-              <p>No pending service requests</p>
+            <div className="text-center py-12">
+              <Clock size={48} className="mx-auto mb-4 text-white/40" />
+              <p className="text-white/70 text-lg font-medium">
+                No pending service requests
+              </p>
             </div>
           ) : (
             pendingServices.map((service) => (
               <div
                 key={service._id}
-                className="card"
-                style={{ padding: "1.5rem" }}
+                className="bg-white/10 backdrop-blur-xl border-2 border-white/30 rounded-xl p-6 hover:border-white/50 transition-all duration-300"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "600",
-                        marginBottom: "0.5rem",
-                      }}
-                    >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-2">
                       {service.itemName}
                     </h3>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "1rem",
-                        fontSize: "0.875rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <span>Type: {service.itemType}</span>
-                      <span>Quantity: {service.quantity}</span>
+                    <div className="flex flex-wrap gap-4 text-sm text-white/80 font-medium">
+                      <span>
+                        Type:{" "}
+                        <span className="text-white">{service.itemType}</span>
+                      </span>
+                      <span>
+                        Quantity:{" "}
+                        <span className="text-white">{service.quantity}</span>
+                      </span>
                       <span>
                         Requested:{" "}
-                        {format(new Date(service.createdAt), "MMM dd, yyyy")}
+                        <span className="text-white">
+                          {format(new Date(service.createdAt), "MMM dd, yyyy")}
+                        </span>
                       </span>
                     </div>
                   </div>
                   <span
-                    style={{
-                      ...getStatusBadge(service.status),
-                      padding: "0.5rem 1rem",
-                      borderRadius: "12px",
-                      fontSize: "0.875rem",
-                      fontWeight: "600",
-                      height: "fit-content",
-                    }}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap ${getStatusBadge(
+                      service.status
+                    )}`}
                   >
                     {service.status.charAt(0).toUpperCase() +
                       service.status.slice(1)}
                   </span>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <p style={{ fontWeight: "600", marginBottom: "0.5rem" }}>
-                    Purpose:
-                  </p>
-                  <p style={{ color: "var(--text-secondary)" }}>
+                {/* Purpose */}
+                <div className="mb-4 p-4 bg-white/5 rounded-lg border border-white/20">
+                  <p className="font-semibold text-white mb-2">Purpose:</p>
+                  <p className="text-white/90 leading-relaxed">
                     {service.purpose}
                   </p>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <p style={{ fontWeight: "600", marginBottom: "0.5rem" }}>
+                {/* Borrow Period */}
+                <div className="mb-4 p-4 bg-white/5 rounded-lg border border-white/20">
+                  <p className="font-semibold text-white mb-2">
                     Borrow Period:
                   </p>
-                  <p style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-white/90">
                     {format(new Date(service.borrowDate), "MMM dd, yyyy")} -{" "}
                     {format(
                       new Date(service.expectedReturnDate),
@@ -207,22 +154,13 @@ const RequestManagement: React.FC<RequestManagementProps> = ({
                   </p>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontWeight: "600",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <MessageSquare
-                      size={16}
-                      style={{ display: "inline", marginRight: "0.25rem" }}
-                    />
+                {/* Response Notes */}
+                <div className="mb-4">
+                  <label className="flex items-center gap-2 font-semibold text-white mb-2">
+                    <MessageSquare size={16} />
                     Response Notes:
                   </label>
                   <textarea
-                    className="input"
                     value={responseText[service._id] || ""}
                     onChange={(e) =>
                       setResponseText((prev) => ({
@@ -232,34 +170,22 @@ const RequestManagement: React.FC<RequestManagementProps> = ({
                     }
                     placeholder="Add notes for approval/rejection..."
                     rows={3}
-                    style={{ width: "100%", resize: "vertical" }}
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-vertical"
                   />
                 </div>
 
-                <div style={{ display: "flex", gap: "1rem" }}>
+                {/* Action Buttons */}
+                <div className="flex gap-3">
                   <button
-                    className="btn btn-primary"
                     onClick={() => handleApproveService(service._id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-300 border-2 border-green-400/50 hover:border-green-400 rounded-lg font-semibold transition-all duration-200"
                   >
                     <CheckCircle size={18} />
                     Approve
                   </button>
                   <button
-                    className="btn"
                     onClick={() => handleRejectService(service._id)}
-                    style={{
-                      background: "rgba(239, 68, 68, 0.1)",
-                      color: "#ef4444",
-                      border: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 border-2 border-red-400/50 hover:border-red-400 rounded-lg font-semibold transition-all duration-200"
                   >
                     <XCircle size={18} />
                     Reject
@@ -271,102 +197,75 @@ const RequestManagement: React.FC<RequestManagementProps> = ({
         </div>
       )}
 
+      {/* Complaints Tab */}
       {activeTab === "complaints" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className="flex flex-col gap-4">
           {pendingComplaints.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "3rem",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <Clock
-                size={48}
-                style={{ margin: "0 auto 1rem", opacity: 0.5 }}
-              />
-              <p>No pending complaints</p>
+            <div className="text-center py-12">
+              <Clock size={48} className="mx-auto mb-4 text-white/40" />
+              <p className="text-white/70 text-lg font-medium">
+                No pending complaints
+              </p>
             </div>
           ) : (
             pendingComplaints.map((complaint) => (
               <div
                 key={complaint._id}
-                className="card"
-                style={{ padding: "1.5rem" }}
+                className="bg-white/10 backdrop-blur-xl border-2 border-white/30 rounded-xl p-6 hover:border-white/50 transition-all duration-300"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "600",
-                        marginBottom: "0.5rem",
-                      }}
-                    >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-2">
                       {complaint.title}
                     </h3>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "1rem",
-                        fontSize: "0.875rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <span>Category: {complaint.category}</span>
-                      <span>Priority: {complaint.priority}</span>
+                    <div className="flex flex-wrap gap-4 text-sm text-white/80 font-medium">
+                      <span>
+                        Category:{" "}
+                        <span className="text-white">{complaint.category}</span>
+                      </span>
+                      <span>
+                        Priority:{" "}
+                        <span className="text-white capitalize">
+                          {complaint.priority}
+                        </span>
+                      </span>
                       <span>
                         Submitted:{" "}
-                        {format(new Date(complaint.createdAt), "MMM dd, yyyy")}
+                        <span className="text-white">
+                          {format(
+                            new Date(complaint.createdAt),
+                            "MMM dd, yyyy"
+                          )}
+                        </span>
                       </span>
                     </div>
                   </div>
                   <span
-                    style={{
-                      ...getStatusBadge(complaint.status),
-                      padding: "0.5rem 1rem",
-                      borderRadius: "12px",
-                      fontSize: "0.875rem",
-                      fontWeight: "600",
-                      height: "fit-content",
-                    }}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap ${getStatusBadge(
+                      complaint.status
+                    )}`}
                   >
                     {complaint.status.charAt(0).toUpperCase() +
                       complaint.status.slice(1)}
                   </span>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <p style={{ fontWeight: "600", marginBottom: "0.5rem" }}>
-                    Description:
-                  </p>
-                  <p style={{ color: "var(--text-secondary)" }}>
+                {/* Description */}
+                <div className="mb-4 p-4 bg-white/5 rounded-lg border border-white/20">
+                  <p className="font-semibold text-white mb-2">Description:</p>
+                  <p className="text-white/90 leading-relaxed">
                     {complaint.description}
                   </p>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontWeight: "600",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <MessageSquare
-                      size={16}
-                      style={{ display: "inline", marginRight: "0.25rem" }}
-                    />
+                {/* Response */}
+                <div className="mb-4">
+                  <label className="flex items-center gap-2 font-semibold text-white mb-2">
+                    <MessageSquare size={16} />
                     Response:
                   </label>
                   <textarea
-                    className="input"
                     value={responseText[complaint._id] || ""}
                     onChange={(e) =>
                       setResponseText((prev) => ({
@@ -376,38 +275,26 @@ const RequestManagement: React.FC<RequestManagementProps> = ({
                     }
                     placeholder="Add response to the complaint..."
                     rows={3}
-                    style={{ width: "100%", resize: "vertical" }}
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-vertical"
                   />
                 </div>
 
-                <div style={{ display: "flex", gap: "1rem" }}>
+                {/* Action Buttons */}
+                <div className="flex gap-3">
                   <button
-                    className="btn btn-primary"
                     onClick={() =>
                       handleUpdateComplaint(complaint._id, "in-progress")
                     }
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-2 border-blue-400/50 hover:border-blue-400 rounded-lg font-semibold transition-all duration-200"
                   >
                     <Clock size={18} />
                     In Progress
                   </button>
                   <button
-                    className="btn"
                     onClick={() =>
                       handleUpdateComplaint(complaint._id, "resolved")
                     }
-                    style={{
-                      background: "rgba(16, 185, 129, 0.1)",
-                      color: "#10b981",
-                      border: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-300 border-2 border-green-400/50 hover:border-green-400 rounded-lg font-semibold transition-all duration-200"
                   >
                     <CheckCircle size={18} />
                     Resolve
