@@ -144,18 +144,18 @@ const Events: React.FC = () => {
   return (
     <div className="min-h-screen relative">
       {/* Unified Background - Same as Home page */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -164,13 +164,13 @@ const Events: React.FC = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="animate-in slide-in-from-top-4 duration-500">
-            <div className="inline-flex items-center gap-2 rounded-full border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-medium text-green-200 backdrop-blur-sm mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-500/10 px-4 py-2 text-sm font-medium text-gray-200 backdrop-blur-sm mb-3">
               <Calendar className="h-4 w-4" />
               Community Events
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
               Barangay{" "}
-              <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent">
                 Events
               </span>
             </h1>
@@ -198,7 +198,7 @@ const Events: React.FC = () => {
                 return (
                   <Card
                     key={event._id}
-                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105 group flex flex-col overflow-hidden"
+                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-105 group flex flex-col overflow-hidden"
                   >
                     {event.imageUrl && (
                       <div className="relative h-48 overflow-hidden">
@@ -217,7 +217,7 @@ const Events: React.FC = () => {
                         </div>
                         {registered && (
                           <div className="absolute top-4 left-4">
-                            <Badge className="bg-green-500 text-white backdrop-blur-sm">
+                            <Badge className="bg-gray-600 text-white backdrop-blur-sm">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Registered
                             </Badge>
@@ -227,7 +227,7 @@ const Events: React.FC = () => {
                     )}
                     <CardHeader>
                       <div className="flex justify-between items-start gap-2">
-                        <CardTitle className="text-xl text-white group-hover:text-purple-300 transition-colors">
+                        <CardTitle className="text-xl text-white group-hover:text-gray-300 transition-colors">
                           {event.title}
                         </CardTitle>
                         {!event.imageUrl && (
@@ -247,23 +247,23 @@ const Events: React.FC = () => {
                     <CardContent className="flex-1 flex flex-col justify-between space-y-4">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-white/80">
-                          <Calendar className="h-4 w-4 text-purple-400" />
+                          <Calendar className="h-4 w-4 text-gray-400" />
                           <span>
                             {format(new Date(event.eventDate), "MMM dd, yyyy")}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-white/80">
-                          <Clock className="h-4 w-4 text-purple-400" />
+                          <Clock className="h-4 w-4 text-gray-400" />
                           <span>
                             {format(new Date(event.eventDate), "h:mm a")}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-white/80">
-                          <MapPin className="h-4 w-4 text-purple-400" />
+                          <MapPin className="h-4 w-4 text-gray-400" />
                           <span className="line-clamp-1">{event.location}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-white/80">
-                          <Users className="h-4 w-4 text-purple-400" />
+                          <Users className="h-4 w-4 text-gray-400" />
                           <span>
                             {attendeeCount} registered
                             {event.maxAttendees &&
@@ -275,7 +275,7 @@ const Events: React.FC = () => {
                       {spotsRemaining !== null &&
                         spotsRemaining <= 5 &&
                         spotsRemaining > 0 && (
-                          <div className="flex items-center gap-2 p-2 bg-yellow-500/10 backdrop-blur-sm text-yellow-300 rounded-lg text-sm border border-yellow-400/30">
+                          <div className="flex items-center gap-2 p-2 bg-gray-500/10 backdrop-blur-sm text-gray-300 rounded-lg text-sm border border-gray-400/30">
                             <Sparkles className="h-4 w-4" />
                             <span>
                               Only {spotsRemaining} spot
@@ -323,7 +323,7 @@ const Events: React.FC = () => {
                                   (spotsRemaining !== null &&
                                     spotsRemaining <= 0)
                                 }
-                                className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+                                className="flex-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-lg shadow-gray-500/50 transition-all duration-300 hover:scale-105"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
                                 {processingEventId === event._id

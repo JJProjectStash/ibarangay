@@ -327,13 +327,13 @@ const Complaints: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen relative">
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
           <div
-            className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+            className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
             style={{ animationDuration: "8s" }}
           />
           <div
-            className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+            className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
             style={{ animationDuration: "10s", animationDelay: "2s" }}
           />
         </div>
@@ -357,18 +357,18 @@ const Complaints: React.FC = () => {
   return (
     <div className="min-h-screen relative">
       {/* Unified Background - Same as Home page */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -379,13 +379,13 @@ const Complaints: React.FC = () => {
           <div className="animate-in slide-in-from-top-4 duration-500">
             <div className="flex justify-between items-start gap-4 mb-6">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-200 backdrop-blur-sm mb-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-500/10 px-4 py-2 text-sm font-medium text-gray-200 backdrop-blur-sm mb-3">
                   <AlertCircle className="h-4 w-4" />
                   Complaint Center
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
                   Report{" "}
-                  <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent">
                     Issues
                   </span>
                 </h1>
@@ -411,7 +411,7 @@ const Complaints: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={handleBulkDelete}
-                    className="bg-white/10 backdrop-blur-xl border-2 border-white/30 hover:bg-red-500/20 hover:border-red-400/50 text-white transition-all duration-300 hover:scale-105"
+                    className="bg-white/10 backdrop-blur-xl border-2 border-white/30 hover:bg-gray-700/20 hover:border-gray-600/50 text-white transition-all duration-300 hover:scale-105"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete ({selectedComplaints.length})
@@ -435,7 +435,7 @@ const Complaints: React.FC = () => {
                 </Button>
                 <Button
                   onClick={() => setShowModal(true)}
-                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-2xl shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-2xl shadow-gray-500/50 transition-all duration-300 hover:scale-105"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Complaint
@@ -453,7 +453,7 @@ const Complaints: React.FC = () => {
                       placeholder="Search complaints..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                      className="pl-10 bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                     />
                   </div>
                 </CardContent>
@@ -519,7 +519,7 @@ const Complaints: React.FC = () => {
                 return (
                   <Card
                     key={complaint._id}
-                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.02] group"
+                    className="bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-300 hover:scale-[1.02] group"
                   >
                     <CardHeader>
                       <div className="flex gap-4 items-start">
@@ -527,11 +527,11 @@ const Complaints: React.FC = () => {
                           type="checkbox"
                           checked={selectedComplaints.includes(complaint._id)}
                           onChange={() => toggleSelectComplaint(complaint._id)}
-                          className="mt-1 w-4 h-4 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500/50"
+                          className="mt-1 w-4 h-4 rounded border-white/30 bg-white/10 text-gray-500 focus:ring-gray-500/50"
                         />
                         <div className="flex-1">
                           <div className="flex justify-between items-start gap-4 mb-2">
-                            <CardTitle className="text-xl text-white group-hover:text-purple-300 transition-colors">
+                            <CardTitle className="text-xl text-white group-hover:text-gray-300 transition-colors">
                               {complaint.title}
                             </CardTitle>
                             <div className="flex gap-2">
@@ -601,8 +601,8 @@ const Complaints: React.FC = () => {
                       </div>
 
                       {complaint.response && (
-                        <div className="p-3 bg-purple-500/20 backdrop-blur-sm rounded-lg border-l-4 border-purple-400">
-                          <p className="text-sm font-medium text-purple-300 mb-1">
+                        <div className="p-3 bg-gray-500/20 backdrop-blur-sm rounded-lg border-l-4 border-gray-400">
+                          <p className="text-sm font-medium text-gray-300 mb-1">
                             Response:
                           </p>
                           <p className="text-sm text-white/90">
@@ -622,10 +622,10 @@ const Complaints: React.FC = () => {
       {/* Category Management Modal */}
       {showCategoryModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <Card className="w-full max-w-md max-h-[90vh] overflow-auto bg-slate-900/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-auto bg-gray-900/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-400" />
+                <Sparkles className="h-5 w-5 text-gray-400" />
                 Manage Complaint Categories
               </CardTitle>
             </CardHeader>
@@ -635,7 +635,7 @@ const Complaints: React.FC = () => {
                   Categories (comma-separated)
                 </label>
                 <textarea
-                  className="w-full p-3 border rounded-md resize-none bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:ring-purple-400/20"
+                  className="w-full p-3 border rounded-md resize-none bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-white/40 focus:border-gray-400/50 focus:ring-gray-400/20"
                   rows={4}
                   value={newCategories}
                   onChange={(e) => setNewCategories(e.target.value)}
@@ -648,7 +648,7 @@ const Complaints: React.FC = () => {
               <div className="flex gap-2">
                 <Button
                   onClick={handleUpdateCategories}
-                  className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white"
+                  className="flex-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white"
                 >
                   Update Categories
                 </Button>
@@ -668,10 +668,10 @@ const Complaints: React.FC = () => {
       {/* Create Complaint Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-slate-900/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 backdrop-blur-xl border-2 border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-400" />
+                <Sparkles className="h-5 w-5 text-gray-400" />
                 Submit Complaint
               </CardTitle>
             </CardHeader>
@@ -686,7 +686,7 @@ const Complaints: React.FC = () => {
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     placeholder="Brief description of the issue"
                     disabled={isSubmitting}
-                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-gray-400/50 focus:ring-gray-400/20 text-white placeholder:text-white/40"
                   />
                   {errors.title && (
                     <p className="text-red-300 text-xs mt-1 flex items-center gap-1">
@@ -730,7 +730,7 @@ const Complaints: React.FC = () => {
                     Description <span className="text-red-400">*</span>
                   </label>
                   <textarea
-                    className="w-full p-3 border rounded-md resize-none bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:ring-purple-400/20"
+                    className="w-full p-3 border rounded-md resize-none bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-white/40 focus:border-gray-400/50 focus:ring-gray-400/20"
                     rows={5}
                     value={formData.description}
                     onChange={(e) =>
@@ -759,7 +759,7 @@ const Complaints: React.FC = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white"
+                    className="flex-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white"
                   >
                     {isSubmitting ? "Submitting..." : "Submit Complaint"}
                   </Button>
