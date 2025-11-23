@@ -39,7 +39,7 @@ const styles: Record<string, React.CSSProperties> = {
   shape1: {
     width: "280px",
     height: "280px",
-    background: "linear-gradient(135deg, #3B82F6, #10B981)",
+    background: "linear-gradient(135deg, #404040, #606060)",
     top: "15%",
     left: "10%",
     animation: "gentleFloat 25s ease-in-out infinite",
@@ -47,7 +47,7 @@ const styles: Record<string, React.CSSProperties> = {
   shape2: {
     width: "180px",
     height: "180px",
-    background: "linear-gradient(135deg, #F59E0B, #EF4444)",
+    background: "linear-gradient(135deg, #505050, #707070)",
     top: "65%",
     right: "15%",
     animation: "gentleFloat 20s ease-in-out infinite 8s",
@@ -55,7 +55,7 @@ const styles: Record<string, React.CSSProperties> = {
   shape3: {
     width: "220px",
     height: "220px",
-    background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+    background: "linear-gradient(135deg, #303030, #808080)",
     bottom: "25%",
     left: "50%",
     animation: "gentleFloat 30s ease-in-out infinite 15s",

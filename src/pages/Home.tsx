@@ -32,7 +32,7 @@ const Home = () => {
       description:
         "Request to borrow barangay equipment and facilities with real-time tracking",
       link: "/services",
-      gradient: "from-blue-500 to-cyan-500",
+      gradient: "from-gray-700 to-gray-500",
     },
     {
       icon: <AlertTriangle className="h-12 w-12" />,
@@ -40,7 +40,7 @@ const Home = () => {
       description:
         "Submit and track your complaints with instant status updates",
       link: "/complaints",
-      gradient: "from-red-500 to-pink-500",
+      gradient: "from-gray-800 to-gray-600",
     },
     {
       icon: <Calendar className="h-12 w-12" />,
@@ -48,7 +48,7 @@ const Home = () => {
       description:
         "View and register for barangay events and community activities",
       link: "/events",
-      gradient: "from-green-500 to-emerald-500",
+      gradient: "from-gray-600 to-gray-400",
     },
   ];
 
@@ -57,19 +57,19 @@ const Home = () => {
       icon: <Clock className="h-6 w-6" />,
       title: "24/7 Access",
       description: "Access services anytime, anywhere from any device",
-      color: "text-blue-400",
+      color: "text-gray-400",
     },
     {
       icon: <Shield className="h-6 w-6" />,
       title: "Secure Platform",
       description: "Your data is protected with enterprise-grade encryption",
-      color: "text-purple-400",
+      color: "text-gray-500",
     },
     {
       icon: <Zap className="h-6 w-6" />,
       title: "Real-time Updates",
       description: "Get instant notifications about your requests and events",
-      color: "text-pink-400",
+      color: "text-gray-600",
     },
   ];
 
@@ -99,18 +99,18 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen relative" id="main-content">
       {/* Unified Background with Particles and Floating Elements */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-black via-gray-900 to-black">
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gray-700/20 to-gray-500/20 blur-3xl animate-pulse"
           style={{ animationDuration: "8s" }}
         />
         <div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gray-600/20 to-gray-400/20 blur-3xl animate-pulse"
           style={{ animationDuration: "10s", animationDelay: "2s" }}
         />
         <div
-          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-gray-500/15 to-gray-700/15 blur-3xl animate-pulse"
           style={{ animationDuration: "12s", animationDelay: "4s" }}
         />
       </div>
@@ -127,10 +127,10 @@ const Home = () => {
           <div className="max-w-5xl mx-auto text-center space-y-8">
             {/* Badge */}
             <div
-              className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/10 px-5 py-2.5 text-sm font-medium text-purple-200 backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-700 hover:scale-105 transition-transform cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-500/10 px-5 py-2.5 text-sm font-medium text-gray-200 backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-700 hover:scale-105 transition-transform cursor-pointer"
               style={{ animationDelay: "0ms" }}
             >
-              <span className="flex h-2 w-2 rounded-full bg-purple-400 animate-pulse"></span>
+              <span className="flex h-2 w-2 rounded-full bg-gray-400 animate-pulse"></span>
               <Sparkles className="h-4 w-4" />
               Digital Barangay Services
             </div>
@@ -143,14 +143,14 @@ const Home = () => {
               {isAuthenticated ? (
                 <>
                   Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent animate-pulse">
+                  <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent animate-pulse">
                     {user?.firstName}!
                   </span>
                 </>
               ) : (
                 <>
                   Your Barangay, <br className="hidden sm:block" />
-                  <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 bg-clip-text text-transparent">
                     Digitally Connected
                   </span>
                 </>
@@ -175,7 +175,7 @@ const Home = () => {
               <Link to={isAuthenticated ? "/services" : "/signup"}>
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto px-10 py-7 text-lg font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-2xl shadow-purple-500/50 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(139,92,246,0.6)] hover:scale-110 group"
+                  className="w-full sm:w-auto px-10 py-7 text-lg font-bold bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 hover:from-gray-800 hover:via-gray-700 hover:to-gray-600 text-white border-0 shadow-2xl shadow-gray-500/50 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(128,128,128,0.6)] hover:scale-110 group"
                 >
                   {isAuthenticated ? "Explore Services" : "Get Started"}
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -225,7 +225,7 @@ const Home = () => {
                 className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-xl border-2 border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 group"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-purple-300 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-gray-700/20 to-gray-500/20 flex items-center justify-center text-gray-300 group-hover:scale-110 transition-transform">
                   {stat.icon}
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-white mb-1">
@@ -243,11 +243,11 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 mb-4">
-              <Sparkles className="h-8 w-8 text-purple-400" />
+              <Sparkles className="h-8 w-8 text-gray-400" />
               <h2 className="text-4xl md:text-5xl font-bold text-white">
                 Our Services
               </h2>
-              <Sparkles className="h-8 w-8 text-pink-400" />
+              <Sparkles className="h-8 w-8 text-gray-500" />
             </div>
             <p className="text-xl text-white/80">
               Everything you need for barangay services, all in one place
@@ -263,7 +263,7 @@ const Home = () => {
               >
                 <Card
                   variant="glass"
-                  className="h-full border-2 border-white/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105 hover:border-white/50 bg-white/10 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 relative overflow-hidden"
+                  className="h-full border-2 border-white/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-500 hover:scale-105 hover:border-white/50 bg-white/10 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 relative overflow-hidden"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Gradient overlay on hover */}
@@ -277,14 +277,14 @@ const Home = () => {
                     >
                       {service.icon}
                     </div>
-                    <CardTitle className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">
+                    <CardTitle className="text-2xl font-bold text-white group-hover:text-gray-300 transition-colors">
                       {service.title}
                     </CardTitle>
                     <CardDescription className="text-base text-white/80 leading-relaxed">
                       {service.description}
                     </CardDescription>
                     <div className="pt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <div className="flex items-center gap-2 text-purple-400 font-semibold">
+                      <div className="flex items-center gap-2 text-gray-400 font-semibold">
                         <span>Learn More</span>
                         <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
                       </div>
@@ -315,16 +315,16 @@ const Home = () => {
               <Card
                 key={index}
                 variant="glass"
-                className="border-2 border-white/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105 hover:border-white/50 bg-white/10 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 group"
+                className="border-2 border-white/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(128,128,128,0.4)] transition-all duration-500 hover:scale-105 hover:border-white/50 bg-white/10 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 group"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <CardHeader className="text-center space-y-5 p-8">
                   <div
-                    className={`w-20 h-20 mx-auto rounded-2xl bg-purple-500/20 flex items-center justify-center ${feature.color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg`}
+                    className={`w-20 h-20 mx-auto rounded-2xl bg-gray-700/20 flex items-center justify-center ${feature.color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg`}
                   >
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">
+                  <CardTitle className="text-2xl font-bold text-white group-hover:text-gray-300 transition-colors">
                     {feature.title}
                   </CardTitle>
                   <CardDescription className="text-base text-white/80 leading-relaxed">
@@ -340,9 +340,9 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-24 relative pb-32 md:pb-24">
         <div className="container mx-auto px-4">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 shadow-2xl max-w-5xl mx-auto group hover:shadow-[0_20px_60px_rgba(139,92,246,0.6)] transition-all duration-500">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 shadow-2xl max-w-5xl mx-auto group hover:shadow-[0_20px_60px_rgba(128,128,128,0.6)] transition-all duration-500">
             {/* Animated gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
             <div className="relative z-10 px-8 py-20 md:py-24 text-center space-y-8">
               <div className="inline-block mb-4">
@@ -362,7 +362,7 @@ const Home = () => {
                 <Link to={isAuthenticated ? "/services" : "/signup"}>
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto px-10 py-7 text-lg font-bold bg-white text-purple-600 hover:bg-white/95 shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-[0_20px_50px_rgba(255,255,255,0.4)]"
+                    className="w-full sm:w-auto px-10 py-7 text-lg font-bold bg-white text-gray-800 hover:bg-white/95 shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-[0_20px_50px_rgba(255,255,255,0.4)]"
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
                     {isAuthenticated ? "View Services" : "Register Now"}
