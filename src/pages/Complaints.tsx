@@ -48,6 +48,30 @@ const Complaints: React.FC = () => {
     priority: "medium",
   });
 
+  const fetchCategories = async () => {
+    try {
+      const response = await api.getComplaintCategories();
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const fetchComplaints = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.getComplaints(filterStatus, filterPriority);
+      const complaintsData = Array.isArray(response.data) ? response.data : [];
+      setComplaints(complaintsData);
+    } catch (error) {
+      console.error("Failed to fetch complaints:", error);
+      showErrorToast(getErrorMessage(error));
+      setComplaints([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchComplaints();
     fetchCategories();
@@ -89,30 +113,6 @@ const Complaints: React.FC = () => {
   useEffect(() => {
     fetchComplaints();
   }, [filterStatus, filterPriority]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.getComplaintCategories();
-      setCategories(response.data || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  };
-
-  const fetchComplaints = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.getComplaints(filterStatus, filterPriority);
-      const complaintsData = Array.isArray(response.data) ? response.data : [];
-      setComplaints(complaintsData);
-    } catch (error) {
-      console.error("Failed to fetch complaints:", error);
-      showErrorToast(getErrorMessage(error));
-      setComplaints([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleUpdateCategories = async () => {
     try {
@@ -464,13 +464,13 @@ const Complaints: React.FC = () => {
                     value={filterStatus}
                     onValueChange={setFilterStatus}
                     options={[
-                      { value: "", label: "All Status" },
+                      { value: "all", label: "All Status" },
                       { value: "pending", label: "Pending" },
                       { value: "in-progress", label: "In Progress" },
                       { value: "resolved", label: "Resolved" },
                       { value: "closed", label: "Closed" },
                     ]}
-                    placeholder="All Status"
+                    placeholder="Filter by status"
                   />
                 </CardContent>
               </Card>
@@ -480,12 +480,12 @@ const Complaints: React.FC = () => {
                     value={filterPriority}
                     onValueChange={setFilterPriority}
                     options={[
-                      { value: "", label: "All Priority" },
+                      { value: "all", label: "All Priority" },
                       { value: "low", label: "Low" },
                       { value: "medium", label: "Medium" },
                       { value: "high", label: "High" },
                     ]}
-                    placeholder="All Priority"
+                    placeholder="Filter by priority"
                   />
                 </CardContent>
               </Card>
@@ -702,12 +702,12 @@ const Complaints: React.FC = () => {
                     handleInputChange("category", value)
                   }
                   options={[
-                    { value: "", label: "Select a category" },
                     ...categories.map((cat) => ({
                       value: cat,
                       label: cat.charAt(0).toUpperCase() + cat.slice(1),
                     })),
                   ]}
+                  placeholder="Select a category"
                   disabled={isSubmitting}
                   error={errors.category}
                 />
