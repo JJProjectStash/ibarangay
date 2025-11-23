@@ -32,7 +32,26 @@ const Login = () => {
     try {
       await login(email, password);
       showSuccessToast("Login successful! Welcome back!");
-      navigate("/dashboard");
+
+      // Get user data from localStorage to determine role
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        // Redirect based on role
+        switch (user.role) {
+          case "admin":
+            navigate("/admin");
+            break;
+          case "staff":
+            navigate("/staff");
+            break;
+          default:
+            navigate("/dashboard");
+            break;
+        }
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: unknown) {
       const errorMessage =
         (err as { response?: { data?: { message?: string } } })?.response?.data

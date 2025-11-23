@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
+  AlertTriangle,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
 import {
@@ -34,14 +41,77 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const navLinks = [
-    { path: "/", label: "Home" },
-    { path: "/services", label: "Services" },
-    { path: "/events", label: "Events" },
-    { path: "/announcements", label: "Announcements" },
-  ];
+  // Define navigation links based on user role
+  const getNavLinks = () => {
+    // Public links for non-authenticated users
+    if (!user) {
+      return [
+        { path: "/", label: "Home" },
+        { path: "/services", label: "Services" },
+        { path: "/events", label: "Events" },
+        { path: "/announcements", label: "Announcements" },
+      ];
+    }
 
-  const isActive = (path: string) => location.pathname === path;
+    // Role-based navigation
+    switch (user.role) {
+      case "admin":
+        return [
+          { path: "/", label: "Home" },
+          { path: "/admin", label: "Dashboard" },
+          { path: "/admin/complaints", label: "Complaints" },
+          { path: "/announcements", label: "Announcements" },
+        ];
+
+      case "staff":
+        return [
+          { path: "/", label: "Home" },
+          { path: "/staff", label: "Dashboard" },
+          { path: "/staff/complaints", label: "Complaints" },
+          { path: "/announcements", label: "Announcements" },
+        ];
+
+      case "resident":
+      default:
+        return [
+          { path: "/", label: "Home" },
+          { path: "/dashboard", label: "Dashboard" },
+          { path: "/services", label: "Services" },
+          { path: "/events", label: "Events" },
+          { path: "/complaints", label: "Complaints" },
+          { path: "/announcements", label: "Announcements" },
+        ];
+    }
+  };
+
+  const navLinks = getNavLinks();
+
+  // Enhanced active check to handle nested routes
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Get role-specific paths
+  const getDashboardPath = () => {
+    if (!user) return "/";
+    return user.role === "admin"
+      ? "/admin"
+      : user.role === "staff"
+      ? "/staff"
+      : "/dashboard";
+  };
+
+  const getComplaintsPath = () => {
+    if (!user) return "/login";
+    return user.role === "admin"
+      ? "/admin/complaints"
+      : user.role === "staff"
+      ? "/staff/complaints"
+      : "/complaints";
+  };
 
   return (
     <nav
@@ -132,19 +202,18 @@ const Navbar = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/20" />
                     <DropdownMenuItem
-                      onClick={() =>
-                        navigate(
-                          user.role === "admin"
-                            ? "/admin"
-                            : user.role === "staff"
-                            ? "/staff"
-                            : "/dashboard"
-                        )
-                      }
+                      onClick={() => navigate(getDashboardPath())}
                       className="cursor-pointer text-white hover:bg-white/10 transition-colors"
                     >
-                      <Settings className="mr-2 h-4 w-4" />
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate(getComplaintsPath())}
+                      className="cursor-pointer text-white hover:bg-white/10 transition-colors"
+                    >
+                      <AlertTriangle className="mr-2 h-4 w-4" />
+                      <span>Complaints</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-colors"
@@ -219,18 +288,23 @@ const Navbar = () => {
                   variant="ghost"
                   className="justify-start w-full rounded-xl text-white hover:bg-white/10"
                   onClick={() => {
-                    navigate(
-                      user.role === "admin"
-                        ? "/admin"
-                        : user.role === "staff"
-                        ? "/staff"
-                        : "/dashboard"
-                    );
+                    navigate(getDashboardPath());
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  <Settings className="mr-2 h-4 w-4" />
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start w-full rounded-xl text-white hover:bg-white/10"
+                  onClick={() => {
+                    navigate(getComplaintsPath());
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Complaints
                 </Button>
                 <Button
                   variant="ghost"
