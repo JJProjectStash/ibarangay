@@ -61,6 +61,7 @@ const Navbar = () => {
           { path: "/admin/events", label: "Events" },
           { path: "/admin/complaints", label: "Complaints" },
           { path: "/admin/announcements", label: "Announcements" },
+          { path: "/admin/services", label: "Services" },
         ];
 
       case "staff":
@@ -69,6 +70,7 @@ const Navbar = () => {
           { path: "/staff/events", label: "Events" },
           { path: "/staff/complaints", label: "Complaints" },
           { path: "/staff/announcements", label: "Announcements" },
+          { path: "/staff/services", label: "Services" },
         ];
 
       case "resident":

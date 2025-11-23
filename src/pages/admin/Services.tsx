@@ -177,23 +177,23 @@ const AdminServices = () => {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { class: string; icon: JSX.Element }> = {
       pending: {
-        class: "bg-yellow-100 text-yellow-800",
+        class: "bg-yellow-500/20 text-yellow-300 border-yellow-400/50",
         icon: <Clock size={14} />,
       },
       approved: {
-        class: "bg-green-100 text-green-800",
+        class: "bg-green-500/20 text-green-300 border-green-400/50",
         icon: <CheckCircle size={14} />,
       },
       rejected: {
-        class: "bg-red-100 text-red-800",
+        class: "bg-red-500/20 text-red-300 border-red-400/50",
         icon: <XCircle size={14} />,
       },
       borrowed: {
-        class: "bg-blue-100 text-blue-800",
+        class: "bg-blue-500/20 text-blue-300 border-blue-400/50",
         icon: <AlertCircle size={14} />,
       },
       returned: {
-        class: "bg-gray-100 text-gray-800",
+        class: "bg-gray-500/20 text-gray-300 border-gray-400/50",
         icon: <CheckCircle size={14} />,
       },
     };
@@ -227,469 +227,531 @@ const AdminServices = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 page-transition">
-      <PageHeader
-        title="Service Management"
-        description="Manage service requests from residents"
-        icon={<Wrench className="h-8 w-8 text-primary" />}
-      />
+    <div className="min-h-screen relative">
+      {/* Unified Background */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div
+          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
+        <div
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+          style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-[40%] left-[50%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-pink-500/15 to-purple-500/15 blur-3xl animate-pulse"
+          style={{ animationDuration: "12s", animationDelay: "4s" }}
+        />
+      </div>
 
-      <div className="max-w-7xl mx-auto space-y-6 mt-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Requests
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold gradient-text-primary">
-                {statusCounts.total}
+      <div className="relative z-10 p-6 page-transition">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="animate-in slide-in-from-top-4 duration-500">
+            <PageHeader
+              title="Service Management"
+              description="Manage service requests from residents"
+              icon={
+                <Wrench className="h-8 w-8 text-purple-400 animate-pulse" />
+              }
+            />
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 animate-in fade-in duration-700 delay-100">
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white">
+                  Total Requests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-purple-400">
+                  {statusCounts.total}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-yellow-400/30 hover:border-yellow-400/50 shadow-2xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-yellow-400" />
+                  Pending
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-yellow-400">
+                  {statusCounts.pending}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-green-400/30 hover:border-green-400/50 shadow-2xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  Approved
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-green-400">
+                  {statusCounts.approved}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-red-400/30 hover:border-red-400/50 shadow-2xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-400" />
+                  Rejected
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-red-400">
+                  {statusCounts.rejected}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-blue-400/30 hover:border-blue-400/50 shadow-2xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-blue-400" />
+                  Borrowed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-blue-400">
+                  {statusCounts.borrowed}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/15 backdrop-blur-xl border-2 border-gray-400/30 hover:border-gray-400/50 shadow-2xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-gray-400" />
+                  Returned
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-gray-400">
+                  {statusCounts.returned}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <Card className="bg-white/15 backdrop-blur-xl border-2 border-white/30 shadow-2xl animate-in fade-in duration-700 delay-200">
+            <CardContent className="pt-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  <Input
+                    placeholder="Search service requests..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-purple-400/50"
+                  />
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="borrowed">Borrowed</SelectItem>
+                      <SelectItem value="returned">Returned</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={itemTypeFilter}
+                    onValueChange={setItemTypeFilter}
+                  >
+                    <SelectTrigger className="w-[140px] bg-white/10 border-white/30 text-white">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Types</SelectItem>
+                      {itemTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-600">
-                {statusCounts.pending}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Service Requests List */}
+          {filteredRequests.length === 0 ? (
+            <EmptyState
+              icon={Wrench}
+              title="No service requests found"
+              description={
+                searchTerm
+                  ? "Try adjusting your search terms"
+                  : "No service requests submitted yet"
+              }
+            />
+          ) : (
+            <div className="space-y-4 animate-in fade-in duration-700 delay-300">
+              {filteredRequests.map((request, index) => {
+                const statusBadge = getStatusBadge(request.status);
 
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Approved
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {statusCounts.approved}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Rejected
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-red-600">
-                {statusCounts.rejected}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Borrowed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
-                {statusCounts.borrowed}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card card-hover">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Returned
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
-                {statusCounts.returned}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card className="glass-card">
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search service requests..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <div className="flex gap-2 flex-wrap">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="borrowed">Borrowed</SelectItem>
-                    <SelectItem value="returned">Returned</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={itemTypeFilter}
-                  onValueChange={setItemTypeFilter}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
-                    {itemTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Service Requests List */}
-        {filteredRequests.length === 0 ? (
-          <EmptyState
-            icon={Wrench}
-            title="No service requests found"
-            description={
-              searchTerm
-                ? "Try adjusting your search terms"
-                : "No service requests submitted yet"
-            }
-          />
-        ) : (
-          <div className="space-y-4">
-            {filteredRequests.map((request) => {
-              const statusBadge = getStatusBadge(request.status);
-
-              return (
-                <Card key={request._id} className="glass-card card-hover">
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-1">
-                          {request.itemName}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          By {request.userId.firstName}{" "}
-                          {request.userId.lastName} • {request.itemType}
-                        </p>
-                        <p className="text-sm leading-relaxed mb-3">
-                          <strong>Purpose:</strong> {request.purpose}
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <strong>Quantity:</strong> {request.quantity}
+                return (
+                  <Card
+                    key={request._id}
+                    className="bg-white/15 backdrop-blur-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.4)] transition-all duration-300 hover:scale-[1.01] animate-in slide-in-from-bottom-4"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-white mb-2">
+                            {request.itemName}
+                          </h3>
+                          <p className="text-sm text-white/80 mb-3 font-medium">
+                            By {request.userId.firstName}{" "}
+                            {request.userId.lastName} • {request.itemType}
+                          </p>
+                          <p className="text-sm leading-relaxed mb-3 text-white/90">
+                            <strong>Purpose:</strong> {request.purpose}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-white/90">
+                            <div>
+                              <strong>Quantity:</strong> {request.quantity}
+                            </div>
+                            <div>
+                              <strong>Borrow Date:</strong>{" "}
+                              {format(
+                                new Date(request.borrowDate),
+                                "MMM dd, yyyy"
+                              )}
+                            </div>
+                            <div>
+                              <strong>Return Date:</strong>{" "}
+                              {format(
+                                new Date(request.expectedReturnDate),
+                                "MMM dd, yyyy"
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <strong>Borrow Date:</strong>{" "}
-                            {format(
-                              new Date(request.borrowDate),
-                              "MMM dd, yyyy"
-                            )}
-                          </div>
-                          <div>
-                            <strong>Return Date:</strong>{" "}
-                            {format(
-                              new Date(request.expectedReturnDate),
-                              "MMM dd, yyyy"
-                            )}
-                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          <Badge
+                            className={`${statusBadge.class} border backdrop-blur-sm font-semibold`}
+                          >
+                            <span className="flex items-center gap-1">
+                              {statusBadge.icon}
+                              {request.status.charAt(0).toUpperCase() +
+                                request.status.slice(1)}
+                            </span>
+                          </Badge>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge className={statusBadge.class}>
-                          <span className="flex items-center gap-1">
-                            {statusBadge.icon}
-                            {request.status.charAt(0).toUpperCase() +
-                              request.status.slice(1)}
-                          </span>
-                        </Badge>
-                      </div>
-                    </div>
+                      {request.notes && (
+                        <div className="mb-3 p-4 bg-green-500/20 rounded-lg border-l-4 border-green-400">
+                          <p className="text-sm font-semibold text-green-300 mb-2">
+                            Admin Notes:
+                          </p>
+                          <p className="text-sm text-white/90">
+                            {request.notes}
+                          </p>
+                        </div>
+                      )}
 
-                    {request.notes && (
-                      <div className="mb-3 p-3 bg-muted/50 rounded-lg border-l-4 border-green-500">
-                        <p className="text-sm font-medium text-green-700 mb-1">
-                          Admin Notes:
-                        </p>
-                        <p className="text-sm">{request.notes}</p>
-                      </div>
-                    )}
+                      {request.rejectionReason && (
+                        <div className="mb-3 p-4 bg-red-500/20 rounded-lg border-l-4 border-red-400">
+                          <p className="text-sm font-semibold text-red-300 mb-2">
+                            Rejection Reason:
+                          </p>
+                          <p className="text-sm text-white/90">
+                            {request.rejectionReason}
+                          </p>
+                        </div>
+                      )}
 
-                    {request.rejectionReason && (
-                      <div className="mb-3 p-3 bg-muted/50 rounded-lg border-l-4 border-red-500">
-                        <p className="text-sm font-medium text-red-700 mb-1">
-                          Rejection Reason:
-                        </p>
-                        <p className="text-sm">{request.rejectionReason}</p>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-muted-foreground">
-                        <span>
-                          Submitted:{" "}
-                          {format(new Date(request.createdAt), "MMM dd, yyyy")}
-                        </span>
-                        {request.approvedAt && (
-                          <span className="ml-4">
-                            Approved:{" "}
+                      <div className="flex justify-between items-center pt-3 border-t border-white/20">
+                        <div className="text-sm text-white/80 font-medium">
+                          <span>
+                            Submitted:{" "}
                             {format(
-                              new Date(request.approvedAt),
+                              new Date(request.createdAt),
                               "MMM dd, yyyy"
                             )}
                           </span>
-                        )}
+                          {request.approvedAt && (
+                            <span className="ml-4">
+                              Approved:{" "}
+                              {format(
+                                new Date(request.approvedAt),
+                                "MMM dd, yyyy"
+                              )}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewDetails(request)}
+                            className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Details
+                          </Button>
+
+                          {request.status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApprove(request)}
+                                className="bg-green-500 hover:bg-green-600 text-white border-0"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReject(request)}
+                                className="bg-red-500/20 border-red-400/50 text-red-300 hover:bg-red-500/30"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusUpdate(request._id, "borrowed")
+                                }
+                              >
+                                Mark as Borrowed
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusUpdate(request._id, "returned")
+                                }
+                              >
+                                Mark as Returned
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewDetails(request)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Details
-                        </Button>
+        {/* Details Modal */}
+        {showDetailsModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-white/95 backdrop-blur-xl border-2 border-white/30 shadow-2xl">
+              <CardHeader className="border-b border-gray-200">
+                <CardTitle className="text-gray-900">
+                  Service Request Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Item Name
+                    </label>
+                    <p className="text-sm text-gray-700">
+                      {selectedRequest.itemName}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Item Type
+                    </label>
+                    <p className="text-sm text-gray-700">
+                      {selectedRequest.itemType}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Quantity
+                    </label>
+                    <p className="text-sm text-gray-700">
+                      {selectedRequest.quantity}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Status
+                    </label>
+                    <p className="text-sm text-gray-700 capitalize">
+                      {selectedRequest.status}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Borrow Date
+                    </label>
+                    <p className="text-sm text-gray-700">
+                      {format(new Date(selectedRequest.borrowDate), "PPP")}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block text-gray-900">
+                      Expected Return
+                    </label>
+                    <p className="text-sm text-gray-700">
+                      {format(
+                        new Date(selectedRequest.expectedReturnDate),
+                        "PPP"
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    Purpose
+                  </label>
+                  <p className="text-sm text-gray-700">
+                    {selectedRequest.purpose}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold mb-1 block text-gray-900">
+                    Requested By
+                  </label>
+                  <p className="text-sm text-gray-700">
+                    {selectedRequest.userId.firstName}{" "}
+                    {selectedRequest.userId.lastName} (
+                    {selectedRequest.userId.email})
+                  </p>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-                        {request.status === "pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() => handleApprove(request)}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleReject(request)}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStatusUpdate(request._id, "borrowed")
-                              }
-                            >
-                              Mark as Borrowed
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStatusUpdate(request._id, "returned")
-                              }
-                            >
-                              Mark as Returned
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+        {/* Notes/Rejection Modal */}
+        {showNotesModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-white/95 backdrop-blur-xl border-2 border-white/30 shadow-2xl">
+              <CardHeader className="border-b border-gray-200">
+                <CardTitle className="text-gray-900">
+                  {rejectionReason !== undefined
+                    ? "Reject Request"
+                    : "Approve Request"}
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  {selectedRequest.itemName} by{" "}
+                  {selectedRequest.userId.firstName}{" "}
+                  {selectedRequest.userId.lastName}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-6">
+                {rejectionReason !== undefined ? (
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block text-gray-900">
+                      Rejection Reason *
+                    </label>
+                    <textarea
+                      className="w-full p-3 border-2 border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      rows={4}
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Please provide a reason for rejection..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block text-gray-900">
+                      Admin Notes (Optional)
+                    </label>
+                    <textarea
+                      className="w-full p-3 border-2 border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      rows={4}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add any notes for this approval..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={
+                      rejectionReason !== undefined
+                        ? handleSubmitRejection
+                        : handleSubmitApproval
+                    }
+                    disabled={
+                      isSubmitting ||
+                      (rejectionReason !== undefined && !rejectionReason.trim())
+                    }
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    {isSubmitting
+                      ? "Processing..."
+                      : rejectionReason !== undefined
+                      ? "Reject Request"
+                      : "Approve Request"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowNotesModal(false);
+                      setNotes("");
+                      setRejectionReason("");
+                      setSelectedRequest(null);
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
-
-      {/* Details Modal */}
-      {showDetailsModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto">
-            <CardHeader>
-              <CardTitle>Service Request Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Item Name</label>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest.itemName}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Item Type</label>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest.itemType}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Quantity</label>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest.quantity}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Status</label>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest.status}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Borrow Date</label>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(selectedRequest.borrowDate), "PPP")}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Expected Return</label>
-                  <p className="text-sm text-muted-foreground">
-                    {format(
-                      new Date(selectedRequest.expectedReturnDate),
-                      "PPP"
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Purpose</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedRequest.purpose}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Requested By</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedRequest.userId.firstName}{" "}
-                  {selectedRequest.userId.lastName} (
-                  {selectedRequest.userId.email})
-                </p>
-              </div>
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="flex-1"
-                >
-                  Close
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Notes/Rejection Modal */}
-      {showNotesModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto">
-            <CardHeader>
-              <CardTitle>
-                {rejectionReason !== undefined
-                  ? "Reject Request"
-                  : "Approve Request"}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {selectedRequest.itemName} by {selectedRequest.userId.firstName}{" "}
-                {selectedRequest.userId.lastName}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {rejectionReason !== undefined ? (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Rejection Reason *
-                  </label>
-                  <textarea
-                    className="w-full p-3 border rounded-md resize-none"
-                    rows={4}
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="Please provide a reason for rejection..."
-                    disabled={isSubmitting}
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Admin Notes (Optional)
-                  </label>
-                  <textarea
-                    className="w-full p-3 border rounded-md resize-none"
-                    rows={4}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any notes for this approval..."
-                    disabled={isSubmitting}
-                  />
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button
-                  onClick={
-                    rejectionReason !== undefined
-                      ? handleSubmitRejection
-                      : handleSubmitApproval
-                  }
-                  disabled={
-                    isSubmitting ||
-                    (rejectionReason !== undefined && !rejectionReason.trim())
-                  }
-                  className="flex-1"
-                >
-                  {isSubmitting
-                    ? "Processing..."
-                    : rejectionReason !== undefined
-                    ? "Reject Request"
-                    : "Approve Request"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowNotesModal(false);
-                    setNotes("");
-                    setRejectionReason("");
-                    setSelectedRequest(null);
-                  }}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };
