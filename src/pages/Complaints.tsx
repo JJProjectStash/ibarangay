@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SelectField } from "@/components/ui/select-field";
 import api from "../services/api";
 import socketService from "../services/socket";
 import { Complaint } from "../types";
@@ -25,6 +26,7 @@ import { validators, getValidationMessage } from "../utils/validators";
 import { useAuth } from "../context/AuthContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
+import { SkeletonCard } from "../components/SkeletonCard";
 
 const Complaints: React.FC = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -280,14 +282,22 @@ const Complaints: React.FC = () => {
     const badges: Record<
       string,
       {
-        variant: "default" | "secondary" | "destructive" | "outline";
+        variant:
+          | "default"
+          | "secondary"
+          | "destructive"
+          | "outline"
+          | "pending"
+          | "in-progress"
+          | "completed"
+          | "closed";
         label: string;
       }
     > = {
-      pending: { variant: "outline", label: "Pending" },
-      "in-progress": { variant: "secondary", label: "In Progress" },
-      resolved: { variant: "default", label: "Resolved" },
-      closed: { variant: "destructive", label: "Closed" },
+      pending: { variant: "pending", label: "Pending" },
+      "in-progress": { variant: "in-progress", label: "In Progress" },
+      resolved: { variant: "completed", label: "Resolved" },
+      closed: { variant: "closed", label: "Closed" },
     };
     return badges[status] || badges.pending;
   };
@@ -296,13 +306,13 @@ const Complaints: React.FC = () => {
     const badges: Record<
       string,
       {
-        variant: "default" | "secondary" | "destructive" | "outline";
+        variant: "default" | "secondary" | "destructive" | "warning" | "info";
         label: string;
       }
     > = {
-      low: { variant: "secondary", label: "Low" },
-      medium: { variant: "outline", label: "Medium" },
-      high: { variant: "destructive", label: "High" },
+      low: { variant: "info", label: "Low" },
+      medium: { variant: "secondary", label: "Medium" },
+      high: { variant: "warning", label: "High" },
     };
     return badges[priority] || badges.medium;
   };
@@ -318,8 +328,30 @@ const Complaints: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="large" />
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          <div
+            className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl animate-pulse"
+            style={{ animationDuration: "8s" }}
+          />
+          <div
+            className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse"
+            style={{ animationDuration: "10s", animationDelay: "2s" }}
+          />
+        </div>
+        <div className="relative z-10 p-6">
+          <div className="max-w-7xl mx-auto space-y-8">
+            <div className="space-y-4">
+              <div className="h-12 w-64 bg-white/20 rounded-lg animate-pulse" />
+              <div className="h-6 w-96 bg-white/10 rounded-lg animate-pulse" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -430,52 +462,33 @@ const Complaints: React.FC = () => {
               </Card>
               <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-white/60" />
-                    <select
-                      className="w-full p-2 border rounded-md bg-white/10 backdrop-blur-xl border-white/20 text-white focus:border-purple-400/50 focus:ring-purple-400/20"
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                      <option value="" className="bg-slate-900">
-                        All Status
-                      </option>
-                      <option value="pending" className="bg-slate-900">
-                        Pending
-                      </option>
-                      <option value="in-progress" className="bg-slate-900">
-                        In Progress
-                      </option>
-                      <option value="resolved" className="bg-slate-900">
-                        Resolved
-                      </option>
-                      <option value="closed" className="bg-slate-900">
-                        Closed
-                      </option>
-                    </select>
-                  </div>
+                  <SelectField
+                    value={filterStatus}
+                    onValueChange={setFilterStatus}
+                    options={[
+                      { value: "", label: "All Status" },
+                      { value: "pending", label: "Pending" },
+                      { value: "in-progress", label: "In Progress" },
+                      { value: "resolved", label: "Resolved" },
+                      { value: "closed", label: "Closed" },
+                    ]}
+                    placeholder="All Status"
+                  />
                 </CardContent>
               </Card>
               <Card className="bg-white/10 backdrop-blur-xl border-2 border-white/20 shadow-2xl">
                 <CardContent className="pt-6">
-                  <select
-                    className="w-full p-2 border rounded-md bg-white/10 backdrop-blur-xl border-white/20 text-white focus:border-purple-400/50 focus:ring-purple-400/20"
+                  <SelectField
                     value={filterPriority}
-                    onChange={(e) => setFilterPriority(e.target.value)}
-                  >
-                    <option value="" className="bg-slate-900">
-                      All Priority
-                    </option>
-                    <option value="low" className="bg-slate-900">
-                      Low
-                    </option>
-                    <option value="medium" className="bg-slate-900">
-                      Medium
-                    </option>
-                    <option value="high" className="bg-slate-900">
-                      High
-                    </option>
-                  </select>
+                    onValueChange={setFilterPriority}
+                    options={[
+                      { value: "", label: "All Priority" },
+                      { value: "low", label: "Low" },
+                      { value: "medium", label: "Medium" },
+                      { value: "high", label: "High" },
+                    ]}
+                    placeholder="All Priority"
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -488,8 +501,16 @@ const Complaints: React.FC = () => {
               title="No complaints found"
               description={
                 searchTerm
-                  ? "Try adjusting your search terms"
-                  : "No complaints submitted yet"
+                  ? "Try adjusting your search terms or filters"
+                  : "No complaints have been submitted yet. Click 'New Complaint' to submit your first complaint."
+              }
+              action={
+                !searchTerm
+                  ? {
+                      label: "Submit Complaint",
+                      onClick: () => setShowModal(true),
+                    }
+                  : undefined
               }
             />
           ) : (
@@ -518,19 +539,21 @@ const Complaints: React.FC = () => {
                             <div className="flex gap-2">
                               <Badge
                                 variant={statusBadge.variant}
+                                showIcon
                                 className="backdrop-blur-sm"
                               >
                                 {statusBadge.label}
                               </Badge>
                               <Badge
                                 variant={priorityBadge.variant}
+                                showIcon
                                 className="backdrop-blur-sm"
                               >
                                 {priorityBadge.label}
                               </Badge>
                             </div>
                           </div>
-                          <p className="text-sm text-white/70">
+                          <p className="text-sm text-white/80">
                             {complaint.category}
                           </p>
                         </div>
@@ -544,7 +567,7 @@ const Complaints: React.FC = () => {
                       {complaint.attachments &&
                         complaint.attachments.length > 0 && (
                           <div>
-                            <p className="text-sm text-white/70 mb-2">
+                            <p className="text-sm text-white/80 mb-2">
                               Attachments ({complaint.attachments.length})
                             </p>
                             <div className="flex gap-2 flex-wrap">
@@ -560,7 +583,7 @@ const Complaints: React.FC = () => {
                           </div>
                         )}
 
-                      <div className="flex justify-between items-center text-sm text-white/70">
+                      <div className="flex justify-between items-center text-sm text-white/80">
                         <span>
                           Submitted:{" "}
                           {format(
@@ -620,7 +643,7 @@ const Complaints: React.FC = () => {
                   onChange={(e) => setNewCategories(e.target.value)}
                   placeholder="e.g., infrastructure, sanitation, security, noise"
                 />
-                <p className="text-xs text-white/60 mt-2">
+                <p className="text-xs text-white/70 mt-2">
                   Current categories: {categories.join(", ")}
                 </p>
               </div>
@@ -657,8 +680,8 @@ const Complaints: React.FC = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white/90">
-                    Title *
+                  <label className="text-sm font-medium mb-2 block text-white/90 flex items-center gap-1">
+                    Title <span className="text-red-400">*</span>
                   </label>
                   <Input
                     value={formData.title}
@@ -668,64 +691,45 @@ const Complaints: React.FC = () => {
                     className="bg-white/10 backdrop-blur-xl border-white/20 focus:border-purple-400/50 focus:ring-purple-400/20 text-white placeholder:text-white/40"
                   />
                   {errors.title && (
-                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-300 text-xs mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" /> {errors.title}
                     </p>
                   )}
                 </div>
+                <SelectField
+                  label="Category"
+                  required
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    handleInputChange("category", value)
+                  }
+                  options={[
+                    { value: "", label: "Select a category" },
+                    ...categories.map((cat) => ({
+                      value: cat,
+                      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+                    })),
+                  ]}
+                  disabled={isSubmitting}
+                  error={errors.category}
+                />
+                <SelectField
+                  label="Priority"
+                  required
+                  value={formData.priority}
+                  onValueChange={(value) =>
+                    handleInputChange("priority", value)
+                  }
+                  options={[
+                    { value: "low", label: "Low" },
+                    { value: "medium", label: "Medium" },
+                    { value: "high", label: "High" },
+                  ]}
+                  disabled={isSubmitting}
+                />
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white/90">
-                    Category *
-                  </label>
-                  <select
-                    className="w-full p-3 border rounded-md bg-white/10 backdrop-blur-xl border-white/20 text-white focus:border-purple-400/50 focus:ring-purple-400/20"
-                    value={formData.category}
-                    onChange={(e) =>
-                      handleInputChange("category", e.target.value)
-                    }
-                    disabled={isSubmitting}
-                  >
-                    <option value="" className="bg-slate-900">
-                      Select a category
-                    </option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat} className="bg-slate-900">
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.category && (
-                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" /> {errors.category}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-white/90">
-                    Priority *
-                  </label>
-                  <select
-                    className="w-full p-3 border rounded-md bg-white/10 backdrop-blur-xl border-white/20 text-white focus:border-purple-400/50 focus:ring-purple-400/20"
-                    value={formData.priority}
-                    onChange={(e) =>
-                      handleInputChange("priority", e.target.value)
-                    }
-                    disabled={isSubmitting}
-                  >
-                    <option value="low" className="bg-slate-900">
-                      Low
-                    </option>
-                    <option value="medium" className="bg-slate-900">
-                      Medium
-                    </option>
-                    <option value="high" className="bg-slate-900">
-                      High
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-white/90">
-                    Description *
+                  <label className="text-sm font-medium mb-2 block text-white/90 flex items-center gap-1">
+                    Description <span className="text-red-400">*</span>
                   </label>
                   <textarea
                     className="w-full p-3 border rounded-md resize-none bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:ring-purple-400/20"
@@ -738,7 +742,7 @@ const Complaints: React.FC = () => {
                     disabled={isSubmitting}
                   />
                   {errors.description && (
-                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-300 text-xs mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" /> {errors.description}
                     </p>
                   )}
