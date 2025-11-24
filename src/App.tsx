@@ -23,6 +23,7 @@ import Signup from "./pages/Signup";
 import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
+import Help from "./pages/Help";
 
 // Lazy loaded components for better performance
 import {
@@ -141,6 +142,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/help" element={<Help />} />
 
         {/* Protected Routes */}
         <Route

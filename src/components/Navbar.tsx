@@ -138,6 +138,15 @@ const Navbar: React.FC = () => {
                   >
                     Events
                   </Link>
+                  <Link
+                    to="/help"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/help") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Help
+                  </Link>
                 </>
               )}
 
