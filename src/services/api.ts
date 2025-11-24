@@ -40,7 +40,7 @@ class ApiService {
     );
   }
 
-  // Auth endpoints
+  // ==================== Auth Endpoints ====================
   async register(data: {
     firstName: string;
     lastName: string;
@@ -73,6 +73,11 @@ class ApiService {
     return response.data;
   }
 
+  async changePassword(data: { currentPassword: string; newPassword: string }) {
+    const response = await this.api.put("/auth/change-password", data);
+    return response.data;
+  }
+
   async createStaffAdmin(data: {
     firstName: string;
     lastName: string;
@@ -86,175 +91,79 @@ class ApiService {
     return response.data;
   }
 
-  // Config endpoints
-  async getComplaintCategories() {
-    const response = await this.api.get("/config/complaint-categories");
-    return response.data;
-  }
-
-  async getServiceItemTypes() {
-    const response = await this.api.get("/config/service-item-types");
-    return response.data;
-  }
-
-  async updateComplaintCategories(categories: string[]) {
-    const response = await this.api.put("/config/complaint-categories", {
-      categories,
-    });
-    return response.data;
-  }
-
-  async updateServiceItemTypes(itemTypes: string[]) {
-    const response = await this.api.put("/config/service-item-types", {
-      itemTypes,
-    });
-    return response.data;
-  }
-
-  // Service endpoints
-  async createServiceRequest(data: {
-    itemName: string;
-    itemType: string;
-    borrowDate: string;
-    expectedReturnDate: string;
-    purpose: string;
-    quantity: number;
-    notes?: string;
+  async getAllUsers(params?: {
+    role?: string;
+    isVerified?: boolean;
+    search?: string;
+    page?: number;
+    limit?: number;
   }) {
-    const response = await this.api.post("/services", data);
+    const response = await this.api.get("/auth/users", { params });
     return response.data;
   }
 
-  async getServiceRequests(params?: { status?: string; search?: string; page?: number; limit?: number }) {
-    const response = await this.api.get("/services", { params });
+  async updateUserRole(userId: string, role: string) {
+    const response = await this.api.put(`/auth/users/${userId}/role`, { role });
     return response.data;
   }
 
-  async getServiceRequestById(id: string) {
-    const response = await this.api.get(`/services/${id}`);
+  async verifyUser(userId: string) {
+    const response = await this.api.patch(`/auth/users/${userId}/verify`);
     return response.data;
   }
 
-  async updateServiceStatus(id: string, status: string, notes?: string, rejectionReason?: string) {
-    const response = await this.api.put(`/services/${id}/status`, {
-      status,
-      notes,
-      rejectionReason,
-    });
+  async deleteUser(userId: string) {
+    const response = await this.api.delete(`/auth/users/${userId}`);
     return response.data;
   }
 
-  async approveServiceRequest(id: string, notes?: string) {
-    const response = await this.api.put(`/services/${id}/approve`, { notes });
+  // ==================== Dashboard Endpoints ====================
+  async getDashboardStats() {
+    const response = await this.api.get("/dashboard/stats");
     return response.data;
   }
 
-  async rejectServiceRequest(id: string, rejectionReason: string, notes?: string) {
-    const response = await this.api.put(`/services/${id}/reject`, {
-      rejectionReason,
-      notes,
-    });
+  async getUserDashboard() {
+    const response = await this.api.get("/dashboard/user");
     return response.data;
   }
 
-  async deleteServiceRequest(id: string) {
-    const response = await this.api.delete(`/services/${id}`);
+  // ==================== Admin Endpoints ====================
+  async getSystemStats() {
+    const response = await this.api.get("/admin/stats");
     return response.data;
   }
 
-  // Complaint endpoints
-  async createComplaint(data: {
-    title: string;
-    description: string;
-    category: string;
-    priority?: string;
-    attachments?: string[];
+  async getAuditLogs(params?: {
+    action?: string;
+    userId?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
   }) {
-    const response = await this.api.post("/complaints", data);
+    const response = await this.api.get("/admin/audit-logs", { params });
     return response.data;
   }
 
-  async getComplaints(status?: string, priority?: string) {
-    const response = await this.api.get("/complaints", {
-      params: { status, priority },
+  async createAuditLog(data: { action: string; details?: string }) {
+    const response = await this.api.post("/admin/audit-logs", data);
+    return response.data;
+  }
+
+  async getAuditLogStats() {
+    const response = await this.api.get("/admin/audit-logs/stats");
+    return response.data;
+  }
+
+  async deleteOldAuditLogs(days: number) {
+    const response = await this.api.delete("/admin/audit-logs/cleanup", {
+      params: { days },
     });
     return response.data;
   }
 
-  async getComplaintById(id: string) {
-    const response = await this.api.get(`/complaints/${id}`);
-    return response.data;
-  }
-
-  async updateComplaintStatus(id: string, status: string, response?: string) {
-    const res = await this.api.put(`/complaints/${id}/status`, {
-      status,
-      response,
-    });
-    return res.data;
-  }
-
-  async deleteComplaint(id: string) {
-    const response = await this.api.delete(`/complaints/${id}`);
-    return response.data;
-  }
-
-  // File upload endpoints
-  async uploadComplaintFile(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await this.api.post("/upload/complaint", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  }
-
-  async uploadEventFile(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await this.api.post("/upload/event", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  }
-
-  // Bulk operations
-  async bulkUpdateComplaintStatus(ids: string[], status: string) {
-    const response = await this.api.put("/bulk/complaints/status", {
-      complaintIds: ids,
-      status,
-    });
-    return response.data;
-  }
-
-  async bulkAssignComplaints(ids: string[], assignedTo: string) {
-    const response = await this.api.put("/bulk/complaints/assign", {
-      complaintIds: ids,
-      staffId: assignedTo,
-    });
-    return response.data;
-  }
-
-  async bulkDeleteComplaints(ids: string[]) {
-    const response = await this.api.post("/bulk/complaints/delete", {
-      complaintIds: ids,
-    });
-    return response.data;
-  }
-
-  async exportComplaints(format: "csv" | "excel", filters?: any) {
-    const response = await this.api.get("/bulk/complaints/export", {
-      params: { format, ...filters },
-      responseType: "blob",
-    });
-    return response.data;
-  }
-
-  // Analytics endpoints
+  // ==================== Analytics Endpoints ====================
   async getTimeSeriesData(period: string = "daily", days: number = 30) {
     const response = await this.api.get("/analytics/time-series", {
       params: { period, days },
@@ -293,7 +202,237 @@ class ApiService {
     return response.data;
   }
 
-  // Event endpoints
+  // ==================== Announcement Endpoints ====================
+  async getAnnouncements(params?: {
+    status?: string;
+    priority?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const response = await this.api.get("/announcements", { params });
+    return response.data;
+  }
+
+  async getAnnouncementById(id: string) {
+    const response = await this.api.get(`/announcements/${id}`);
+    return response.data;
+  }
+
+  async getAnnouncementStats() {
+    const response = await this.api.get("/announcements/stats");
+    return response.data;
+  }
+
+  async createAnnouncement(data: {
+    title: string;
+    content: string;
+    priority: "low" | "medium" | "high";
+    category: string;
+    expiresAt?: string;
+    attachments?: string[];
+  }) {
+    const response = await this.api.post("/announcements", data);
+    return response.data;
+  }
+
+  async updateAnnouncement(
+    id: string,
+    data: Partial<{
+      title: string;
+      content: string;
+      priority: string;
+      category: string;
+      expiresAt: string;
+      attachments: string[];
+    }>
+  ) {
+    const response = await this.api.put(`/announcements/${id}`, data);
+    return response.data;
+  }
+
+  async publishAnnouncement(id: string) {
+    const response = await this.api.patch(`/announcements/${id}/publish`);
+    return response.data;
+  }
+
+  async unpublishAnnouncement(id: string) {
+    const response = await this.api.patch(`/announcements/${id}/unpublish`);
+    return response.data;
+  }
+
+  async deleteAnnouncement(id: string) {
+    const response = await this.api.delete(`/announcements/${id}`);
+    return response.data;
+  }
+
+  // ==================== Config Endpoints ====================
+  async getComplaintCategories() {
+    const response = await this.api.get("/config/complaint-categories");
+    return response.data;
+  }
+
+  async getServiceItemTypes() {
+    const response = await this.api.get("/config/service-item-types");
+    return response.data;
+  }
+
+  async updateComplaintCategories(categories: string[]) {
+    const response = await this.api.put("/config/complaint-categories", {
+      categories,
+    });
+    return response.data;
+  }
+
+  async updateServiceItemTypes(itemTypes: string[]) {
+    const response = await this.api.put("/config/service-item-types", {
+      itemTypes,
+    });
+    return response.data;
+  }
+
+  // ==================== Service Endpoints ====================
+  async createServiceRequest(data: {
+    itemName: string;
+    itemType: string;
+    borrowDate: string;
+    expectedReturnDate: string;
+    purpose: string;
+    quantity: number;
+    notes?: string;
+  }) {
+    const response = await this.api.post("/services", data);
+    return response.data;
+  }
+
+  async getServiceRequests(params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const response = await this.api.get("/services", { params });
+    return response.data;
+  }
+
+  async getServiceRequestById(id: string) {
+    const response = await this.api.get(`/services/${id}`);
+    return response.data;
+  }
+
+  async updateServiceStatus(
+    id: string,
+    status: string,
+    notes?: string,
+    rejectionReason?: string
+  ) {
+    const response = await this.api.put(`/services/${id}/status`, {
+      status,
+      notes,
+      rejectionReason,
+    });
+    return response.data;
+  }
+
+  async approveServiceRequest(id: string, notes?: string) {
+    const response = await this.api.put(`/services/${id}/approve`, { notes });
+    return response.data;
+  }
+
+  async rejectServiceRequest(
+    id: string,
+    rejectionReason: string,
+    notes?: string
+  ) {
+    const response = await this.api.put(`/services/${id}/reject`, {
+      rejectionReason,
+      notes,
+    });
+    return response.data;
+  }
+
+  async deleteServiceRequest(id: string) {
+    const response = await this.api.delete(`/services/${id}`);
+    return response.data;
+  }
+
+  // ==================== Complaint Endpoints ====================
+  async createComplaint(data: {
+    title: string;
+    description: string;
+    category: string;
+    priority?: string;
+    attachments?: string[];
+  }) {
+    const response = await this.api.post("/complaints", data);
+    return response.data;
+  }
+
+  async getComplaints(params?: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const response = await this.api.get("/complaints", { params });
+    return response.data;
+  }
+
+  async getComplaintById(id: string) {
+    const response = await this.api.get(`/complaints/${id}`);
+    return response.data;
+  }
+
+  async getComplaintStats() {
+    const response = await this.api.get("/complaints/stats");
+    return response.data;
+  }
+
+  async updateComplaintStatus(id: string, status: string, response?: string) {
+    const res = await this.api.put(`/complaints/${id}/status`, {
+      status,
+      response,
+    });
+    return res.data;
+  }
+
+  async assignComplaint(id: string, assignedTo: string) {
+    const response = await this.api.put(`/complaints/${id}/assign`, {
+      assignedTo,
+    });
+    return response.data;
+  }
+
+  async addComplaintComment(id: string, comment: string) {
+    const response = await this.api.post(`/complaints/${id}/comments`, {
+      comment,
+    });
+    return response.data;
+  }
+
+  async rateComplaint(id: string, rating: number, feedback?: string) {
+    const response = await this.api.post(`/complaints/${id}/rate`, {
+      rating,
+      feedback,
+    });
+    return response.data;
+  }
+
+  async escalateComplaint(id: string, reason: string) {
+    const response = await this.api.post(`/complaints/${id}/escalate`, {
+      reason,
+    });
+    return response.data;
+  }
+
+  async deleteComplaint(id: string) {
+    const response = await this.api.delete(`/complaints/${id}`);
+    return response.data;
+  }
+
+  // ==================== Event Endpoints ====================
   async createEvent(data: {
     title: string;
     description: string;
@@ -307,7 +446,13 @@ class ApiService {
     return response.data;
   }
 
-  async getEvents(params?: { status?: string; category?: string; search?: string }) {
+  async getEvents(params?: {
+    status?: string;
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const response = await this.api.get("/events", { params });
     return response.data;
   }
@@ -322,8 +467,11 @@ class ApiService {
     return response.data;
   }
 
-  async exportEventAttendees(id: string) {
-    const response = await this.api.get(`/events/${id}/attendees/export`);
+  async exportEventAttendees(id: string, format: "csv" | "excel" = "csv") {
+    const response = await this.api.get(`/events/${id}/attendees/export`, {
+      params: { format },
+      responseType: "blob",
+    });
     return response.data;
   }
 
@@ -337,7 +485,7 @@ class ApiService {
     return response.data;
   }
 
-  async updateEvent(id: string, data: Partial<Event>) {
+  async updateEvent(id: string, data: any) {
     const response = await this.api.put(`/events/${id}`, data);
     return response.data;
   }
@@ -347,11 +495,13 @@ class ApiService {
     return response.data;
   }
 
-  // Notification endpoints
-  async getNotifications(isRead?: boolean) {
-    const response = await this.api.get("/notifications", {
-      params: isRead !== undefined ? { isRead } : {},
-    });
+  // ==================== Notification Endpoints ====================
+  async getNotifications(params?: {
+    isRead?: boolean;
+    page?: number;
+    limit?: number;
+  }) {
+    const response = await this.api.get("/notifications", { params });
     return response.data;
   }
 
@@ -367,6 +517,72 @@ class ApiService {
 
   async deleteNotification(id: string) {
     const response = await this.api.delete(`/notifications/${id}`);
+    return response.data;
+  }
+
+  // ==================== Bulk Operations ====================
+  async bulkUpdateComplaintStatus(ids: string[], status: string) {
+    const response = await this.api.put("/bulk/complaints/status", {
+      complaintIds: ids,
+      status,
+    });
+    return response.data;
+  }
+
+  async bulkAssignComplaints(ids: string[], assignedTo: string) {
+    const response = await this.api.put("/bulk/complaints/assign", {
+      complaintIds: ids,
+      staffId: assignedTo,
+    });
+    return response.data;
+  }
+
+  async bulkDeleteComplaints(ids: string[]) {
+    const response = await this.api.post("/bulk/complaints/delete", {
+      complaintIds: ids,
+    });
+    return response.data;
+  }
+
+  async exportComplaints(format: "csv" | "excel", filters?: any) {
+    const response = await this.api.get("/bulk/complaints/export", {
+      params: { format, ...filters },
+      responseType: "blob",
+    });
+    return response.data;
+  }
+
+  // ==================== File Upload Endpoints ====================
+  async uploadComplaintFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.api.post("/upload/complaint", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  }
+
+  async uploadEventFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.api.post("/upload/event", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  }
+
+  async uploadAnnouncementFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.api.post("/upload/announcement", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   }
 }

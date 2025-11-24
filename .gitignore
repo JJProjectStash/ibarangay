@@ -27,3 +27,40 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Vite / build artifacts
+/.vite
+/build
+/out
+/public/build
+
+# Distribution artifacts (already present but be explicit)
+dist/
+dist-ssr/
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache folders
+/.parcel-cache
+/.cache
+/.turbo
+
+# esbuild / bundler caches
+.esbuild
+
+# Test coverage & reports
+/coverage
+/coverage/**
+test-results.xml
+
+# CI and deployment
+.vercel
+.vercel_build_output
+.netlify
+.firebase
+
+# Misc
+Thumbs.db
+.pnp.*
+.pnpm-store

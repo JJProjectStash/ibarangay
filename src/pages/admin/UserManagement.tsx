@@ -4,29 +4,29 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import ErrorBoundary from "./components/ErrorBoundary";
-import LoadingSpinner from "./components/LoadingSpinner";
-import Navbar from "./components/Navbar";
-import ToastProvider from "./components/Toast";
-import socketService from "./services/socket";
+import { AuthProvider, useAuth } from "../../context/AuthContext";
+import ErrorBoundary from "../../components/ErrorBoundary";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import Navbar from "../../components/Navbar";
+import ToastProvider from "../../components/Toast";
+import socketService from "../../services/socket";
 import { useEffect } from "react";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Services from "./pages/Services";
-import Complaints from "./pages/Complaints";
-import Events from "./pages/Events";
-import Notifications from "./pages/Notifications";
-import Dashboard from "./pages/Dashboard";
-import Announcements from "./pages/Announcements";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import StaffDashboard from "./pages/staff/StaffDashboard";
-import UserManagement from "./pages/admin/UserManagement";
-import AnnouncementsManagement from "./pages/admin/AnnouncementsManagement";
-import Analytics from "./pages/admin/Analytics";
-import AuditLogs from "./pages/admin/AuditLogs";
-import SystemConfig from "./pages/admin/SystemConfig";
+import Home from "../Home";
+import Login from "../Login";
+import Signup from "../Signup";
+import Services from "../Services";
+import Complaints from "../Complaints";
+import Events from "../Events";
+import Notifications from "../Notifications";
+import Dashboard from "../Dashboard";
+import Announcements from "../Announcements";
+import AdminDashboard from "./AdminDashboard";
+import StaffDashboard from "../staff/StaffDashboard";
+import UserManagement from "./UserManagement";
+import AnnouncementsManagement from "./AnnouncementsManagement";
+import Analytics from "./Analytics";
+import AuditLogs from "./AuditLogs";
+import SystemConfig from "./SystemConfig";
 import "./styles/design-system.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
