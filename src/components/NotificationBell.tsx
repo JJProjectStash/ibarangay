@@ -53,7 +53,7 @@ const NotificationBell: React.FC = () => {
     try {
       const response = await api.getNotifications();
       // Backend returns { success: true, data: { notifications: [], unreadCount: 0 } }
-      const notificationData = response.data || {};
+      const notificationData = response.data?.data ?? response.data ?? {};
       const notifs = Array.isArray(notificationData.notifications)
         ? notificationData.notifications
         : [];

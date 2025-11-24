@@ -51,7 +51,41 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
     try {
       setLoading(true);
       const response = await api.globalSearch(searchQuery);
-      setResults(response.data);
+      // backend returns { success, query, totalResults, data: { complaints, services, events, announcements, users }}
+      const payload = response.data?.data ?? {};
+      // Flatten grouped results into a single list of SearchResult
+      const flattened: SearchResult[] = [];
+
+      const pushResults = (list: any[], type: SearchResult['type']) => {
+        if (!Array.isArray(list)) return;
+        list.forEach((item) => {
+          flattened.push({
+            id: item._id || item.id || item.idStr || String(Math.random()),
+            type,
+            title: item.title || item.name || item.fullName || item.email || "Untitled",
+            description:
+              item.description || item.content || item.email || item.category || "",
+            url:
+              type === 'complaint'
+                ? `/complaints/${item._id}`
+                : type === 'service'
+                ? `/services/${item._id}`
+                : type === 'event'
+                ? `/events/${item._id}`
+                : type === 'announcement'
+                ? `/announcements/${item._id}`
+                : `/admin/users/${item._id}`,
+          });
+        });
+      };
+
+      pushResults(payload.complaints || [], 'complaint');
+      pushResults(payload.services || [], 'service');
+      pushResults(payload.events || [], 'event');
+      pushResults(payload.announcements || [], 'announcement');
+      pushResults(payload.users || [], 'user');
+
+      setResults(flattened);
       setSelectedIndex(0);
     } catch (err) {
       console.error("Search failed:", err);

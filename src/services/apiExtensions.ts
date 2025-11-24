@@ -73,9 +73,10 @@ const extendedApi = Object.assign(api, {
   escalateComplaint: (id: string, reason: string) =>
     api.post(`/complaints/${id}/escalate`, { reason }),
   uploadComplaintFile: (file: File) => uploadService.uploadFile(file),
-  getComplaintCategories: () => api.get("/complaints/categories"),
+  // complaint categories are actually served from /config on the backend
+  getComplaintCategories: () => api.get("/config/complaint-categories"),
   updateComplaintCategories: (categories: any[]) =>
-    api.put("/complaints/categories", { categories }),
+    api.put("/config/complaint-categories", { categories }),
 
   // Bulk operations
   bulkDeleteComplaints: bulkService.deleteComplaints,
@@ -91,9 +92,11 @@ const extendedApi = Object.assign(api, {
   deleteService: serviceService.delete,
   updateServiceStatus: serviceService.updateStatus,
   assignService: serviceService.assign,
-  getServiceItemTypes: () => api.get("/services/item-types"),
+  // service item types live under the /config namespace on the backend
+  getServiceItemTypes: () => api.get("/config/service-item-types"),
+  // backend expects the field name 'itemTypes' in request body
   updateServiceItemTypes: (types: any[]) =>
-    api.put("/services/item-types", { types }),
+    api.put("/config/service-item-types", { itemTypes: types }),
 
   // Event methods
   getEvents: eventService.getAll,

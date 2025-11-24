@@ -43,7 +43,8 @@ const Services: React.FC = () => {
   const fetchItemTypes = async () => {
     try {
       const response = await api.getServiceItemTypes();
-      setItemTypes(response.data || []);
+      // backend returns { success: boolean, data: [...] }
+      setItemTypes(response.data?.data || []);
     } catch (error) {
       console.error("Failed to fetch item types:", error);
     }
@@ -53,7 +54,9 @@ const Services: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getServiceRequests();
-      const servicesData = Array.isArray(response.data) ? response.data : [];
+      const servicesData = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
       setServices(servicesData);
     } catch (error) {
       console.error("Failed to fetch services:", error);

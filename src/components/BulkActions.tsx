@@ -23,7 +23,8 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   const loadStaffList = async () => {
     try {
       const response = await api.getAllUsers({ role: "staff" });
-      setStaffList(response.data.users || []);
+      // admin GET /admin/users: { success, data: users, pagination }
+      setStaffList(response.data?.data || []);
     } catch (error) {
       toast.error("Failed to load staff list");
     }

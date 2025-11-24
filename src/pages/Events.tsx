@@ -27,8 +27,10 @@ const Events: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setIsLoading(true);
-      const response = await api.getEvents();
-      const eventsData = Array.isArray(response.data) ? response.data : [];
+        const response = await api.getEvents();
+        const eventsData = Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
       setEvents(eventsData);
     } catch (error) {
       console.error("Failed to fetch events:", error);

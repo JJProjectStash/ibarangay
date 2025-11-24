@@ -47,8 +47,35 @@ const AuditLogs = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await api.getAuditLogStats();
-      setStats(response.data);
+      // Backend doesn't provide a dedicated audit-stats endpoint — fetch a large page and derive stats
+      const res = await api.getAuditLogs({ page: 1, limit: 1000 });
+      const payload = res.data?.data || [];
+
+      const totalLogs = payload.length;
+      const today = new Date();
+      const todayLogs = payload.filter((l: any) => {
+        const ts = new Date(l.timestamp || l.updatedAt || l.createdAt);
+        return (
+          ts.getFullYear() === today.getFullYear() &&
+          ts.getMonth() === today.getMonth() &&
+          ts.getDate() === today.getDate()
+        );
+      }).length;
+
+      const failedActions = payload.filter((l: any) => {
+        if (!l.status) return false;
+        const s = String(l.status).toLowerCase();
+        return s === 'failed' || s === 'error' || s === 'rejected';
+      }).length;
+
+      const uniqueUsers = new Set(
+        payload.map((l: any) => {
+          if (!l.user) return null;
+          return typeof l.user === 'string' ? l.user : l.user._id || l.user.id || null;
+        }).filter(Boolean),
+      ).size;
+
+      setStats({ totalLogs, todayLogs, failedActions, uniqueUsers });
     } catch (err) {
       console.error(err);
       console.error(err);

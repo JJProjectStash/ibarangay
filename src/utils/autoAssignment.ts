@@ -48,7 +48,7 @@ export class AutoAssignmentService {
     try {
       // Get all staff members
       const staffResponse = await api.getAllUsers({ role: "staff" });
-      const staffMembers: StaffMember[] = staffResponse.data;
+      const staffMembers: StaffMember[] = staffResponse.data?.data || [];
 
       if (staffMembers.length === 0) {
         console.warn("No staff members available for assignment");
@@ -59,7 +59,7 @@ export class AutoAssignmentService {
       const complaintsResponse = await api.getComplaints({
         status: "pending,in-progress",
       });
-      const activeComplaints = complaintsResponse.data;
+      const activeComplaints = complaintsResponse.data?.data || [];
 
       // Calculate workload for each staff member
       const staffScores = await Promise.all(
@@ -140,12 +140,14 @@ export class AutoAssignmentService {
     try {
       const complaint = await api.getComplaintById(complaintId);
 
-      if (complaint.data.assignedTo) {
+      const complaintData = complaint.data?.data || complaint.data;
+
+      if (complaintData.assignedTo) {
         console.log("Complaint already assigned");
         return false;
       }
 
-      const bestStaffId = await this.findBestStaffForComplaint(complaint.data);
+      const bestStaffId = await this.findBestStaffForComplaint(complaintData);
 
       if (!bestStaffId) {
         console.warn("No suitable staff found for auto-assignment");
@@ -171,7 +173,7 @@ export class AutoAssignmentService {
       const complaintsResponse = await api.getComplaints({
         status: "pending,in-progress",
       });
-      const complaints = complaintsResponse.data;
+      const complaints = complaintsResponse.data?.data || [];
 
       const now = new Date();
       const overdueThreshold = 72 * 60 * 60 * 1000; // 72 hours
@@ -213,12 +215,12 @@ export class AutoAssignmentService {
   async rebalanceWorkload(): Promise<void> {
     try {
       const staffResponse = await api.getAllUsers({ role: "staff" });
-      const staffMembers: StaffMember[] = staffResponse.data;
+      const staffMembers: StaffMember[] = staffResponse.data?.data || [];
 
       const complaintsResponse = await api.getComplaints({
         status: "pending,in-progress",
       });
-      const activeComplaints = complaintsResponse.data;
+      const activeComplaints = complaintsResponse.data?.data || [];
 
       // Calculate workload for each staff
       const workloadMap = new Map<string, any[]>();

@@ -86,7 +86,8 @@ const Complaints: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.getComplaintCategories();
-      setCategories(response.data || []);
+      // backend returns { success: boolean, data: [...] }
+      setCategories(response.data?.data || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
@@ -100,7 +101,10 @@ const Complaints: React.FC = () => {
       if (filterPriority) params.priority = filterPriority;
 
       const response = await api.getComplaints(params);
-      const complaintsData = Array.isArray(response.data) ? response.data : [];
+      // backend returns { success: boolean, data: [...] }
+      const complaintsData = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
       setComplaints(complaintsData);
     } catch (error) {
       console.error("Failed to fetch complaints:", error);

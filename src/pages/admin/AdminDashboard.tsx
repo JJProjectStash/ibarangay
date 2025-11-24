@@ -44,8 +44,9 @@ const AdminDashboard: React.FC = () => {
         api.getTimeSeriesData("complaints", `30d`),
       ]);
 
-      setStats(statsResponse.data);
-      setTimeSeriesData(timeSeriesResponse.data);
+      // backend responses are wrapped under data
+      setStats(statsResponse.data?.data ?? statsResponse.data);
+      setTimeSeriesData(timeSeriesResponse.data?.data ?? timeSeriesResponse.data);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
       showErrorToast(getErrorMessage(error));

@@ -40,7 +40,8 @@ const Notifications: React.FC = () => {
         setIsRefreshing(true);
       }
       const response = await api.getNotifications();
-      setNotifications(response.data.notifications || []);
+      const payload = response.data?.data ?? response.data;
+      setNotifications(payload.notifications || []);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       showErrorToast(getErrorMessage(error));

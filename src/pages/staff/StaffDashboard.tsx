@@ -52,9 +52,10 @@ const StaffDashboard = () => {
           api.getStaffPerformance(),
         ]);
 
-      setStats(statsRes.data);
-      setAssignedComplaints(complaintsRes.data);
-      setPendingServices(servicesRes.data);
+      // backend responses use { success, data }
+      setStats(statsRes.data?.data ?? statsRes.data);
+      setAssignedComplaints(complaintsRes.data?.data || []);
+      setPendingServices(servicesRes.data?.data || []);
 
       // Find current staff performance
       const staffPerf = performanceRes.data.find(

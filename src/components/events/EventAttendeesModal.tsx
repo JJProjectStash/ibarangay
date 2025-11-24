@@ -44,9 +44,10 @@ const EventAttendeesModal: React.FC<EventAttendeesModalProps> = ({
     try {
       setIsLoading(true);
       const response = await api.getEventAttendees(eventId);
-      setAttendees(response.data.attendees || []);
-      setTotalAttendees(response.data.totalAttendees || 0);
-      setMaxAttendees(response.data.maxAttendees || null);
+      const payload = response.data?.data ?? response.data;
+      setAttendees(payload.attendees || []);
+      setTotalAttendees(payload.totalAttendees || 0);
+      setMaxAttendees(payload.maxAttendees ?? null);
     } catch (error) {
       console.error("Failed to fetch attendees:", error);
       showErrorToast(getErrorMessage(error));

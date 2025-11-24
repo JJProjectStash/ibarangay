@@ -23,8 +23,9 @@ const SystemConfig = () => {
         api.getServiceItemTypes(),
       ]);
 
-      setComplaintCategories(categoriesRes.data || []);
-      setServiceItemTypes(itemTypesRes.data || []);
+      // backend returns { success: boolean, data: [...] }
+      setComplaintCategories(categoriesRes.data?.data || []);
+      setServiceItemTypes(itemTypesRes.data?.data || []);
     } catch (err) {
       console.error(err);
       showToast("Failed to fetch configuration", "error");
