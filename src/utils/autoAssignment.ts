@@ -14,12 +14,12 @@ interface Complaint {
   assignedTo?: string;
 }
 
-interface WorkloadStats {
-  staffId: string;
-  activeComplaints: number;
-  avgResponseTime: number;
-  categories: string[];
-}
+// interface WorkloadStats {
+//   staffId: string;
+//   activeComplaints: number;
+//   avgResponseTime: number;
+//   categories: string[];
+// }
 
 /**
  * Intelligent auto-assignment algorithm
@@ -224,7 +224,7 @@ export class AutoAssignmentService {
       const workloadMap = new Map<string, any[]>();
       staffMembers.forEach((staff) => {
         const staffComplaints = activeComplaints.filter(
-          (c) => c.assignedTo?._id === staff._id || c.assignedTo === staff._id
+          (c: any) => c.assignedTo?._id === staff._id || c.assignedTo === staff._id
         );
         workloadMap.set(staff._id, staffComplaints);
       });

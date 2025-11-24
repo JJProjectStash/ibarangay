@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../services/apiExtensions";
 import { Shield, AlertCircle } from "lucide-react";
 
 interface CSRFTokenProps {
@@ -15,18 +16,10 @@ const CSRFToken: React.FC<CSRFTokenProps> = ({ onTokenReceived }) => {
         setIsLoading(true);
         setError("");
 
-        // In a real implementation, this would fetch from your backend
-        const response = await fetch("/api/v1/csrf-token", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch CSRF token");
-        }
-
-        const data = await response.json();
-        const token = data.csrfToken;
+        // Use the axios client (apiExtensions) which points to /api/v1 by default
+        // and will be proxied by Vite during development to avoid CORS issues.
+        const res = await api.getCsrfToken();
+        const token = res.data?.csrfToken;
 
         // Store token in meta tag for axios interceptor
         let metaTag = document.querySelector(

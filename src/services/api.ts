@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError} from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+// Use a relative API base by default so dev server proxies (Vite) handle
+// requests and avoid CORS issues when running on different dev ports.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "/api/v1";
 
 /**
  * Axios instance with default configuration
