@@ -10,7 +10,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { Announcement, PaginatedResponse } from "../../types";
 import { showSuccessToast, showErrorToast } from "../../components/Toast";
 import { getErrorMessage } from "../../utils/errorHandler";
@@ -60,8 +60,8 @@ const AnnouncementManagement: React.FC = () => {
       if (filterPriority !== "all") params.priority = filterPriority;
       if (searchTerm) params.search = searchTerm;
 
-      const response: PaginatedResponse<Announcement> =
-        await api.getAnnouncements(params);
+      const res = await api.getAnnouncements(params);
+      const response: PaginatedResponse<Announcement> = res.data;
       setAnnouncements(response.data);
       setPagination(response.pagination);
     } catch (error) {

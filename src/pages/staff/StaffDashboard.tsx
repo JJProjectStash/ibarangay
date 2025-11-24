@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { Complaint, Service } from "../../types";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { showToast } from "../../utils/toast";

@@ -8,7 +8,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { User, PaginatedResponse } from "../../types";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import CreateStaffAdminModal from "../../components/admin/CreateStaffAdminModal";

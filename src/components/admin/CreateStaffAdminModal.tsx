@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { showToast } from "../../utils/toast";
 
 interface CreateStaffAdminModalProps {

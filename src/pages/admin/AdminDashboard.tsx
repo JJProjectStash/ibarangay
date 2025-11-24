@@ -9,7 +9,7 @@ import {
   Clock,
   Activity,
 } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { DashboardStats, TimeSeriesData } from "../../types";
 import { showErrorToast } from "../../components/Toast";
 import { getErrorMessage } from "../../utils/errorHandler";

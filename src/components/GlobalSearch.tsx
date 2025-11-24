@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchResult {

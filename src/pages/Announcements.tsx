@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Calendar, Eye, AlertCircle } from "lucide-react";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import { Announcement, PaginatedResponse } from "../types";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { showErrorToast } from "../components/Toast";
@@ -40,8 +40,8 @@ const Announcements: React.FC = () => {
       if (searchTerm) params.search = searchTerm;
       if (filterPriority !== "all") params.priority = filterPriority;
 
-      const response: PaginatedResponse<Announcement> =
-        await api.getAnnouncements(params);
+      const res = await api.getAnnouncements(params);
+      const response: PaginatedResponse<Announcement> = res.data;
       setAnnouncements(response.data);
       setPagination(response.pagination);
     } catch (error) {

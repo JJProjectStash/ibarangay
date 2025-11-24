@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import { User } from "../types";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 
 interface AuthContextType {
   user: User | null;

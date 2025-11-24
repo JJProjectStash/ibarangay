@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Filter, Trash2 } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { AuditLog, PaginatedResponse, User } from "../../types";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { showToast } from "../../utils/toast";
@@ -33,9 +33,8 @@ const AuditLogs = () => {
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
-      const response: PaginatedResponse<AuditLog> = await api.getAuditLogs(
-        params
-      );
+      const res = await api.getAuditLogs(params);
+      const response: PaginatedResponse<AuditLog> = res.data;
       setLogs(response.data);
       setPagination(response.pagination);
     } catch (err) {

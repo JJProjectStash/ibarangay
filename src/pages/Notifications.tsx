@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Check, Trash2, RefreshCw } from "lucide-react";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import socketService from "../services/socket";
 import { Notification } from "../types";
 import { format } from "date-fns";

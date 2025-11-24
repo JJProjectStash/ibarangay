@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Save, Plus, Trash2, Settings } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { showToast } from "../../utils/toast";
 

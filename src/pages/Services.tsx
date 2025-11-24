@@ -7,7 +7,7 @@ import {
   XCircle,
   Settings,
 } from "lucide-react";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import { Service } from "../types";
 import { format } from "date-fns";
 import { showSuccessToast, showErrorToast } from "../components/Toast";

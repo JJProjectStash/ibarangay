@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 import { format } from "date-fns";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import socketService from "../services/socket";
 
 interface Notification {

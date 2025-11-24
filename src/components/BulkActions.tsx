@@ -1,253 +1,189 @@
-import { useState, useEffect } from "react";
-import { Trash2, Download, UserPlus } from "lucide-react";
-import api from "../services/api";
-import { showToast } from "../utils/toast";
+import React, { useState } from "react";
+import { Download, Trash2, UserPlus } from "lucide-react";
+import api from "../services/apiExtensions";
+import { toast } from "../utils/toast";
 
 interface BulkActionsProps {
   selectedIds: string[];
   onActionComplete: () => void;
-  onClearSelection: () => void;
-  type: "complaints" | "services" | "events";
-}
-
-interface StaffMember {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  role: string;
+  type: "complaints" | "services";
 }
 
 const BulkActions: React.FC<BulkActionsProps> = ({
   selectedIds,
   onActionComplete,
-  onClearSelection,
   type,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [showStaffSelect, setShowStaffSelect] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState("");
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    if (showAssignModal && type === "complaints") {
-      fetchStaffMembers();
-    }
-  }, [showAssignModal, type]);
-
-  const fetchStaffMembers = async () => {
+  const loadStaffList = async () => {
     try {
       const response = await api.getAllUsers({ role: "staff" });
-      setStaffMembers(response.data);
+      setStaffList(response.data.users || []);
     } catch (error) {
-      console.error("Failed to fetch staff members:", error);
-      showToast("Failed to load staff members", "error");
+      toast.error("Failed to load staff list");
     }
   };
 
   const handleBulkDelete = async () => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedIds.length} ${type}?`
-      )
-    ) {
-      return;
-    }
+    if (!confirm(`Delete ${selectedIds.length} ${type}?`)) return;
 
     try {
-      setIsLoading(true);
       if (type === "complaints") {
         await api.bulkDeleteComplaints(selectedIds);
+      } else {
+        // Implement bulk delete for services if needed
+        toast.error("Bulk delete for services not implemented");
+        return;
       }
-      showToast(
-        `Successfully deleted ${selectedIds.length} ${type}`,
-        "success"
-      );
+
+      toast.success(`${selectedIds.length} ${type} deleted successfully`);
       onActionComplete();
-      onClearSelection();
-    } catch (error) {
-      console.error("Bulk delete failed:", error);
-      showToast(`Failed to delete ${type}`, "error");
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to delete ${type}`);
     }
   };
 
   const handleBulkAssign = async () => {
     if (!selectedStaff) {
-      showToast("Please select a staff member", "error");
+      toast.error("Please select a staff member");
       return;
     }
 
+    setIsAssigning(true);
     try {
-      setIsLoading(true);
       await api.bulkAssignComplaints(selectedIds, selectedStaff);
-      showToast(
-        `Successfully assigned ${selectedIds.length} complaints`,
-        "success"
-      );
-      setShowAssignModal(false);
+      toast.success(`${selectedIds.length} ${type} assigned successfully`);
+      setShowStaffSelect(false);
+      setSelectedStaff("");
       onActionComplete();
-      onClearSelection();
-    } catch (error) {
-      console.error("Bulk assign failed:", error);
-      showToast("Failed to assign complaints", "error");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to assign ${type}`);
     } finally {
-      setIsLoading(false);
+      setIsAssigning(false);
     }
   };
 
   const handleExport = async (format: "csv" | "excel") => {
+    setIsExporting(true);
     try {
-      setIsLoading(true);
-      const blob = await api.exportComplaints(format, {
+      const res = await api.exportComplaints(format, {
         ids: selectedIds,
       });
+
+      const blob = res.data;
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${type}-export.${format}`;
+      a.download = `${type}-export-${Date.now()}.${
+        format === "csv" ? "csv" : "xlsx"
+      }`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      showToast(`Exported ${selectedIds.length} ${type}`, "success");
-    } catch (error) {
-      console.error("Export failed:", error);
-      showToast("Failed to export data", "error");
+
+      toast.success(`${type} exported successfully`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to export ${type}`);
     } finally {
-      setIsLoading(false);
+      setIsExporting(false);
     }
   };
 
-  if (selectedIds.length === 0) {
-    return null;
-  }
+  const openStaffSelect = () => {
+    loadStaffList();
+    setShowStaffSelect(true);
+  };
+
+  if (selectedIds.length === 0) return null;
 
   return (
-    <>
-      <div
-        className="card"
-        style={{
-          position: "fixed",
-          bottom: "2rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1000,
-          minWidth: "400px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-        }}
-      >
-        <div className="card-body">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <strong>{selectedIds.length}</strong> items selected
-            </div>
-            <div className="btn-group">
-              {type === "complaints" && (
-                <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => setShowAssignModal(true)}
-                  disabled={isLoading}
-                >
-                  <UserPlus size={16} className="me-1" />
-                  Assign
-                </button>
-              )}
-              <button
-                className="btn btn-sm btn-outline-success"
-                onClick={() => handleExport("csv")}
-                disabled={isLoading}
-              >
-                <Download size={16} className="me-1" />
-                Export CSV
-              </button>
-              <button
-                className="btn btn-sm btn-outline-success"
-                onClick={() => handleExport("excel")}
-                disabled={isLoading}
-              >
-                <Download size={16} className="me-1" />
-                Export Excel
-              </button>
-              <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={handleBulkDelete}
-                disabled={isLoading}
-              >
-                <Trash2 size={16} className="me-1" />
-                Delete
-              </button>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={onClearSelection}
-                disabled={isLoading}
-              >
-                Clear
-              </button>
-            </div>
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-blue-900">
+          {selectedIds.length} {type} selected
+        </span>
+
+        <div className="flex gap-2">
+          <button
+            onClick={openStaffSelect}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <UserPlus className="w-4 h-4" />
+            Assign
+          </button>
+
+          <button
+            onClick={handleBulkDelete}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </button>
+
+          <div className="relative">
+            <button
+              onClick={() => handleExport("csv")}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
           </div>
+
+          <button
+            onClick={() => handleExport("excel")}
+            disabled={isExporting}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            Export Excel
+          </button>
         </div>
       </div>
 
-      {/* Assign Modal */}
-      {showAssignModal && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Assign to Staff Member</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAssignModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Select Staff Member</label>
-                  <select
-                    className="form-select"
-                    value={selectedStaff}
-                    onChange={(e) => setSelectedStaff(e.target.value)}
-                  >
-                    <option value="">Choose...</option>
-                    {staffMembers.map((staff) => (
-                      <option key={staff._id} value={staff._id}>
-                        {staff.firstName} {staff.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <p className="text-muted small">
-                  This will assign {selectedIds.length} complaints to the
-                  selected staff member.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowAssignModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleBulkAssign}
-                  disabled={isLoading || !selectedStaff}
-                >
-                  {isLoading ? "Assigning..." : "Assign"}
-                </button>
-              </div>
-            </div>
-          </div>
+      {showStaffSelect && (
+        <div className="mt-4 flex items-center gap-2">
+          <select
+            value={selectedStaff}
+            onChange={(e) => setSelectedStaff(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select staff member...</option>
+            {staffList.map((staff) => (
+              <option key={staff._id} value={staff._id}>
+                {staff.name} ({staff.email})
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={handleBulkAssign}
+            disabled={isAssigning || !selectedStaff}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {isAssigning ? "Assigning..." : "Confirm"}
+          </button>
+
+          <button
+            onClick={() => {
+              setShowStaffSelect(false);
+              setSelectedStaff("");
+            }}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          >
+            Cancel
+          </button>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

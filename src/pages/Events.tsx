@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, MapPin, Users, CheckCircle, XCircle } from "lucide-react";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import { Event } from "../types";
 import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";

@@ -8,7 +8,7 @@ import {
   AlertCircle,
   Settings,
 } from "lucide-react";
-import api from "../services/api";
+import api from "../services/apiExtensions";
 import socketService from "../services/socket";
 import { Complaint } from "../types";
 import { format } from "date-fns";
@@ -246,10 +246,11 @@ const Complaints: React.FC = () => {
 
   const handleExport = async (format: "csv" | "excel") => {
     try {
-      const blob = await api.exportComplaints(format, {
+      const res = await api.exportComplaints(format, {
         status: filterStatus,
         priority: filterPriority,
       });
+      const blob = res.data;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

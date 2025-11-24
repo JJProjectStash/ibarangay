@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Users, X, Download, Mail, Phone, MapPin } from "lucide-react";
-import api from "../../services/api";
+import api from "../../services/apiExtensions";
 import { showSuccessToast, showErrorToast } from "../Toast";
 import { getErrorMessage } from "../../utils/errorHandler";
 import { format } from "date-fns";
