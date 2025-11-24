@@ -41,10 +41,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    if (storedToken) {
-      setToken(storedToken);
+    // treat stringified null/undefined/empty as missing values
+    const hasValidToken = Boolean(
+      storedToken && storedToken !== "null" && storedToken !== "undefined" && storedToken !== ""
+    );
 
-      if (storedUser) {
+    if (hasValidToken) {
+      setToken(storedToken);
+    } else if (storedToken) {
+      // cleanup bad token values stored previously
+      localStorage.removeItem("token");
+    }
+
+    if (storedUser) {
         // storedUser may sometimes be the string "undefined" or invalid JSON
         try {
           const parsed = JSON.parse(storedUser);
@@ -60,7 +69,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           localStorage.removeItem("user");
           // Try to recover by asking the backend for the profile when possible
           try {
-            api
+            // only try fetching the profile if we have a valid token
+            if (hasValidToken) {
+              api
               .getProfile()
               .then((r) => {
                 const fetchedUser = r.data?.user || r.data;
@@ -74,12 +85,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
                 setToken(null);
                 localStorage.removeItem("token");
               });
+            }
           } catch {
             // ignore
           }
         }
       }
-    }
     setIsLoading(false);
   }, []);
 
@@ -93,8 +104,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       setUser(userData || null);
       setToken(userToken || null);
-      localStorage.setItem("token", userToken);
-      localStorage.setItem("user", JSON.stringify(userData));
+      if (userToken) {
+        localStorage.setItem("token", userToken);
+      } else {
+        localStorage.removeItem("token");
+      }
+
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
+      } else {
+        localStorage.removeItem("user");
+      }
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Login failed");
     }
@@ -109,8 +129,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       setUser(userData || null);
       setToken(userToken || null);
-      localStorage.setItem("token", userToken);
-      localStorage.setItem("user", JSON.stringify(userData));
+      if (userToken) {
+        localStorage.setItem("token", userToken);
+      } else {
+        localStorage.removeItem("token");
+      }
+
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
+      } else {
+        localStorage.removeItem("user");
+      }
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Registration failed");
     }
@@ -129,7 +158,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     login,
     register,
     logout,
-    isAuthenticated: !!token,
+    // Consider the user authenticated either when a user object exists
+    // (cookie or profile-based flows) OR when an explicit token is present.
+    isAuthenticated: Boolean(user || token),
     isLoading,
   };
 
