@@ -27,7 +27,8 @@ interface WorkloadStats {
  */
 export class AutoAssignmentService {
   private static instance: AutoAssignmentService;
-  private staffWorkload: Map<string, WorkloadStats> = new Map();
+  // internal workload cache (unused right now) - kept for future improvements
+  // private staffWorkload: Map<string, WorkloadStats> = new Map();
 
   private constructor() {}
 
@@ -100,14 +101,14 @@ export class AutoAssignmentService {
 
     // Factor 1: Current workload (lower is better)
     const staffComplaints = activeComplaints.filter(
-      (c) => c.assignedTo?._id === staff._id || c.assignedTo === staff._id
+      (c: any) => c.assignedTo?._id === staff._id || c.assignedTo === staff._id
     );
     const workloadPenalty = staffComplaints.length * 10;
     score -= workloadPenalty;
 
     // Factor 2: Category expertise (bonus if staff has handled this category before)
     const categoryExperience = staffComplaints.filter(
-      (c) => c.category === complaint.category
+      (c: any) => c.category === complaint.category
     ).length;
     const categoryBonus = Math.min(categoryExperience * 5, 25);
     score += categoryBonus;

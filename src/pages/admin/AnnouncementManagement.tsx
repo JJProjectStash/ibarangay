@@ -257,7 +257,7 @@ const AnnouncementManagement: React.FC = () => {
     return (
       <div style={{ padding: "2rem 0" }}>
         <div className="container">
-          <SkeletonLoader count={5} height={120} />
+          <SkeletonLoader count={5} height="120px" />
         </div>
       </div>
     );

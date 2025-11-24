@@ -77,7 +77,7 @@ const Analytics = () => {
       setLoading(true);
       const [timeSeriesRes, categoryRes, staffRes, trendsRes, responseTimeRes] =
         await Promise.all([
-          api.getTimeSeriesData(period, days),
+          api.getTimeSeriesData("complaints", `${days}d`),
           api.getCategoryAnalytics(),
           api.getStaffPerformance(),
           api.getTrendAnalysis(days),
@@ -108,8 +108,11 @@ const Analytics = () => {
   ];
 
   // Custom label function for pie chart
-  const renderCustomLabel = (entry: CategoryData) => {
-    return `${entry.category}: ${entry.percentage}%`;
+  const renderCustomLabel = (props: any) => {
+    // Recharts passes label props; payload contains our CategoryData
+    const payload = props.payload as CategoryData | undefined;
+    if (!payload) return "";
+    return `${payload.category}: ${payload.percentage}%`;
   };
 
   if (loading) {

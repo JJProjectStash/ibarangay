@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Search,
-  Filter,
-  Plus,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Search, Filter, Plus, Trash2, CheckCircle, XCircle } from "lucide-react";
 import api from "../../services/apiExtensions";
 import { User, PaginatedResponse } from "../../types";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -40,7 +32,8 @@ const UserManagement = () => {
       if (verifiedFilter !== "all")
         params.verified = verifiedFilter === "verified";
 
-      const response: PaginatedResponse<User> = await api.getUsers(params);
+      const res = await api.getUsers(params);
+      const response: PaginatedResponse<User> = res.data;
       setUsers(response.data);
       setPagination(response.pagination);
     } catch (err) {
@@ -341,6 +334,7 @@ const UserManagement = () => {
       {/* Create Staff/Admin Modal */}
       {showCreateModal && (
         <CreateStaffAdminModal
+          isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
             setShowCreateModal(false);

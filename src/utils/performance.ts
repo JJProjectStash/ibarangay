@@ -36,7 +36,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
 
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -127,14 +127,12 @@ export function isSlowConnection(): boolean {
  * Virtual scrolling helper for large lists
  */
 export class VirtualScroller {
-  private container: HTMLElement;
   private itemHeight: number;
   private visibleCount: number;
   private totalCount: number;
   private scrollTop: number = 0;
 
   constructor(container: HTMLElement, itemHeight: number, totalCount: number) {
-    this.container = container;
     this.itemHeight = itemHeight;
     this.totalCount = totalCount;
     this.visibleCount = Math.ceil(container.clientHeight / itemHeight) + 2;

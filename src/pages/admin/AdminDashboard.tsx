@@ -40,7 +40,8 @@ const AdminDashboard: React.FC = () => {
       setIsLoading(true);
       const [statsResponse, timeSeriesResponse] = await Promise.all([
         api.getDashboardStats(),
-        api.getTimeSeriesData(period, 30),
+        // apiExtensions' getTimeSeriesData expects (type, periodString). Use complaints + duration
+        api.getTimeSeriesData("complaints", `30d`),
       ]);
 
       setStats(statsResponse.data);
