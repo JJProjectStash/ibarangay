@@ -41,9 +41,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    if (storedToken && storedUser) {
+    if (storedToken) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+
+      if (storedUser) {
+        // storedUser may sometimes be the string "undefined" or invalid JSON
+        try {
+          const parsed = JSON.parse(storedUser);
+          // ensure parsed appears to be an object with an _id or email to guard against bad data
+          if (parsed && (parsed._id || parsed.email)) {
+            setUser(parsed as User);
+          } else {
+            // invalid user data => remove it
+            localStorage.removeItem("user");
+          }
+        } catch (err) {
+          // invalid JSON in localStorage -> remove it to avoid the parsing error
+          localStorage.removeItem("user");
+          // Try to recover by asking the backend for the profile when possible
+          try {
+            api
+              .getProfile()
+              .then((r) => {
+                const fetchedUser = r.data?.user || r.data;
+                if (fetchedUser) {
+                  setUser(fetchedUser);
+                  localStorage.setItem("user", JSON.stringify(fetchedUser));
+                }
+              })
+              .catch(() => {
+                // profile fetch failed — clear token and user
+                setToken(null);
+                localStorage.removeItem("token");
+              });
+          } catch {
+            // ignore
+          }
+        }
+      }
     }
     setIsLoading(false);
   }, []);
@@ -51,10 +86,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const login = async (email: string, password: string) => {
     try {
       const response = await api.login({ email, password });
-      const { user: userData, token: userToken } = response.data;
+      // response.data may either be the payload directly or { data: payload }
+      const payload = response.data?.data ?? response.data;
+      const userData = payload?.user ?? payload?.userData ?? payload;
+      const userToken = payload?.token ?? payload?.accessToken ?? null;
 
-      setUser(userData);
-      setToken(userToken);
+      setUser(userData || null);
+      setToken(userToken || null);
       localStorage.setItem("token", userToken);
       localStorage.setItem("user", JSON.stringify(userData));
     } catch (error: any) {
@@ -65,10 +103,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const register = async (data: RegisterData) => {
     try {
       const response = await api.register(data);
-      const { user: userData, token: userToken } = response.data;
+      const payload = response.data?.data ?? response.data;
+      const userData = payload?.user ?? payload?.userData ?? payload;
+      const userToken = payload?.token ?? payload?.accessToken ?? null;
 
-      setUser(userData);
-      setToken(userToken);
+      setUser(userData || null);
+      setToken(userToken || null);
       localStorage.setItem("token", userToken);
       localStorage.setItem("user", JSON.stringify(userData));
     } catch (error: any) {
