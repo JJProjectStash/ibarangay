@@ -23,10 +23,11 @@ import Announcements from "./pages/Announcements";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import UserManagement from "./pages/admin/UserManagement";
-import AnnouncementsManagement from "./pages/admin/AnnouncementsManagement";
+import AnnouncementManagement from "./pages/admin/AnnouncementManagement";
 import Analytics from "./pages/admin/Analytics";
 import AuditLogs from "./pages/admin/AuditLogs";
 import SystemConfig from "./pages/admin/SystemConfig";
+import AutomationSettings from "./pages/admin/AutomationSettings";
 import "./styles/design-system.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -158,7 +159,7 @@ function AppRoutes() {
           path="/admin/announcements"
           element={
             <RoleBasedRoute allowedRoles={["admin", "staff"]}>
-              <AnnouncementsManagement />
+              <AnnouncementManagement />
             </RoleBasedRoute>
           }
         />
@@ -183,6 +184,14 @@ function AppRoutes() {
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
               <SystemConfig />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/admin/automation"
+          element={
+            <RoleBasedRoute allowedRoles={["admin"]}>
+              <AutomationSettings />
             </RoleBasedRoute>
           }
         />
