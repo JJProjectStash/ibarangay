@@ -1,84 +1,89 @@
-/**
- * Error Handler Utilities
- *
- * Provides centralized error handling and message extraction for the application.
- * Supports various error types including Axios errors, validation errors, and custom errors.
- *
- * @module utils/errorHandler
- */
-
 import { AxiosError } from "axios";
 
 /**
- * Extracts a user-friendly error message from various error types
- *
- * @param error - The error object (can be AxiosError, Error, or unknown)
- * @returns A human-readable error message string
- *
- * @example
- * ```typescript
- * try {
- *   await api.createComplaint(data);
- * } catch (error) {
- *   const message = getErrorMessage(error);
- *   showErrorToast(message);
- * }
- * ```
+ * Error response interface
+ */
+export interface ErrorResponse {
+  success: false;
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+/**
+ * Extract error message from various error types
+ * @param error - Error object from API call
+ * @returns User-friendly error message
  */
 export const getErrorMessage = (error: unknown): string => {
-  // Handle Axios errors (API responses)
   if (error instanceof AxiosError) {
-    // Server responded with error
-    if (error.response?.data?.message) {
-      return error.response.data.message;
+    const data = error.response?.data as ErrorResponse;
+
+    // Handle validation errors
+    if (data?.errors) {
+      const firstError = Object.values(data.errors)[0];
+      return firstError?.[0] || "Validation error occurred";
     }
 
-    // Network error
-    if (error.message === "Network Error") {
-      return "Network error. Please check your internet connection.";
+    // Handle general API errors
+    if (data?.message) {
+      return data.message;
     }
 
-    // Timeout error
+    // Handle network errors
     if (error.code === "ECONNABORTED") {
       return "Request timeout. Please try again.";
     }
 
-    // Generic Axios error
-    return error.message || "An unexpected error occurred";
+    if (error.code === "ERR_NETWORK") {
+      return "Network error. Please check your connection.";
+    }
+
+    // Handle HTTP status codes
+    switch (error.response?.status) {
+      case 400:
+        return "Invalid request. Please check your input.";
+      case 401:
+        return "Unauthorized. Please log in again.";
+      case 403:
+        return "Access denied. You do not have permission.";
+      case 404:
+        return "Resource not found.";
+      case 409:
+        return "Conflict. Resource already exists.";
+      case 429:
+        return "Too many requests. Please try again later.";
+      case 500:
+        return "Server error. Please try again later.";
+      case 503:
+        return "Service unavailable. Please try again later.";
+      default:
+        return "An unexpected error occurred.";
+    }
   }
 
-  // Handle standard Error objects
   if (error instanceof Error) {
     return error.message;
   }
 
-  // Handle string errors
-  if (typeof error === "string") {
-    return error;
-  }
-
-  // Fallback for unknown error types
-  return "An unexpected error occurred. Please try again.";
+  return "An unknown error occurred";
 };
 
 /**
- * Checks if an error is a network-related error
- *
- * @param error - The error object to check
- * @returns True if the error is network-related, false otherwise
+ * Check if error is a network error
+ * @param error - Error object
+ * @returns True if network error
  */
 export const isNetworkError = (error: unknown): boolean => {
   if (error instanceof AxiosError) {
-    return error.message === "Network Error" || error.code === "ECONNABORTED";
+    return error.code === "ERR_NETWORK" || error.code === "ECONNABORTED";
   }
   return false;
 };
 
 /**
- * Checks if an error is an authentication error (401 Unauthorized)
- *
- * @param error - The error object to check
- * @returns True if the error is an authentication error, false otherwise
+ * Check if error is an authentication error
+ * @param error - Error object
+ * @returns True if auth error
  */
 export const isAuthError = (error: unknown): boolean => {
   if (error instanceof AxiosError) {
@@ -88,46 +93,80 @@ export const isAuthError = (error: unknown): boolean => {
 };
 
 /**
- * Checks if an error is a validation error (400 Bad Request)
- *
- * @param error - The error object to check
- * @returns True if the error is a validation error, false otherwise
+ * Check if error is a validation error
+ * @param error - Error object
+ * @returns True if validation error
  */
 export const isValidationError = (error: unknown): boolean => {
   if (error instanceof AxiosError) {
-    return error.response?.status === 400;
+    const data = error.response?.data as ErrorResponse;
+    return error.response?.status === 400 && !!data?.errors;
   }
   return false;
 };
 
 /**
- * Extracts validation errors from an API response
- *
- * @param error - The error object
- * @returns An object mapping field names to error messages, or null if not a validation error
- *
- * @example
- * ```typescript
- * try {
- *   await api.register(formData);
- * } catch (error) {
- *   const validationErrors = getValidationErrors(error);
- *   if (validationErrors) {
- *     Object.entries(validationErrors).forEach(([field, message]) => {
- *       setFieldError(field, message);
- *     });
- *   }
- * }
- * ```
+ * Retry function with exponential backoff
+ * @param fn - Function to retry
+ * @param maxRetries - Maximum number of retries
+ * @param delay - Initial delay in milliseconds
+ * @returns Promise with function result
  */
-export const getValidationErrors = (
-  error: unknown
-): Record<string, string> | null => {
-  if (error instanceof AxiosError && error.response?.status === 400) {
-    const errors = error.response.data?.errors;
-    if (errors && typeof errors === "object") {
-      return errors as Record<string, string>;
+export const retryWithBackoff = async <T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T> => {
+  let lastError: unknown;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on auth errors or validation errors
+      if (isAuthError(error) || isValidationError(error)) {
+        throw error;
+      }
+
+      // Only retry on network errors or server errors
+      if (
+        i < maxRetries - 1 &&
+        (isNetworkError(error) ||
+          (error instanceof AxiosError &&
+            error.response?.status &&
+            error.response.status >= 500))
+      ) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, delay * Math.pow(2, i))
+        );
+        continue;
+      }
+
+      throw error;
     }
   }
-  return null;
+
+  throw lastError;
+};
+
+/**
+ * Handle API error and show toast notification
+ * @param error - Error object
+ * @param showToast - Toast notification function
+ * @param customMessage - Custom error message
+ */
+export const handleApiError = (
+  error: unknown,
+  showToast?: (message: string, type: "error" | "success" | "info") => void,
+  customMessage?: string
+): void => {
+  const message = customMessage || getErrorMessage(error);
+
+  if (showToast) {
+    showToast(message, "error");
+  } else {
+    console.error("API Error:", message, error);
+  }
 };
