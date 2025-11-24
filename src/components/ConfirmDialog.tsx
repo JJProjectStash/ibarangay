@@ -1,78 +1,57 @@
-import { AlertTriangle, X } from "lucide-react";
+import React from "react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
   message: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: "danger" | "warning" | "info";
   onConfirm: () => void;
   onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  type?: "danger" | "warning" | "info";
 }
 
-const ConfirmDialog = ({
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  variant = "warning",
   onConfirm,
   onCancel,
-}: ConfirmDialogProps) => {
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  type = "info",
+}) => {
   if (!isOpen) return null;
 
-  const variantColors = {
-    danger: "btn-danger",
-    warning: "btn-warning",
-    info: "btn-info",
+  const getTypeStyles = () => {
+    switch (type) {
+      case "danger":
+        return "bg-red-600 hover:bg-red-700 text-white";
+      case "warning":
+        return "bg-yellow-600 hover:bg-yellow-700 text-white";
+      default:
+        return "bg-blue-600 hover:bg-blue-700 text-white";
+    }
   };
 
   return (
-    <div
-      className="modal show d-block"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      onClick={onCancel}
-    >
-      <div
-        className="modal-dialog modal-dialog-centered"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="modal-content">
-          <div className="modal-header border-0">
-            <div className="d-flex align-items-center">
-              <AlertTriangle size={24} className={`me-2 text-${variant}`} />
-              <h5 className="modal-title mb-0">{title}</h5>
-            </div>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={onCancel}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <p className="mb-0">{message}</p>
-          </div>
-          <div className="modal-footer border-0">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onCancel}
-            >
-              {cancelText}
-            </button>
-            <button
-              type="button"
-              className={`btn ${variantColors[variant]}`}
-              onClick={() => {
-                onConfirm();
-                onCancel();
-              }}
-            >
-              {confirmText}
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex space-x-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 px-4 py-2 rounded-md transition-colors ${getTypeStyles()}`}
+          >
+            {confirmText}
+          </button>
         </div>
       </div>
     </div>

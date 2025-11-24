@@ -5,29 +5,40 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import ErrorBoundary from "./components/ErrorBoundary";
+import EnhancedErrorBoundary from "./components/EnhancedErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
 import Navbar from "./components/Navbar";
 import ToastProvider from "./components/Toast";
+import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
+import CSRFToken from "./components/CSRFToken";
+import RateLimitFeedback, {
+  useRateLimit,
+} from "./components/RateLimitFeedback";
+import { useSessionTimeout } from "./hooks/useSessionTimeout";
 import socketService from "./services/socket";
 import { useEffect } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Services from "./pages/Services";
-import Complaints from "./pages/Complaints";
-import Events from "./pages/Events";
 import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import StaffDashboard from "./pages/staff/StaffDashboard";
-import UserManagement from "./pages/admin/UserManagement";
-import AnnouncementManagement from "./pages/admin/AnnouncementManagement";
-import Analytics from "./pages/admin/Analytics";
-import AuditLogs from "./pages/admin/AuditLogs";
-import SystemConfig from "./pages/admin/SystemConfig";
-import AutomationSettings from "./pages/admin/AutomationSettings";
+
+// Lazy loaded components for better performance
+import {
+  LazyAdminDashboard,
+  LazyUserManagement,
+  LazyAnnouncementManagement,
+  LazyAnalytics,
+  LazyAuditLogs,
+  LazySystemConfig,
+  LazyAutomationSettings,
+  LazyStaffDashboard,
+  LazyEvents,
+  LazyComplaints,
+  LazyServices,
+} from "./utils/lazyRoutes";
+
 import "./styles/design-system.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -64,8 +75,15 @@ const RoleBasedRoute = ({
   return <>{children}</>;
 };
 
-function AppRoutes() {
+function AppContent() {
   const { token, isAuthenticated } = useAuth();
+  const { rateLimitState, updateRateLimit, handleRateLimitError } =
+    useRateLimit();
+  const { showWarning, timeLeft, extendSession, handleLogout } =
+    useSessionTimeout({
+      warningTime: 300, // 5 minutes warning
+      sessionDuration: 3600, // 1 hour session
+    });
 
   useEffect(() => {
     if (isAuthenticated && token) {
@@ -79,10 +97,46 @@ function AppRoutes() {
     }
   }, [isAuthenticated, token]);
 
+  // Listen for rate limit events
+  useEffect(() => {
+    const handleRateLimitEvent = (event: CustomEvent) => {
+      updateRateLimit(event.detail);
+    };
+
+    const handleRateLimitExceeded = (event: CustomEvent) => {
+      handleRateLimitError(event.detail.retryAfter);
+    };
+
+    window.addEventListener("rateLimit", handleRateLimitEvent as EventListener);
+    window.addEventListener(
+      "rateLimitExceeded",
+      handleRateLimitExceeded as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "rateLimit",
+        handleRateLimitEvent as EventListener
+      );
+      window.removeEventListener(
+        "rateLimitExceeded",
+        handleRateLimitExceeded as EventListener
+      );
+    };
+  }, [updateRateLimit, handleRateLimitError]);
+
   return (
     <>
+      <CSRFToken />
       <Navbar />
       <ToastProvider />
+      <RateLimitFeedback {...rateLimitState} />
+      <SessionTimeoutWarning
+        isVisible={showWarning}
+        timeLeft={timeLeft}
+        onExtend={extendSession}
+        onLogout={handleLogout}
+      />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -101,7 +155,7 @@ function AppRoutes() {
           path="/services"
           element={
             <PrivateRoute>
-              <Services />
+              <LazyServices />
             </PrivateRoute>
           }
         />
@@ -109,7 +163,7 @@ function AppRoutes() {
           path="/complaints"
           element={
             <PrivateRoute>
-              <Complaints />
+              <LazyComplaints />
             </PrivateRoute>
           }
         />
@@ -117,7 +171,7 @@ function AppRoutes() {
           path="/events"
           element={
             <PrivateRoute>
-              <Events />
+              <LazyEvents />
             </PrivateRoute>
           }
         />
@@ -138,12 +192,12 @@ function AppRoutes() {
           }
         />
 
-        {/* Admin Routes */}
+        {/* Admin Routes - Lazy Loaded */}
         <Route
           path="/admin"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
+              <LazyAdminDashboard />
             </RoleBasedRoute>
           }
         />
@@ -151,7 +205,7 @@ function AppRoutes() {
           path="/admin/users"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
-              <UserManagement />
+              <LazyUserManagement />
             </RoleBasedRoute>
           }
         />
@@ -159,7 +213,7 @@ function AppRoutes() {
           path="/admin/announcements"
           element={
             <RoleBasedRoute allowedRoles={["admin", "staff"]}>
-              <AnnouncementManagement />
+              <LazyAnnouncementManagement />
             </RoleBasedRoute>
           }
         />
@@ -167,7 +221,7 @@ function AppRoutes() {
           path="/admin/analytics"
           element={
             <RoleBasedRoute allowedRoles={["admin", "staff"]}>
-              <Analytics />
+              <LazyAnalytics />
             </RoleBasedRoute>
           }
         />
@@ -175,7 +229,7 @@ function AppRoutes() {
           path="/admin/audit-logs"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
-              <AuditLogs />
+              <LazyAuditLogs />
             </RoleBasedRoute>
           }
         />
@@ -183,7 +237,7 @@ function AppRoutes() {
           path="/admin/config"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
-              <SystemConfig />
+              <LazySystemConfig />
             </RoleBasedRoute>
           }
         />
@@ -191,17 +245,17 @@ function AppRoutes() {
           path="/admin/automation"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
-              <AutomationSettings />
+              <LazyAutomationSettings />
             </RoleBasedRoute>
           }
         />
 
-        {/* Staff Routes */}
+        {/* Staff Routes - Lazy Loaded */}
         <Route
           path="/staff"
           element={
             <RoleBasedRoute allowedRoles={["staff"]}>
-              <StaffDashboard />
+              <LazyStaffDashboard />
             </RoleBasedRoute>
           }
         />
@@ -215,13 +269,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <ErrorBoundary>
+    <EnhancedErrorBoundary>
       <Router>
         <AuthProvider>
-          <AppRoutes />
+          <AppContent />
         </AuthProvider>
       </Router>
-    </ErrorBoundary>
+    </EnhancedErrorBoundary>
   );
 }
 

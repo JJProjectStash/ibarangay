@@ -31,6 +31,7 @@ interface CategoryData {
   category: string;
   count: number;
   percentage: number;
+  [key: string]: string | number; // Index signature for recharts compatibility
 }
 
 interface StaffPerformance {
@@ -105,6 +106,11 @@ const Analytics = () => {
     "#8884D8",
     "#82CA9D",
   ];
+
+  // Custom label function for pie chart
+  const renderCustomLabel = (entry: CategoryData) => {
+    return `${entry.category}: ${entry.percentage}%`;
+  };
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
@@ -314,9 +320,7 @@ const Analytics = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry: CategoryData) =>
-                      `${entry.category}: ${entry.percentage}%`
-                    }
+                    label={renderCustomLabel}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
