@@ -20,13 +20,13 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      showToast({ message: "Login successful!", type: "success" });
+      showToast("Login successful!", "success");
       navigate("/");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Login failed. Please try again.";
       setError(errorMessage);
-      showToast({ message: errorMessage, type: "error" });
+      showToast(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { UserPlus, X } from "lucide-react";
+import { X } from "lucide-react";
 import api from "../../services/api";
-import { showSuccessToast, showErrorToast } from "../Toast";
-import { getErrorMessage } from "../../utils/errorHandler";
+import { showToast } from "../../utils/toast";
 
 interface CreateStaffAdminModalProps {
   isOpen: boolean;
@@ -15,50 +14,41 @@ const CreateStaffAdminModal: React.FC<CreateStaffAdminModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: "",
     address: "",
     phoneNumber: "",
     role: "staff" as "admin" | "staff",
   });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
     }
-
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required";
     }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
     }
-
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
     if (!formData.address.trim()) {
       newErrors.address = "Address is required";
     }
-
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
     }
@@ -71,44 +61,34 @@ const CreateStaffAdminModal: React.FC<CreateStaffAdminModalProps> = ({
     e.preventDefault();
 
     if (!validateForm()) {
-      showErrorToast("Please fix the form errors");
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const { confirmPassword, ...submitData } = formData;
-      await api.createStaffAdmin(submitData);
-      showSuccessToast(
+      setIsLoading(true);
+      await api.createStaffAdmin(formData);
+      showToast(
         `${
-          formData.role.charAt(0).toUpperCase() + formData.role.slice(1)
-        } account created successfully!`
+          formData.role === "admin" ? "Admin" : "Staff"
+        } account created successfully`,
+        "success"
       );
+      onSuccess();
+      onClose();
       setFormData({
         firstName: "",
         lastName: "",
         email: "",
         password: "",
-        confirmPassword: "",
         address: "",
         phoneNumber: "",
         role: "staff",
       });
-      setErrors({});
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Failed to create account:", error);
-      showErrorToast(getErrorMessage(error));
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to create account", "error");
     } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
+      setIsLoading(false);
     }
   };
 
@@ -122,20 +102,20 @@ const CreateStaffAdminModal: React.FC<CreateStaffAdminModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        background: "rgba(0,0,0,0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
-        padding: "1rem",
       }}
-      onClick={() => !isSubmitting && onClose()}
+      onClick={onClose}
     >
       <div
         className="card"
         style={{
           maxWidth: "600px",
           width: "100%",
+          margin: "1rem",
           maxHeight: "90vh",
           overflow: "auto",
         }}
@@ -149,298 +129,148 @@ const CreateStaffAdminModal: React.FC<CreateStaffAdminModalProps> = ({
             marginBottom: "1.5rem",
           }}
         >
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-            <UserPlus
-              size={24}
-              style={{ display: "inline", marginRight: "0.5rem" }}
-            />
-            Create Staff/Admin Account
-          </h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "0.5rem",
-            }}
-          >
-            <X size={24} />
+          <h2 className="text-2xl font-bold">Create Staff/Admin Account</h2>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-        >
-          <div>
-            <label
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <div>
+              <label className="form-label">Role *</label>
+              <select
+                className="input"
+                value={formData.role}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    role: e.target.value as "admin" | "staff",
+                  })
+                }
+              >
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div
               style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "500",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "1rem",
               }}
             >
-              Role *
-            </label>
-            <select
-              className="input"
-              value={formData.role}
-              onChange={(e) =>
-                handleInputChange("role", e.target.value as "admin" | "staff")
-              }
-              disabled={isSubmitting}
-            >
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+              <div>
+                <label className="form-label">First Name *</label>
+                <input
+                  type="text"
+                  className={`input ${errors.firstName ? "input-error" : ""}`}
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                />
+                {errors.firstName && (
+                  <p className="form-error">{errors.firstName}</p>
+                )}
+              </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1rem",
-            }}
-          >
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                First Name *
-              </label>
-              <input
-                className="input"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                disabled={isSubmitting}
-              />
-              {errors.firstName && (
-                <p
-                  style={{
-                    color: "var(--error)",
-                    fontSize: "0.85rem",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  {errors.firstName}
-                </p>
-              )}
+              <div>
+                <label className="form-label">Last Name *</label>
+                <input
+                  type="text"
+                  className={`input ${errors.lastName ? "input-error" : ""}`}
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
+                />
+                {errors.lastName && (
+                  <p className="form-error">{errors.lastName}</p>
+                )}
+              </div>
             </div>
 
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                Last Name *
-              </label>
+              <label className="form-label">Email *</label>
               <input
-                className="input"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                disabled={isSubmitting}
+                type="email"
+                className={`input ${errors.email ? "input-error" : ""}`}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
-              {errors.lastName && (
-                <p
-                  style={{
-                    color: "var(--error)",
-                    fontSize: "0.85rem",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  {errors.lastName}
-                </p>
-              )}
+              {errors.email && <p className="form-error">{errors.email}</p>}
             </div>
-          </div>
 
-          <div>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "500",
-              }}
-            >
-              Email *
-            </label>
-            <input
-              type="email"
-              className="input"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              disabled={isSubmitting}
-            />
-            {errors.email && (
-              <p
-                style={{
-                  color: "var(--error)",
-                  fontSize: "0.85rem",
-                  marginTop: "0.25rem",
-                }}
-              >
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1rem",
-            }}
-          >
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                Password *
-              </label>
+              <label className="form-label">Password *</label>
               <input
                 type="password"
-                className="input"
+                className={`input ${errors.password ? "input-error" : ""}`}
                 value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                disabled={isSubmitting}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
               />
               {errors.password && (
-                <p
-                  style={{
-                    color: "var(--error)",
-                    fontSize: "0.85rem",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  {errors.password}
-                </p>
+                <p className="form-error">{errors.password}</p>
               )}
             </div>
 
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                }}
-              >
-                Confirm Password *
-              </label>
+              <label className="form-label">Phone Number *</label>
               <input
-                type="password"
-                className="input"
-                value={formData.confirmPassword}
+                type="tel"
+                className={`input ${errors.phoneNumber ? "input-error" : ""}`}
+                value={formData.phoneNumber}
                 onChange={(e) =>
-                  handleInputChange("confirmPassword", e.target.value)
+                  setFormData({ ...formData, phoneNumber: e.target.value })
                 }
-                disabled={isSubmitting}
               />
-              {errors.confirmPassword && (
-                <p
-                  style={{
-                    color: "var(--error)",
-                    fontSize: "0.85rem",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  {errors.confirmPassword}
-                </p>
+              {errors.phoneNumber && (
+                <p className="form-error">{errors.phoneNumber}</p>
               )}
+            </div>
+
+            <div>
+              <label className="form-label">Address *</label>
+              <textarea
+                className={`input ${errors.address ? "input-error" : ""}`}
+                rows={3}
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+              />
+              {errors.address && <p className="form-error">{errors.address}</p>}
             </div>
           </div>
 
-          <div>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "500",
-              }}
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              justifyContent: "flex-end",
+              marginTop: "1.5rem",
+            }}
+          >
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+              disabled={isLoading}
             >
-              Phone Number *
-            </label>
-            <input
-              type="tel"
-              className="input"
-              value={formData.phoneNumber}
-              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-              disabled={isSubmitting}
-              placeholder="09XXXXXXXXX"
-            />
-            {errors.phoneNumber && (
-              <p
-                style={{
-                  color: "var(--error)",
-                  fontSize: "0.85rem",
-                  marginTop: "0.25rem",
-                }}
-              >
-                {errors.phoneNumber}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                fontWeight: "500",
-              }}
-            >
-              Address *
-            </label>
-            <textarea
-              className="input"
-              rows={3}
-              value={formData.address}
-              onChange={(e) => handleInputChange("address", e.target.value)}
-              disabled={isSubmitting}
-            />
-            {errors.address && (
-              <p
-                style={{
-                  color: "var(--error)",
-                  fontSize: "0.85rem",
-                  marginTop: "0.25rem",
-                }}
-              >
-                {errors.address}
-              </p>
-            )}
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+              Cancel
+            </button>
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ flex: 1 }}
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
-              {isSubmitting ? "Creating..." : "Create Account"}
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ flex: 1 }}
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
+              {isLoading ? "Creating..." : "Create Account"}
             </button>
           </div>
         </form>

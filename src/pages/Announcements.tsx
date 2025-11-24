@@ -1,78 +1,71 @@
 import React, { useState, useEffect } from "react";
-import {
-  Megaphone,
-  Plus,
-  Search,
-  Filter,
-  AlertCircle,
-  Info,
-  CheckCircle,
-  Calendar,
-  User,
-  Eye,
-} from "lucide-react";
+import { Search, Calendar, Eye, AlertCircle } from "lucide-react";
 import api from "../services/api";
-import { Announcement } from "../types";
-import { format } from "date-fns";
-import { showSuccessToast, showErrorToast } from "../components/Toast";
+import { Announcement, PaginatedResponse } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const Announcements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterPriority, setFilterPriority] = useState<string>("");
-  const [filterCategory, setFilterCategory] = useState<string>("");
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const canManage = user?.role === "admin" || user?.role === "staff";
+  const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pages: 1,
+    total: 0,
+    limit: 10,
+  });
 
   useEffect(() => {
     fetchAnnouncements();
-  }, [filterPriority, filterCategory]);
+  }, [searchTerm, filterPriority, pagination.page]);
 
   const fetchAnnouncements = async () => {
     try {
       setIsLoading(true);
-      const response = await api.getAnnouncements({
+      const params: {
+        status: string;
+        priority?: string;
+        search?: string;
+        page: number;
+        limit: number;
+      } = {
         status: "published",
-        priority: filterPriority || undefined,
-        search: searchTerm || undefined,
-      });
-      const announcementsData = Array.isArray(response.data)
-        ? response.data
-        : [];
-      setAnnouncements(announcementsData);
+        page: pagination.page,
+        limit: pagination.limit,
+      };
+
+      if (searchTerm) params.search = searchTerm;
+      if (filterPriority !== "all") params.priority = filterPriority;
+
+      const response: PaginatedResponse<Announcement> =
+        await api.getAnnouncements(params);
+      setAnnouncements(response.data);
+      setPagination(response.pagination);
     } catch (error) {
       console.error("Failed to fetch announcements:", error);
       showErrorToast(getErrorMessage(error));
-      setAnnouncements([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    fetchAnnouncements();
-  };
-
-  const getPriorityIcon = (priority: string) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return <AlertCircle size={16} />;
+        return "var(--error-500)";
       case "medium":
-        return <Info size={16} />;
+        return "var(--warning-500)";
       case "low":
-        return <CheckCircle size={16} />;
+        return "var(--info-500)";
       default:
-        return <Info size={16} />;
+        return "var(--gray-500)";
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "high":
         return "badge-error";
@@ -81,95 +74,68 @@ const Announcements: React.FC = () => {
       case "low":
         return "badge-info";
       default:
-        return "badge-info";
+        return "badge-secondary";
     }
   };
 
-  if (isLoading) {
-    return (
-      <div
-        className="flex items-center justify-center"
-        style={{ padding: "2rem", minHeight: "calc(100vh - 64px)" }}
-      >
-        <div className="spinner" />
-      </div>
-    );
+  if (isLoading && announcements.length === 0) {
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
     <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
       <div className="container">
         {/* Header */}
-        <div
-          className="flex items-center justify-between"
-          style={{ marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}
-        >
-          <div>
-            <h1
-              className="text-3xl font-bold"
-              style={{ marginBottom: "0.5rem" }}
-            >
-              <Megaphone
-                size={32}
-                style={{ display: "inline", marginRight: "0.5rem" }}
-              />
-              Announcements
-            </h1>
-            <p className="text-secondary">
-              Stay updated with the latest barangay news and announcements
-            </p>
-          </div>
-          {canManage && (
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/admin/announcements")}
-            >
-              <Plus size={20} /> Manage Announcements
-            </button>
-          )}
+        <div style={{ marginBottom: "2rem" }}>
+          <h1 className="text-3xl font-bold" style={{ marginBottom: "0.5rem" }}>
+            Announcements
+          </h1>
+          <p className="text-secondary">
+            Stay updated with the latest barangay announcements
+          </p>
         </div>
 
-        {/* Search and Filters */}
+        {/* Filters */}
         <div className="card" style={{ marginBottom: "2rem" }}>
           <div
-            className="grid grid-cols-1 md:grid-cols-3"
-            style={{ gap: "1rem" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "1rem",
+            }}
           >
-            <div className="md:col-span-2">
-              <div className="flex gap-2">
-                <div style={{ flex: 1, position: "relative" }}>
-                  <Search
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "12px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "var(--text-secondary)",
-                    }}
-                  />
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="Search announcements..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    style={{ paddingLeft: "2.5rem" }}
-                  />
-                </div>
-                <button className="btn btn-primary" onClick={handleSearch}>
-                  Search
-                </button>
+            <div>
+              <label className="form-label">Search</label>
+              <div style={{ position: "relative" }}>
+                <Search
+                  size={18}
+                  style={{
+                    position: "absolute",
+                    left: "0.75rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "var(--text-tertiary)",
+                  }}
+                />
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Search announcements..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ paddingLeft: "2.5rem" }}
+                />
               </div>
             </div>
-            <div className="flex gap-2">
+
+            <div>
+              <label className="form-label">Priority</label>
               <select
                 className="input"
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
               >
-                <option value="">All Priorities</option>
+                <option value="all">All Priorities</option>
                 <option value="high">High</option>
                 <option value="medium">Medium</option>
                 <option value="low">Low</option>
@@ -179,109 +145,216 @@ const Announcements: React.FC = () => {
         </div>
 
         {/* Announcements List */}
-        <div className="flex flex-col gap-4">
-          {announcements.length === 0 ? (
-            <div
-              className="card"
-              style={{ textAlign: "center", padding: "3rem" }}
+        {announcements.length === 0 ? (
+          <div
+            className="card"
+            style={{ padding: "3rem", textAlign: "center" }}
+          >
+            <AlertCircle
+              size={48}
+              style={{ margin: "0 auto 1rem", color: "var(--text-tertiary)" }}
+            />
+            <h3
+              className="text-xl font-semibold"
+              style={{ marginBottom: "0.5rem" }}
             >
-              <Megaphone
-                size={48}
-                style={{
-                  margin: "0 auto 1rem",
-                  color: "var(--text-secondary)",
-                }}
-              />
-              <p className="text-secondary">No announcements available</p>
-            </div>
-          ) : (
-            announcements.map((announcement, index) => (
+              No announcements found
+            </h3>
+            <p className="text-secondary">
+              {searchTerm || filterPriority !== "all"
+                ? "Try adjusting your filters"
+                : "Check back later for updates"}
+            </p>
+          </div>
+        ) : (
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+          >
+            {announcements.map((announcement, index) => (
               <div
                 key={announcement._id}
                 className="card card-interactive animate-slide-up"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div
-                  className="flex items-start justify-between"
-                  style={{ marginBottom: "1rem" }}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "start",
+                    marginBottom: "1rem",
+                  }}
                 >
                   <div style={{ flex: 1 }}>
                     <div
-                      className="flex items-center gap-2"
-                      style={{ marginBottom: "0.5rem" }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        marginBottom: "0.5rem",
+                      }}
                     >
-                      <h3 className="text-xl font-semibold">
+                      <div
+                        style={{
+                          width: "4px",
+                          height: "24px",
+                          backgroundColor: getPriorityColor(
+                            announcement.priority
+                          ),
+                          borderRadius: "var(--radius-full)",
+                        }}
+                      />
+                      <h2 className="text-xl font-semibold">
                         {announcement.title}
-                      </h3>
+                      </h2>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        flexWrap: "wrap",
+                        marginBottom: "1rem",
+                      }}
+                    >
                       <span
-                        className={`badge ${getPriorityColor(
+                        className={`badge ${getPriorityBadge(
                           announcement.priority
                         )}`}
+                      >
+                        {announcement.priority} priority
+                      </span>
+                      <span className="badge badge-info">
+                        {announcement.category}
+                      </span>
+                      <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "0.25rem",
+                          fontSize: "var(--font-size-sm)",
+                          color: "var(--text-tertiary)",
                         }}
                       >
-                        {getPriorityIcon(announcement.priority)}
-                        {announcement.priority}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-secondary">
-                      <span className="flex items-center gap-1">
-                        <User size={14} />
-                        {typeof announcement.author === "object"
-                          ? `${announcement.author.firstName} ${announcement.author.lastName}`
-                          : "Admin"}
-                      </span>
-                      <span className="flex items-center gap-1">
                         <Calendar size={14} />
-                        {format(
-                          new Date(
-                            announcement.publishedAt || announcement.createdAt
-                          ),
-                          "MMM dd, yyyy"
-                        )}
-                      </span>
-                      <span className="flex items-center gap-1">
+                        {new Date(announcement.createdAt).toLocaleDateString()}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem",
+                          fontSize: "var(--font-size-sm)",
+                          color: "var(--text-tertiary)",
+                        }}
+                      >
                         <Eye size={14} />
                         {announcement.views} views
-                      </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div
-                  className="text-secondary"
                   style={{
-                    marginBottom: "1rem",
-                    lineHeight: "1.6",
+                    lineHeight: "var(--line-height-relaxed)",
+                    color: "var(--text-secondary)",
                     whiteSpace: "pre-wrap",
                   }}
                 >
-                  {announcement.content.length > 300
-                    ? `${announcement.content.substring(0, 300)}...`
-                    : announcement.content}
+                  {announcement.content}
                 </div>
 
-                {announcement.category && (
-                  <div style={{ marginBottom: "0.5rem" }}>
-                    <span className="badge badge-info">
-                      {announcement.category}
-                    </span>
+                {announcement.expiresAt && (
+                  <div
+                    style={{
+                      marginTop: "1rem",
+                      padding: "0.75rem",
+                      backgroundColor: "var(--warning-50)",
+                      borderRadius: "var(--radius-md)",
+                      fontSize: "var(--font-size-sm)",
+                      color: "var(--warning-700)",
+                    }}
+                  >
+                    <strong>Expires:</strong>{" "}
+                    {new Date(announcement.expiresAt).toLocaleDateString()}
                   </div>
                 )}
 
-                {announcement.expiresAt && (
-                  <p className="text-xs text-tertiary">
-                    Expires on:{" "}
-                    {format(new Date(announcement.expiresAt), "MMM dd, yyyy")}
-                  </p>
-                )}
+                {announcement.attachments &&
+                  announcement.attachments.length > 0 && (
+                    <div style={{ marginTop: "1rem" }}>
+                      <p
+                        className="text-sm text-secondary"
+                        style={{ marginBottom: "0.5rem" }}
+                      >
+                        Attachments:
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "0.5rem",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {announcement.attachments.map((attachment, idx) => (
+                          <a
+                            key={idx}
+                            href={attachment}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-sm btn-outline"
+                          >
+                            View Attachment {idx + 1}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "2rem",
+              gap: "0.5rem",
+            }}
+          >
+            <button
+              className="btn btn-secondary"
+              onClick={() =>
+                setPagination({ ...pagination, page: pagination.page - 1 })
+              }
+              disabled={pagination.page === 1}
+            >
+              Previous
+            </button>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0 1rem",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <button
+              className="btn btn-secondary"
+              onClick={() =>
+                setPagination({ ...pagination, page: pagination.page + 1 })
+              }
+              disabled={pagination.page === pagination.pages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

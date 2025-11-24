@@ -4,8 +4,6 @@ import {
   FileText,
   Package,
   Calendar,
-  TrendingUp,
-  TrendingDown,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -18,11 +16,6 @@ import { getErrorMessage } from "../../utils/errorHandler";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -30,8 +23,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
-const COLORS = ["#2196f3", "#4caf50", "#ff9800", "#f44336", "#9c27b0"];
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -41,6 +32,7 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
 
   const fetchDashboardData = async () => {
@@ -194,7 +186,9 @@ const AdminDashboard: React.FC = () => {
               <select
                 className="input"
                 value={period}
-                onChange={(e) => setPeriod(e.target.value as any)}
+                onChange={(e) =>
+                  setPeriod(e.target.value as "daily" | "weekly" | "monthly")
+                }
                 style={{ width: "auto", padding: "0.5rem" }}
               >
                 <option value="daily">Daily</option>

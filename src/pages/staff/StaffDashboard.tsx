@@ -1,242 +1,363 @@
-import React, { useState, useEffect } from "react";
-import { ClipboardList, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import api from "../../services/api";
-import RequestManagement from "../../components/staff/RequestManagement";
-import { Service, Complaint } from "../../types";
+import { Complaint, Service } from "../../types";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { showToast } from "../../utils/toast";
+import { useAuth } from "../../context/AuthContext";
 
-const StaffDashboard: React.FC = () => {
-  const [services, setServices] = useState<Service[]>([]);
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface DashboardStats {
+  assignedToMe?: number;
+  inProgress?: number;
+  resolvedToday?: number;
+  pendingServices?: number;
+}
+
+interface PerformanceData {
+  name: string;
+  value: number;
+}
+
+const StaffDashboard = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [assignedComplaints, setAssignedComplaints] = useState<Complaint[]>([]);
+  const [pendingServices, setPendingServices] = useState<Service[]>([]);
+  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
 
   useEffect(() => {
-    fetchData();
+    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchData = async () => {
-    setIsLoading(true);
+  const fetchDashboardData = async () => {
     try {
-      const [servicesResponse, complaintsResponse] = await Promise.all([
-        api.getServiceRequests(),
-        api.getComplaints(),
-      ]);
+      setLoading(true);
+      const [statsRes, complaintsRes, servicesRes, performanceRes] =
+        await Promise.all([
+          api.getDashboardStats(),
+          api.getComplaints({ status: "in-progress", limit: 5 }),
+          api.getServiceRequests({ status: "pending", limit: 5 }),
+          api.getStaffPerformance(),
+        ]);
 
-      setServices(servicesResponse.data || []);
-      setComplaints(complaintsResponse.data || []);
-    } catch (error) {
-      const err = error as Error;
-      showToast({
-        message: err.message || "Failed to fetch data",
-        type: "error",
-      });
+      setStats(statsRes.data);
+      setAssignedComplaints(complaintsRes.data);
+      setPendingServices(servicesRes.data);
+
+      // Find current staff performance
+      const staffPerf = performanceRes.data.find(
+        (s: { staffId: string; assigned: number; resolved: number }) =>
+          s.staffId === user?.id
+      );
+      if (staffPerf) {
+        setPerformanceData([
+          { name: "Assigned", value: staffPerf.assigned },
+          { name: "Resolved", value: staffPerf.resolved },
+          { name: "Pending", value: staffPerf.assigned - staffPerf.resolved },
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to fetch dashboard data", "error");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleUpdateServiceStatus = async (
-    id: string,
-    status: string,
-    notes?: string
-  ) => {
+  const handleUpdateComplaintStatus = async (id: string, status: string) => {
     try {
-      await api.updateServiceStatus(id, status, notes);
-      showToast({
-        message: "Service request updated successfully",
-        type: "success",
-      });
-      fetchData();
-    } catch (error) {
-      const err = error as Error;
-      showToast({
-        message: err.message || "Failed to update service request",
-        type: "error",
-      });
+      await api.updateComplaintStatus(id, status);
+      showToast("Complaint status updated successfully", "success");
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update complaint status", "error");
     }
   };
 
-  const handleUpdateComplaintStatus = async (
-    id: string,
-    status: string,
-    response?: string
-  ) => {
+  const handleUpdateServiceStatus = async (id: string, status: string) => {
     try {
-      await api.updateComplaintStatus(id, status, response);
-      showToast({ message: "Complaint updated successfully", type: "success" });
-      fetchData();
-    } catch (error) {
-      const err = error as Error;
-      showToast({
-        message: err.message || "Failed to update complaint",
-        type: "error",
-      });
+      await api.updateServiceStatus(id, status);
+      showToast("Service request status updated successfully", "success");
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update service status", "error");
     }
   };
 
-  const pendingServices = services.filter((s) => s.status === "pending");
-  const pendingComplaints = complaints.filter((c) => c.status === "pending");
-  const inProgressComplaints = complaints.filter(
-    (c) => c.status === "in-progress"
-  );
-  const resolvedComplaints = complaints.filter((c) => c.status === "resolved");
+  const getPriorityBadge = (priority: string) => {
+    const colors = {
+      low: "badge-info",
+      medium: "badge-warning",
+      high: "badge-danger",
+    };
+    return colors[priority as keyof typeof colors] || "badge-secondary";
+  };
 
-  if (isLoading) {
-    return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <p>Loading staff dashboard...</p>
-      </div>
-    );
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      pending: "badge-warning",
+      "in-progress": "badge-info",
+      resolved: "badge-success",
+      closed: "badge-secondary",
+      approved: "badge-success",
+      rejected: "badge-danger",
+    };
+    return colors[status as keyof typeof colors] || "badge-secondary";
+  };
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
-    <div style={{ padding: "2rem 0", minHeight: "calc(100vh - 64px)" }}>
-      <div className="container">
-        <h1
-          style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "2rem" }}
-        >
-          Staff Dashboard
-        </h1>
+    <div className="container-fluid py-4">
+      <div className="page-header mb-4">
+        <h1 className="h3 mb-2">Staff Dashboard</h1>
+        <p className="text-muted">
+          Welcome back, {user?.firstName}! Here's your work overview.
+        </p>
+      </div>
 
-        {/* Stats Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1.5rem",
-            marginBottom: "2rem",
-          }}
-        >
+      {/* Stats Cards */}
+      <div className="row g-4 mb-4">
+        <div className="col-md-3">
           <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(245, 158, 11, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <Clock size={24} style={{ color: "#f59e0b" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Pending Services
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {pendingServices.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(239, 68, 68, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <AlertCircle size={24} style={{ color: "#ef4444" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Pending Complaints
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {pendingComplaints.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(59, 130, 246, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <ClipboardList size={24} style={{ color: "#3b82f6" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  In Progress
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {inProgressComplaints.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div
-                style={{
-                  padding: "0.75rem",
-                  background: "rgba(16, 185, 129, 0.1)",
-                  borderRadius: "8px",
-                }}
-              >
-                <CheckCircle size={24} style={{ color: "#10b981" }} />
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.25rem",
-                  }}
-                >
-                  Resolved
-                </p>
-                <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>
-                  {resolvedComplaints.length}
-                </p>
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <p className="text-muted mb-1">Assigned to Me</p>
+                  <h3 className="mb-0">{stats?.assignedToMe || 0}</h3>
+                </div>
+                <div className="icon-box bg-primary-subtle">
+                  <FileText size={24} className="text-primary" />
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="col-md-3">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <p className="text-muted mb-1">In Progress</p>
+                  <h3 className="mb-0">{stats?.inProgress || 0}</h3>
+                </div>
+                <div className="icon-box bg-warning-subtle">
+                  <Clock size={24} className="text-warning" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <p className="text-muted mb-1">Resolved Today</p>
+                  <h3 className="mb-0">{stats?.resolvedToday || 0}</h3>
+                </div>
+                <div className="icon-box bg-success-subtle">
+                  <CheckCircle size={24} className="text-success" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <p className="text-muted mb-1">Pending Services</p>
+                  <h3 className="mb-0">{stats?.pendingServices || 0}</h3>
+                </div>
+                <div className="icon-box bg-info-subtle">
+                  <AlertCircle size={24} className="text-info" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Request Management */}
-        <div className="card" style={{ padding: "1.5rem" }}>
-          <h2
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: "600",
-              marginBottom: "1.5rem",
-            }}
-          >
-            Request Management
-          </h2>
-          <RequestManagement
-            services={services}
-            complaints={complaints}
-            onUpdateServiceStatus={handleUpdateServiceStatus}
-            onUpdateComplaintStatus={handleUpdateComplaintStatus}
-          />
+      <div className="row g-4">
+        {/* Assigned Complaints */}
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0">My Assigned Complaints</h5>
+            </div>
+            <div className="card-body">
+              {assignedComplaints.length === 0 ? (
+                <div className="text-center py-4 text-muted">
+                  No complaints assigned to you
+                </div>
+              ) : (
+                <div className="list-group list-group-flush">
+                  {assignedComplaints.map((complaint) => (
+                    <div key={complaint._id} className="list-group-item px-0">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1">{complaint.title}</h6>
+                          <p className="text-muted small mb-2">
+                            {complaint.description.substring(0, 80)}...
+                          </p>
+                          <div className="d-flex gap-2">
+                            <span
+                              className={`badge ${getPriorityBadge(
+                                complaint.priority
+                              )}`}
+                            >
+                              {complaint.priority}
+                            </span>
+                            <span
+                              className={`badge ${getStatusBadge(
+                                complaint.status
+                              )}`}
+                            >
+                              {complaint.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="d-flex gap-2 mt-2">
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() =>
+                            handleUpdateComplaintStatus(
+                              complaint._id,
+                              "resolved"
+                            )
+                          }
+                        >
+                          Mark Resolved
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() =>
+                            (window.location.href = `/complaints?id=${complaint._id}`)
+                          }
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Service Requests */}
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0">Pending Service Requests</h5>
+            </div>
+            <div className="card-body">
+              {pendingServices.length === 0 ? (
+                <div className="text-center py-4 text-muted">
+                  No pending service requests
+                </div>
+              ) : (
+                <div className="list-group list-group-flush">
+                  {pendingServices.map((service) => (
+                    <div key={service._id} className="list-group-item px-0">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1">{service.itemName}</h6>
+                          <p className="text-muted small mb-2">
+                            Type: {service.itemType} | Quantity:{" "}
+                            {service.quantity}
+                          </p>
+                          <p className="text-muted small mb-2">
+                            Purpose: {service.purpose}
+                          </p>
+                          <span
+                            className={`badge ${getStatusBadge(
+                              service.status
+                            )}`}
+                          >
+                            {service.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="d-flex gap-2 mt-2">
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() =>
+                            handleUpdateServiceStatus(service._id, "approved")
+                          }
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() =>
+                            handleUpdateServiceStatus(service._id, "rejected")
+                          }
+                        >
+                          Reject
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() =>
+                            (window.location.href = `/services?id=${service._id}`)
+                          }
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Performance Overview */}
+        <div className="col-12">
+          <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0">My Performance</h5>
+            </div>
+            <div className="card-body">
+              {performanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="value" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center py-4 text-muted">
+                  No performance data available
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

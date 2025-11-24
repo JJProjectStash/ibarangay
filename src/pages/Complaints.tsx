@@ -75,10 +75,12 @@ const Complaints: React.FC = () => {
         socketService.offComplaintStatusChanged();
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => {
     fetchComplaints();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus, filterPriority]);
 
   const fetchCategories = async () => {
@@ -93,7 +95,11 @@ const Complaints: React.FC = () => {
   const fetchComplaints = async () => {
     try {
       setIsLoading(true);
-      const response = await api.getComplaints(filterStatus, filterPriority);
+      const params: { status?: string; priority?: string } = {};
+      if (filterStatus) params.status = filterStatus;
+      if (filterPriority) params.priority = filterPriority;
+
+      const response = await api.getComplaints(params);
       const complaintsData = Array.isArray(response.data) ? response.data : [];
       setComplaints(complaintsData);
     } catch (error) {
