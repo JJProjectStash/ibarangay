@@ -11,6 +11,12 @@ import {
   Briefcase,
   ChevronDown,
   Settings,
+  Bell,
+  Home,
+  Megaphone,
+  Wrench,
+  MessageSquare,
+  Calendar,
 } from "lucide-react";
 import { BarangayLogo } from "./CustomIcons";
 import NotificationBell from "./NotificationBell";
@@ -32,7 +38,6 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
@@ -72,17 +77,17 @@ const Navbar: React.FC = () => {
           display: "inline-flex",
           alignItems: "center",
           gap: "0.375rem",
-          padding: "0.375rem 0.75rem",
+          padding: "0.25rem 0.625rem",
           background: `${badge.color}15`,
           color: badge.color,
-          borderRadius: "16px",
-          fontSize: "0.75rem",
+          borderRadius: "6px",
+          fontSize: "0.6875rem",
           fontWeight: "600",
           letterSpacing: "0.025em",
-          border: `1.5px solid ${badge.color}30`,
+          border: `1px solid ${badge.color}30`,
         }}
       >
-        <Icon size={13} strokeWidth={2.5} />
+        <Icon size={11} strokeWidth={2.5} />
         {badge.label}
       </span>
     );
@@ -95,19 +100,19 @@ const Navbar: React.FC = () => {
         {
           to: "/admin/announcements",
           label: "Manage Announcements",
-          icon: null,
+          icon: Megaphone,
         },
         { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-        { to: "/admin/audit-logs", label: "Audit Logs", icon: null },
+        { to: "/admin/audit-logs", label: "Audit Logs", icon: Shield },
         { to: "/admin/config", label: "System Config", icon: Settings },
-        { to: "/admin/automation", label: "Automation", icon: null },
+        { to: "/admin/automation", label: "Automation", icon: Wrench },
       ];
     } else if (user?.role === "staff") {
       return [
         {
           to: "/admin/announcements",
           label: "Manage Announcements",
-          icon: null,
+          icon: Megaphone,
         },
         { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
       ];
@@ -115,77 +120,56 @@ const Navbar: React.FC = () => {
     return [];
   };
 
+  const navigationItems = [
+    { to: "/", label: "Home", icon: Home },
+    { to: getRoleBasedDashboard(), label: "Dashboard", icon: BarChart3 },
+    { to: "/announcements", label: "Announcements", icon: Megaphone },
+    { to: "/services", label: "Services", icon: Wrench },
+    { to: "/complaints", label: "Complaints", icon: MessageSquare },
+    { to: "/events", label: "Events", icon: Calendar },
+  ];
+
   return (
     <nav style={{ ...styles.nav, ...(scrolled ? styles.navScrolled : {}) }}>
       <div className="container" style={styles.container}>
+        {/* Logo Section */}
         <Link to="/" style={styles.logo}>
-          <BarangayLogo size={40} />
-          <span style={styles.logoText}>iBarangay</span>
+          <div style={styles.logoIconWrapper}>
+            <BarangayLogo size={32} />
+          </div>
+          <div style={styles.logoTextWrapper}>
+            <span style={styles.logoText}>iBarangay</span>
+            <span style={styles.logoSubtext}>Community Portal</span>
+          </div>
         </Link>
 
         {/* Desktop Menu */}
         <div style={styles.desktopMenu}>
           {isAuthenticated ? (
             <>
-              <Link
-                to="/"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/") ? styles.navLinkActive : {}),
-                }}
-              >
-                Home
-              </Link>
-              <Link
-                to={getRoleBasedDashboard()}
-                style={{
-                  ...styles.navLink,
-                  ...(isActive(getRoleBasedDashboard())
-                    ? styles.navLinkActive
-                    : {}),
-                }}
-              >
-                <BarChart3 size={18} style={{ marginRight: "0.375rem" }} />
-                Dashboard
-              </Link>
-              <Link
-                to="/announcements"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/announcements") ? styles.navLinkActive : {}),
-                }}
-              >
-                Announcements
-              </Link>
-              <Link
-                to="/services"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/services") ? styles.navLinkActive : {}),
-                }}
-              >
-                Services
-              </Link>
-              <Link
-                to="/complaints"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/complaints") ? styles.navLinkActive : {}),
-                }}
-              >
-                Complaints
-              </Link>
-              <Link
-                to="/events"
-                style={{
-                  ...styles.navLink,
-                  ...(isActive("/events") ? styles.navLinkActive : {}),
-                }}
-              >
-                Events
-              </Link>
+              {/* Navigation Links */}
+              <div style={styles.navLinksContainer}>
+                {navigationItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.to);
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      style={{
+                        ...styles.navLink,
+                        ...(active ? styles.navLinkActive : {}),
+                      }}
+                      className="nav-link"
+                    >
+                      <Icon size={16} strokeWidth={2.2} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
 
-              {/* Admin/Staff Dropdown Menu */}
+              {/* Admin/Staff Dropdown */}
               {(user?.role === "staff" || user?.role === "admin") &&
                 getAdminLinks().length > 0 && (
                   <div
@@ -201,13 +185,15 @@ const Navbar: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => setShowAdminDropdown(!showAdminDropdown)}
+                      className="admin-dropdown-btn"
                     >
-                      <Shield size={18} />
+                      <Shield size={16} strokeWidth={2.2} />
                       <span>Admin</span>
                       <ChevronDown
-                        size={16}
+                        size={14}
                         style={{
-                          transition: "transform 0.2s ease",
+                          transition:
+                            "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                           transform: showAdminDropdown
                             ? "rotate(180deg)"
                             : "rotate(0deg)",
@@ -217,96 +203,119 @@ const Navbar: React.FC = () => {
 
                     {showAdminDropdown && (
                       <div style={styles.adminDropdown} className="fade-in">
-                        {getAdminLinks().map((link, index) => (
-                          <Link
-                            key={link.to}
-                            to={link.to}
-                            style={{
-                              ...styles.dropdownLink,
-                              ...(isActive(link.to)
-                                ? styles.dropdownLinkActive
-                                : {}),
-                              ...(index === getAdminLinks().length - 1
-                                ? { borderBottom: "none" }
-                                : {}),
-                            }}
-                            onClick={() => setShowAdminDropdown(false)}
-                          >
-                            {link.icon && (
-                              <link.icon
-                                size={16}
-                                style={{ marginRight: "0.5rem" }}
-                              />
-                            )}
-                            {link.label}
-                          </Link>
-                        ))}
+                        <div style={styles.dropdownHeader}>
+                          <Shield size={14} style={{ opacity: 0.6 }} />
+                          <span>Administration</span>
+                        </div>
+                        {getAdminLinks().map((link, index) => {
+                          const Icon = link.icon;
+                          return (
+                            <Link
+                              key={link.to}
+                              to={link.to}
+                              style={{
+                                ...styles.dropdownLink,
+                                ...(isActive(link.to)
+                                  ? styles.dropdownLinkActive
+                                  : {}),
+                              }}
+                              onClick={() => setShowAdminDropdown(false)}
+                              className="dropdown-link"
+                            >
+                              {Icon && <Icon size={16} strokeWidth={2} />}
+                              <span>{link.label}</span>
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
                 )}
 
-              <div style={styles.divider} />
+              {/* Right Section */}
+              <div style={styles.rightSection}>
+                <div style={styles.divider} />
 
-              <NotificationBell />
+                {/* Notification Bell */}
+                <div style={styles.notificationWrapper}>
+                  <NotificationBell />
+                </div>
 
-              {/* User Menu with Dropdown */}
-              <div
-                style={styles.userMenuContainer}
-                onMouseEnter={() => setShowUserDropdown(true)}
-                onMouseLeave={() => setShowUserDropdown(false)}
-              >
-                <button
-                  style={{
-                    ...styles.userMenu,
-                    ...(showUserDropdown ? styles.userMenuActive : {}),
-                  }}
-                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                {/* User Menu */}
+                <div
+                  style={styles.userMenuContainer}
+                  onMouseEnter={() => setShowUserDropdown(true)}
+                  onMouseLeave={() => setShowUserDropdown(false)}
                 >
-                  <div style={styles.userAvatar}>
-                    <User size={18} />
-                  </div>
-                  <div style={styles.userInfo}>
-                    <span style={styles.userName}>{user?.firstName}</span>
-                    {getRoleBadge()}
-                  </div>
-                  <ChevronDown
-                    size={18}
+                  <button
                     style={{
-                      transition: "transform 0.2s ease",
-                      transform: showUserDropdown
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      opacity: 0.8,
+                      ...styles.userMenu,
+                      ...(showUserDropdown ? styles.userMenuActive : {}),
                     }}
-                  />
-                </button>
-
-                {showUserDropdown && (
-                  <div style={styles.userDropdown} className="fade-in">
-                    <div style={styles.dropdownHeader}>
-                      <div style={styles.dropdownUserName}>
-                        {user?.firstName} {user?.lastName}
-                      </div>
-                      <div style={styles.dropdownUserEmail}>{user?.email}</div>
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="user-menu-btn"
+                  >
+                    <div style={styles.userAvatar}>
+                      <User size={16} strokeWidth={2.5} />
                     </div>
-                    <button onClick={handleLogout} style={styles.logoutBtn}>
-                      <LogOut size={18} />
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                )}
+                    <div style={styles.userInfo}>
+                      <span style={styles.userName}>{user?.firstName}</span>
+                      {getRoleBadge()}
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      style={{
+                        transition:
+                          "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                        transform: showUserDropdown
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        opacity: 0.7,
+                      }}
+                    />
+                  </button>
+
+                  {showUserDropdown && (
+                    <div style={styles.userDropdown} className="fade-in">
+                      <div style={styles.userDropdownHeader}>
+                        <div style={styles.userDropdownAvatar}>
+                          <User size={20} strokeWidth={2} />
+                        </div>
+                        <div style={styles.userDropdownInfo}>
+                          <div style={styles.dropdownUserName}>
+                            {user?.firstName} {user?.lastName}
+                          </div>
+                          <div style={styles.dropdownUserEmail}>
+                            {user?.email}
+                          </div>
+                          <div style={{ marginTop: "0.5rem" }}>
+                            {getRoleBadge()}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={styles.dropdownDivider} />
+                      <button
+                        onClick={handleLogout}
+                        style={styles.logoutBtn}
+                        className="logout-btn"
+                      >
+                        <LogOut size={18} strokeWidth={2} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </>
           ) : (
             <>
-              <Link to="/login" style={styles.navLink}>
+              <Link to="/login" style={styles.loginBtn} className="login-btn">
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="btn btn-primary"
                 style={styles.signupBtn}
+                className="signup-btn"
               >
                 Sign Up
               </Link>
@@ -319,8 +328,13 @@ const Navbar: React.FC = () => {
           style={styles.mobileMenuBtn}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
+          className="mobile-menu-btn"
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? (
+            <X size={22} strokeWidth={2.5} />
+          ) : (
+            <Menu size={22} strokeWidth={2.5} />
+          )}
         </button>
       </div>
 
@@ -331,97 +345,60 @@ const Navbar: React.FC = () => {
             <>
               <div style={styles.mobileUserHeader}>
                 <div style={styles.mobileUserAvatar}>
-                  <User size={24} />
+                  <User size={24} strokeWidth={2} />
                 </div>
                 <div style={styles.mobileUserInfo}>
                   <div style={styles.mobileUserName}>
                     {user?.firstName} {user?.lastName}
                   </div>
                   <div style={styles.mobileUserEmail}>{user?.email}</div>
-                  <div style={{ marginTop: "0.5rem" }}>{getRoleBadge()}</div>
+                  <div style={{ marginTop: "0.625rem" }}>{getRoleBadge()}</div>
                 </div>
               </div>
 
               <div style={styles.mobileDivider} />
 
-              <Link
-                to="/"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to={getRoleBasedDashboard()}
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <BarChart3 size={18} style={{ marginRight: "0.5rem" }} />
-                Dashboard
-              </Link>
-              <Link
-                to="/announcements"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Announcements
-              </Link>
-              <Link
-                to="/services"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link
-                to="/complaints"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Complaints
-              </Link>
-              <Link
-                to="/events"
-                style={styles.mobileLink}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Events
-              </Link>
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="mobile-link"
+                  >
+                    <Icon size={18} strokeWidth={2} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
 
-              {user?.role === "resident" && (
-                <Link
-                  to="/help"
-                  style={styles.mobileLink}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Help
-                </Link>
-              )}
-
-              {/* Admin/Staff Section in Mobile */}
               {(user?.role === "staff" || user?.role === "admin") &&
                 getAdminLinks().length > 0 && (
                   <>
+                    <div style={styles.mobileDivider} />
                     <div style={styles.mobileSectionTitle}>
-                      <Shield size={14} style={{ marginRight: "0.375rem" }} />
-                      {user.role === "admin" ? "Admin Tools" : "Staff Tools"}
+                      <Shield size={14} strokeWidth={2.5} />
+                      <span>
+                        {user.role === "admin" ? "Admin Tools" : "Staff Tools"}
+                      </span>
                     </div>
-                    {getAdminLinks().map((link) => (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        style={styles.mobileLink}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {link.icon && (
-                          <link.icon
-                            size={16}
-                            style={{ marginRight: "0.5rem" }}
-                          />
-                        )}
-                        {link.label}
-                      </Link>
-                    ))}
+                    {getAdminLinks().map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.to}
+                          to={link.to}
+                          style={styles.mobileLink}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="mobile-link"
+                        >
+                          {Icon && <Icon size={18} strokeWidth={2} />}
+                          <span>{link.label}</span>
+                        </Link>
+                      );
+                    })}
                   </>
                 )}
 
@@ -431,12 +408,18 @@ const Navbar: React.FC = () => {
                 to="/notifications"
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
+                className="mobile-link"
               >
-                Notifications
+                <Bell size={18} strokeWidth={2} />
+                <span>Notifications</span>
               </Link>
-              <button onClick={handleLogout} style={styles.mobileLogout}>
-                <LogOut size={18} />
-                <span>Logout</span>
+              <button
+                onClick={handleLogout}
+                style={styles.mobileLogout}
+                className="mobile-logout"
+              >
+                <LogOut size={18} strokeWidth={2} />
+                <span>Sign Out</span>
               </button>
             </>
           ) : (
@@ -445,6 +428,7 @@ const Navbar: React.FC = () => {
                 to="/login"
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
+                className="mobile-link"
               >
                 Login
               </Link>
@@ -452,6 +436,7 @@ const Navbar: React.FC = () => {
                 to="/signup"
                 style={styles.mobileLink}
                 onClick={() => setIsMenuOpen(false)}
+                className="mobile-link"
               >
                 Sign Up
               </Link>
@@ -465,46 +450,82 @@ const Navbar: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   nav: {
-    background: "linear-gradient(135deg, #1E3A8A 0%, #1e40af 100%)",
+    background:
+      "linear-gradient(135deg, #1E3A8A 0%, #2563eb 50%, #1e40af 100%)",
     color: "white",
-    padding: "1rem 0",
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+    padding: "0.875rem 0",
+    boxShadow:
+      "0 4px 24px rgba(30, 58, 138, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)",
     position: "sticky",
     top: 0,
     zIndex: 1000,
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
   },
   navScrolled: {
-    padding: "0.75rem 0",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+    padding: "0.625rem 0",
+    boxShadow:
+      "0 8px 32px rgba(30, 58, 138, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15)",
     background:
-      "linear-gradient(135deg, rgba(30, 58, 138, 0.98) 0%, rgba(30, 64, 175, 0.98) 100%)",
-    backdropFilter: "blur(16px)",
+      "linear-gradient(135deg, rgba(30, 58, 138, 0.98) 0%, rgba(37, 99, 235, 0.98) 50%, rgba(30, 64, 175, 0.98) 100%)",
+    backdropFilter: "blur(20px) saturate(180%)",
   },
   container: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    maxWidth: "1200px",
+    maxWidth: "1280px",
     margin: "0 auto",
-    padding: "0 1.5rem",
+    padding: "0 2rem",
+    gap: "2rem",
   },
   logo: {
     display: "flex",
     alignItems: "center",
-    gap: "0.875rem",
-    fontSize: "1.5rem",
-    fontWeight: "700",
-    color: "white",
-    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    gap: "0.75rem",
     textDecoration: "none",
-    letterSpacing: "-0.025em",
+    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    cursor: "pointer",
   },
-  logoText: {
+  logoIconWrapper: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "10px",
+    background: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(10px)",
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
+    border: "1.5px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  },
+  logoTextWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.125rem",
+  },
+  logoText: {
+    fontSize: "1.375rem",
+    fontWeight: "700",
+    color: "white",
+    letterSpacing: "-0.025em",
+    lineHeight: 1,
+  },
+  logoSubtext: {
+    fontSize: "0.6875rem",
+    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.75)",
+    letterSpacing: "0.025em",
+    textTransform: "uppercase",
   },
   desktopMenu: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.75rem",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  navLinksContainer: {
     display: "flex",
     alignItems: "center",
     gap: "0.25rem",
@@ -512,28 +533,41 @@ const styles: Record<string, React.CSSProperties> = {
   navLink: {
     color: "white",
     fontWeight: "500",
-    transition: "all 0.2s ease",
-    opacity: 0.9,
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    opacity: 0.85,
     position: "relative",
-    padding: "0.625rem 0.875rem",
+    padding: "0.5rem 0.875rem",
     display: "flex",
     alignItems: "center",
-    borderRadius: "10px",
-    fontSize: "0.9rem",
+    gap: "0.5rem",
+    borderRadius: "8px",
+    fontSize: "0.875rem",
     textDecoration: "none",
     whiteSpace: "nowrap",
+    border: "1px solid transparent",
   },
   navLinkActive: {
     opacity: 1,
     fontWeight: "600",
-    background: "rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    background: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    boxShadow:
+      "0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+  },
+  rightSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.75rem",
   },
   divider: {
     width: "1px",
-    height: "24px",
-    background: "rgba(255, 255, 255, 0.25)",
-    margin: "0 0.375rem",
+    height: "28px",
+    background: "rgba(255, 255, 255, 0.2)",
+  },
+  notificationWrapper: {
+    display: "flex",
+    alignItems: "center",
   },
   dropdownContainer: {
     position: "relative",
@@ -542,45 +576,61 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: "0.5rem",
-    padding: "0.625rem 0.875rem",
-    background: "rgba(255, 255, 255, 0.1)",
-    border: "1.5px solid rgba(255, 255, 255, 0.2)",
+    padding: "0.5rem 0.875rem",
+    background: "rgba(255, 255, 255, 0.12)",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
     color: "white",
-    borderRadius: "10px",
+    borderRadius: "8px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
-    fontSize: "0.9rem",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    fontSize: "0.875rem",
     fontWeight: "500",
     whiteSpace: "nowrap",
   },
   adminDropdownBtnActive: {
-    background: "rgba(255, 255, 255, 0.18)",
+    background: "rgba(255, 255, 255, 0.2)",
     borderColor: "rgba(255, 255, 255, 0.35)",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
   },
   adminDropdown: {
     position: "absolute",
-    top: "calc(100% + 0.25rem)",
+    top: "calc(100% + 0.125rem)",
     left: 0,
     background: "white",
     borderRadius: "12px",
-    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.12)",
-    minWidth: "260px",
+    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1)",
+    minWidth: "240px",
     overflow: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.08)",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
     zIndex: 1001,
+    paddingTop: "0.125rem",
+  },
+  dropdownHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    padding: "0.875rem 1rem",
+    background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+    fontSize: "0.75rem",
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
   dropdownLink: {
     display: "flex",
     alignItems: "center",
-    padding: "0.875rem 1.25rem",
+    gap: "0.75rem",
+    padding: "0.75rem 1rem",
     color: "#334155",
     textDecoration: "none",
-    fontSize: "0.9rem",
+    fontSize: "0.875rem",
     fontWeight: "500",
-    transition: "all 0.15s ease",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
     cursor: "pointer",
+    borderLeft: "3px solid transparent",
   },
   dropdownLinkActive: {
     background:
@@ -588,7 +638,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#1E3A8A",
     fontWeight: "600",
     borderLeft: "3px solid #1E3A8A",
-    paddingLeft: "1.125rem",
   },
   userMenuContainer: {
     position: "relative",
@@ -596,30 +645,31 @@ const styles: Record<string, React.CSSProperties> = {
   userMenu: {
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
-    padding: "0.5rem 1rem",
-    background: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(12px)",
-    borderRadius: "12px",
-    transition: "all 0.2s ease",
-    border: "1.5px solid rgba(255, 255, 255, 0.2)",
+    gap: "0.625rem",
+    padding: "0.375rem 0.875rem 0.375rem 0.5rem",
+    background: "rgba(255, 255, 255, 0.12)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "10px",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
     cursor: "pointer",
     color: "white",
   },
   userMenuActive: {
-    background: "rgba(255, 255, 255, 0.18)",
+    background: "rgba(255, 255, 255, 0.2)",
     borderColor: "rgba(255, 255, 255, 0.35)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
   },
   userAvatar: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "50%",
+    width: "32px",
+    height: "32px",
+    borderRadius: "8px",
     background:
       "linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2))",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    border: "2px solid rgba(255, 255, 255, 0.35)",
+    border: "1.5px solid rgba(255, 255, 255, 0.35)",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
   userInfo: {
@@ -630,103 +680,147 @@ const styles: Record<string, React.CSSProperties> = {
   },
   userName: {
     fontWeight: "600",
-    fontSize: "0.9375rem",
+    fontSize: "0.875rem",
     letterSpacing: "-0.01em",
+    lineHeight: 1,
   },
   userDropdown: {
     position: "absolute",
-    top: "calc(100% + 0.25rem)",
+    top: "calc(100% + 0.125rem)",
     right: 0,
     background: "white",
     borderRadius: "12px",
-    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.12)",
-    minWidth: "300px",
+    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1)",
+    minWidth: "280px",
     overflow: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.08)",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
     zIndex: 1001,
+    paddingTop: "0.125rem",
   },
-  dropdownHeader: {
-    padding: "1.5rem 1.25rem",
+  userDropdownHeader: {
+    display: "flex",
+    gap: "0.875rem",
+    padding: "1.25rem",
     background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
     borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
   },
+  userDropdownAvatar: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "10px",
+    background: "linear-gradient(135deg, #1E3A8A, #2563eb)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    flexShrink: 0,
+    boxShadow: "0 4px 12px rgba(30, 58, 138, 0.2)",
+  },
+  userDropdownInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
   dropdownUserName: {
     fontWeight: "600",
-    fontSize: "1.0625rem",
+    fontSize: "1rem",
     color: "#1F2937",
-    marginBottom: "0.375rem",
+    marginBottom: "0.25rem",
     letterSpacing: "-0.01em",
   },
   dropdownUserEmail: {
-    fontSize: "0.875rem",
+    fontSize: "0.8125rem",
     color: "#6B7280",
     fontWeight: "500",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  dropdownDivider: {
+    height: "1px",
+    background: "rgba(0, 0, 0, 0.06)",
   },
   logoutBtn: {
     width: "100%",
     display: "flex",
     alignItems: "center",
     gap: "0.75rem",
-    padding: "1rem 1.25rem",
+    padding: "0.875rem 1.25rem",
     background: "transparent",
     border: "none",
     color: "#ef4444",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    fontSize: "0.9375rem",
+    fontSize: "0.875rem",
+  },
+  loginBtn: {
+    color: "white",
+    fontWeight: "500",
+    padding: "0.5rem 1.25rem",
+    borderRadius: "8px",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    textDecoration: "none",
+    fontSize: "0.875rem",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    background: "rgba(255, 255, 255, 0.1)",
   },
   signupBtn: {
     background: "white",
     color: "#1E3A8A",
-    padding: "0.625rem 1.75rem",
-    borderRadius: "10px",
+    padding: "0.5rem 1.5rem",
+    borderRadius: "8px",
     fontWeight: "600",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    transition: "all 0.2s ease",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     textDecoration: "none",
     display: "inline-block",
+    fontSize: "0.875rem",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
   },
   mobileMenuBtn: {
     display: "none",
     background: "rgba(255, 255, 255, 0.15)",
-    border: "1.5px solid rgba(255, 255, 255, 0.25)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
     color: "white",
     cursor: "pointer",
-    padding: "0.625rem",
-    borderRadius: "10px",
-    transition: "all 0.2s ease",
+    padding: "0.5rem",
+    borderRadius: "8px",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   },
   mobileMenu: {
     display: "none",
     flexDirection: "column",
-    gap: "0.5rem",
-    padding: "1.5rem",
+    gap: "0.375rem",
+    padding: "1.25rem",
     background: "rgba(30, 58, 138, 0.98)",
-    backdropFilter: "blur(16px)",
-    borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
+    borderTop: "1px solid rgba(255, 255, 255, 0.1)",
   },
   mobileUserHeader: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem",
+    gap: "0.875rem",
     padding: "1rem",
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(255, 255, 255, 0.12)",
+    backdropFilter: "blur(10px)",
     borderRadius: "12px",
-    marginBottom: "0.5rem",
+    marginBottom: "0.625rem",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
   },
   mobileUserAvatar: {
-    width: "56px",
-    height: "56px",
-    borderRadius: "50%",
+    width: "52px",
+    height: "52px",
+    borderRadius: "10px",
     background: "rgba(255, 255, 255, 0.25)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    border: "2.5px solid rgba(255, 255, 255, 0.3)",
+    border: "2px solid rgba(255, 255, 255, 0.3)",
+    flexShrink: 0,
   },
   mobileUserInfo: {
     flex: 1,
+    minWidth: 0,
   },
   mobileUserName: {
     fontWeight: "600",
@@ -735,52 +829,57 @@ const styles: Record<string, React.CSSProperties> = {
     color: "white",
   },
   mobileUserEmail: {
-    fontSize: "0.875rem",
-    opacity: 0.85,
-    color: "rgba(255, 255, 255, 0.85)",
+    fontSize: "0.8125rem",
+    color: "rgba(255, 255, 255, 0.8)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   mobileDivider: {
     height: "1px",
     background: "rgba(255, 255, 255, 0.15)",
-    margin: "0.75rem 0",
+    margin: "0.625rem 0",
   },
   mobileSectionTitle: {
-    fontSize: "0.75rem",
+    fontSize: "0.6875rem",
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: "0.1em",
     color: "rgba(255, 255, 255, 0.6)",
-    padding: "0.75rem 0.875rem 0.375rem",
-    marginTop: "0.5rem",
+    padding: "0.625rem 0.75rem 0.375rem",
+    marginTop: "0.375rem",
     display: "flex",
     alignItems: "center",
+    gap: "0.5rem",
   },
   mobileLink: {
     color: "white",
-    padding: "0.875rem 1rem",
+    padding: "0.75rem 0.875rem",
     fontWeight: "500",
-    borderRadius: "10px",
-    transition: "all 0.2s ease",
+    borderRadius: "8px",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     textDecoration: "none",
-    fontSize: "0.9375rem",
+    fontSize: "0.875rem",
     display: "flex",
     alignItems: "center",
+    gap: "0.75rem",
+    border: "1px solid transparent",
   },
   mobileLogout: {
     background: "rgba(239, 68, 68, 0.15)",
     color: "#fca5a5",
-    border: "1.5px solid rgba(239, 68, 68, 0.3)",
-    padding: "0.875rem 1rem",
-    borderRadius: "10px",
+    border: "1px solid rgba(239, 68, 68, 0.3)",
+    padding: "0.75rem 0.875rem",
+    borderRadius: "8px",
     fontWeight: "600",
     cursor: "pointer",
-    marginTop: "0.75rem",
-    transition: "all 0.2s ease",
+    marginTop: "0.625rem",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     gap: "0.625rem",
-    fontSize: "0.9375rem",
+    fontSize: "0.875rem",
   },
 };
 
@@ -790,7 +889,7 @@ styleSheet.textContent = `
   @keyframes fade-in {
     from {
       opacity: 0;
-      transform: translateY(-8px);
+      transform: translateY(-10px);
     }
     to {
       opacity: 1;
@@ -810,73 +909,104 @@ styleSheet.textContent = `
   }
 
   .fade-in {
-    animation: fade-in 0.2s ease;
+    animation: fade-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .slide-in-right {
-    animation: slide-in-right 0.3s ease;
+    animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  nav a[style*="navLink"]:hover {
+  /* Logo hover */
+  nav a[style*="logo"]:hover {
+    transform: scale(1.03);
+  }
+  
+  nav a[style*="logo"]:hover > div[style*="logoIconWrapper"] {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Nav links hover */
+  .nav-link:hover {
     opacity: 1 !important;
     background: rgba(255, 255, 255, 0.18) !important;
     transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2) !important;
   }
   
-  nav a[style*="logo"]:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-  }
-  
-  nav button[style*="adminDropdownBtn"]:hover {
-    background: rgba(255, 255, 255, 0.18) !important;
+  /* Admin dropdown button hover */
+  .admin-dropdown-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
     border-color: rgba(255, 255, 255, 0.35) !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
   
-  nav a[style*="dropdownLink"]:hover {
-    background: linear-gradient(90deg, rgba(30, 58, 138, 0.06) 0%, transparent 100%) !important;
-    padding-left: 1.5rem !important;
+  /* Dropdown link hover */
+  .dropdown-link:hover {
+    background: linear-gradient(90deg, rgba(30, 58, 138, 0.08) 0%, transparent 100%) !important;
     color: #1E3A8A !important;
+    transform: translateX(4px);
   }
   
-  nav button[style*="userMenu"]:hover {
-    background: rgba(255, 255, 255, 0.18) !important;
+  /* User menu button hover */
+  .user-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
     border-color: rgba(255, 255, 255, 0.35) !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
   
-  nav button[style*="logoutBtn"]:hover {
+  /* Logout button hover */
+  .logout-btn:hover {
     background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, transparent 100%) !important;
     color: #dc2626 !important;
   }
   
-  nav a[style*="signupBtn"]:hover {
+  /* Login button hover */
+  .login-btn:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    transform: translateY(-1px);
+  }
+  
+  /* Signup button hover */
+  .signup-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
     background: #f8fafc !important;
   }
   
-  nav button[style*="mobileMenuBtn"]:hover {
+  /* Mobile menu button hover */
+  .mobile-menu-btn:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     border-color: rgba(255, 255, 255, 0.35) !important;
     transform: scale(1.05);
   }
   
-  nav a[style*="mobileLink"]:hover {
+  /* Mobile link hover */
+  .mobile-link:hover {
     background: rgba(255, 255, 255, 0.15) !important;
     transform: translateX(6px);
+    border-color: rgba(255, 255, 255, 0.2) !important;
   }
   
-  nav button[style*="mobileLogout"]:hover {
+  /* Mobile logout hover */
+  .mobile-logout:hover {
     background: rgba(239, 68, 68, 0.25) !important;
     border-color: rgba(239, 68, 68, 0.5) !important;
     color: #fff !important;
     transform: translateY(-2px);
   }
   
+  /* Responsive styles */
+  @media (max-width: 1024px) {
+    nav > div {
+      padding: 0 1.5rem !important;
+    }
+  }
+
   @media (max-width: 768px) {
     nav > div > div:nth-child(2) {
       display: none !important;
