@@ -109,6 +109,17 @@ const Navbar: React.FC = () => {
                 <BarChart3 size={18} style={{ marginRight: "0.25rem" }} />
                 Dashboard
               </Link>
+              {/* Common routes available to all authenticated users */}
+              <Link
+                to="/announcements"
+                style={{
+                  ...styles.navLink,
+                  ...(isActive("/announcements") ? styles.navLinkActive : {}),
+                }}
+              >
+                Announcements
+              </Link>
+
               {user?.role === "resident" && (
                 <>
                   <Link
@@ -150,7 +161,123 @@ const Navbar: React.FC = () => {
                 </>
               )}
 
+              {/* Staff and Admin have access to most authenticated pages in addition to admin tools */}
+              {(user?.role === "staff" || user?.role === "admin") && (
+                <>
+                  <Link
+                    to="/services"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/services") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Services
+                  </Link>
+                  <Link
+                    to="/complaints"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/complaints") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Complaints
+                  </Link>
+                  <Link
+                    to="/events"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/events") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Events
+                  </Link>
+                </>
+              )}
+
               <NotificationBell />
+
+              {/* Admin / Staff tools */}
+              {user?.role === "staff" && (
+                <>
+                  <Link
+                    to="/admin/announcements"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/announcements") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Manage Announcements
+                  </Link>
+                  <Link
+                    to="/admin/analytics"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/analytics") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Analytics
+                  </Link>
+                </>
+              )}
+
+              {user?.role === "admin" && (
+                <>
+                  <Link
+                    to="/admin/users"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/users") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    User Management
+                  </Link>
+                  <Link
+                    to="/admin/announcements"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/announcements") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Manage Announcements
+                  </Link>
+                  <Link
+                    to="/admin/analytics"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/analytics") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Analytics
+                  </Link>
+                  <Link
+                    to="/admin/audit-logs"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/audit-logs") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Audit Logs
+                  </Link>
+                  <Link
+                    to="/admin/config"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/config") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    System Config
+                  </Link>
+                  <Link
+                    to="/admin/automation"
+                    style={{
+                      ...styles.navLink,
+                      ...(isActive("/admin/automation") ? styles.navLinkActive : {}),
+                    }}
+                  >
+                    Automation
+                  </Link>
+                </>
+              )}
 
               <div style={styles.userMenu}>
                 <div style={styles.userAvatar}>
@@ -231,28 +358,109 @@ const Navbar: React.FC = () => {
               >
                 Dashboard
               </Link>
-              {user?.role === "resident" && (
+              {/* all authenticated users can reach these pages */}
+              <Link
+                to="/announcements"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Announcements
+              </Link>
+
+              <Link
+                to="/services"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Services
+              </Link>
+              <Link
+                to="/complaints"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Complaints
+              </Link>
+              <Link
+                to="/events"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Events
+              </Link>
+
+              <Link
+                to="/help"
+                style={styles.mobileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Help
+              </Link>
+
+              {/* Staff-specific quick links */}
+              {user?.role === "staff" && (
                 <>
                   <Link
-                    to="/services"
+                    to="/admin/announcements"
                     style={styles.mobileLink}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Services
+                    Manage Announcements
                   </Link>
                   <Link
-                    to="/complaints"
+                    to="/admin/analytics"
                     style={styles.mobileLink}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Complaints
+                    Analytics
+                  </Link>
+                </>
+              )}
+
+              {/* Admin quick links */}
+              {user?.role === "admin" && (
+                <>
+                  <Link
+                    to="/admin/users"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    User Management
                   </Link>
                   <Link
-                    to="/events"
+                    to="/admin/announcements"
                     style={styles.mobileLink}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Events
+                    Manage Announcements
+                  </Link>
+                  <Link
+                    to="/admin/analytics"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Analytics
+                  </Link>
+                  <Link
+                    to="/admin/audit-logs"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Audit Logs
+                  </Link>
+                  <Link
+                    to="/admin/config"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    System Config
+                  </Link>
+                  <Link
+                    to="/admin/automation"
+                    style={styles.mobileLink}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Automation
                   </Link>
                 </>
               )}
