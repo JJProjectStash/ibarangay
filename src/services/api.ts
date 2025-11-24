@@ -102,6 +102,17 @@ class ApiService {
     return response.data;
   }
 
+  async getUsers(params?: {
+    role?: string;
+    verified?: boolean;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const response = await this.api.get("/auth/users", { params });
+    return response.data;
+  }
+
   async updateUserRole(userId: string, role: string) {
     const response = await this.api.put(`/auth/users/${userId}/role`, { role });
     return response.data;
@@ -517,6 +528,14 @@ class ApiService {
 
   async deleteNotification(id: string) {
     const response = await this.api.delete(`/notifications/${id}`);
+    return response.data;
+  }
+
+  // ==================== Search Endpoints ====================
+  async globalSearch(query: string) {
+    const response = await this.api.get("/search/global", {
+      params: { q: query },
+    });
     return response.data;
   }
 
