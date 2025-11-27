@@ -181,9 +181,15 @@ const Navbar: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => setShowAdminDropdown(!showAdminDropdown)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setShowAdminDropdown(false);
+                        if (e.key === "Enter" || e.key === " ")
+                          setShowAdminDropdown((s) => !s);
+                      }}
                       className="admin-dropdown-btn"
                       aria-expanded={showAdminDropdown}
                       aria-haspopup="true"
+                      aria-controls="admin-dropdown"
                     >
                       <Shield size={16} strokeWidth={2.2} />
                       <span>Admin</span>
@@ -201,9 +207,11 @@ const Navbar: React.FC = () => {
 
                     {showAdminDropdown && (
                       <div
+                        id="admin-dropdown"
                         style={styles.adminDropdown}
                         className="fade-in"
                         role="menu"
+                        aria-label="Administration menu"
                       >
                         <div style={styles.dropdownHeader}>
                           <Shield size={14} style={{ opacity: 0.6 }} />
@@ -256,9 +264,15 @@ const Navbar: React.FC = () => {
                       ...(showUserDropdown ? styles.userMenuActive : {}),
                     }}
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setShowUserDropdown(false);
+                      if (e.key === "Enter" || e.key === " ")
+                        setShowUserDropdown((s) => !s);
+                    }}
                     className="user-menu-btn"
                     aria-expanded={showUserDropdown}
                     aria-haspopup="true"
+                    aria-controls="user-dropdown"
                     aria-label="User menu"
                   >
                     <div style={styles.userAvatar}>
@@ -283,9 +297,11 @@ const Navbar: React.FC = () => {
 
                   {showUserDropdown && (
                     <div
+                      id="user-dropdown"
                       style={styles.userDropdown}
                       className="fade-in"
                       role="menu"
+                      aria-label="User menu"
                     >
                       <div style={styles.userDropdownHeader}>
                         <div style={styles.userDropdownAvatar}>
