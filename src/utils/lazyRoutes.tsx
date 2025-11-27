@@ -11,13 +11,9 @@ export const UserManagement = React.lazy(
 export const AnnouncementManagement = React.lazy(
   () => import("../pages/admin/AnnouncementManagement")
 );
-export const Analytics = React.lazy(() => import("../pages/admin/Analytics"));
 export const AuditLogs = React.lazy(() => import("../pages/admin/AuditLogs"));
 export const SystemConfig = React.lazy(
   () => import("../pages/admin/SystemConfig")
-);
-export const AutomationSettings = React.lazy(
-  () => import("../pages/admin/AutomationSettings")
 );
 export const StaffDashboard = React.lazy(
   () => import("../pages/staff/StaffDashboard")
@@ -43,10 +39,8 @@ export const withSuspense = (
 export const LazyAdminDashboard = withSuspense(AdminDashboard);
 export const LazyUserManagement = withSuspense(UserManagement);
 export const LazyAnnouncementManagement = withSuspense(AnnouncementManagement);
-export const LazyAnalytics = withSuspense(Analytics);
 export const LazyAuditLogs = withSuspense(AuditLogs);
 export const LazySystemConfig = withSuspense(SystemConfig);
-export const LazyAutomationSettings = withSuspense(AutomationSettings);
 export const LazyStaffDashboard = withSuspense(StaffDashboard);
 export const LazyEvents = withSuspense(Events);
 export const LazyComplaints = withSuspense(Complaints);

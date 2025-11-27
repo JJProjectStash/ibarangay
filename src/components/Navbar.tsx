@@ -12,9 +12,7 @@ import {
   ChevronDown,
   Settings,
   Bell,
-  Home,
   Megaphone,
-  Wrench,
   MessageSquare,
   Calendar,
 } from "lucide-react";
@@ -70,7 +68,7 @@ const Navbar: React.FC = () => {
       resident: { icon: User, color: "#10b981", label: "Resident" },
     };
     const badge = badges[user.role];
-    if (!badge) return null; // guard against unexpected/undefined roles
+    if (!badge) return null;
     const Icon = badge.icon;
     return (
       <span
@@ -103,10 +101,8 @@ const Navbar: React.FC = () => {
           label: "Manage Announcements",
           icon: Megaphone,
         },
-        { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
         { to: "/admin/audit-logs", label: "Audit Logs", icon: Shield },
         { to: "/admin/config", label: "System Config", icon: Settings },
-        { to: "/admin/automation", label: "Automation", icon: Wrench },
       ];
     } else if (user?.role === "staff") {
       return [
@@ -115,17 +111,15 @@ const Navbar: React.FC = () => {
           label: "Manage Announcements",
           icon: Megaphone,
         },
-        { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
       ];
     }
     return [];
   };
 
   const navigationItems = [
-    { to: "/", label: "Home", icon: Home },
     { to: getRoleBasedDashboard(), label: "Dashboard", icon: BarChart3 },
     { to: "/announcements", label: "Announcements", icon: Megaphone },
-    { to: "/services", label: "Services", icon: Wrench },
+    { to: "/services", label: "Services", icon: User },
     { to: "/complaints", label: "Complaints", icon: MessageSquare },
     { to: "/events", label: "Events", icon: Calendar },
   ];
@@ -134,7 +128,7 @@ const Navbar: React.FC = () => {
     <nav style={{ ...styles.nav, ...(scrolled ? styles.navScrolled : {}) }}>
       <div className="container" style={styles.container}>
         {/* Logo Section */}
-        <Link to="/" style={styles.logo}>
+        <Link to="/" style={styles.logo} aria-label="iBarangay Home">
           <div style={styles.logoIconWrapper}>
             <BarangayLogo size={32} />
           </div>
@@ -162,6 +156,7 @@ const Navbar: React.FC = () => {
                         ...(active ? styles.navLinkActive : {}),
                       }}
                       className="nav-link"
+                      aria-current={active ? "page" : undefined}
                     >
                       <Icon size={16} strokeWidth={2.2} />
                       <span>{item.label}</span>
@@ -187,6 +182,8 @@ const Navbar: React.FC = () => {
                       }}
                       onClick={() => setShowAdminDropdown(!showAdminDropdown)}
                       className="admin-dropdown-btn"
+                      aria-expanded={showAdminDropdown}
+                      aria-haspopup="true"
                     >
                       <Shield size={16} strokeWidth={2.2} />
                       <span>Admin</span>
@@ -203,7 +200,11 @@ const Navbar: React.FC = () => {
                     </button>
 
                     {showAdminDropdown && (
-                      <div style={styles.adminDropdown} className="fade-in">
+                      <div
+                        style={styles.adminDropdown}
+                        className="fade-in"
+                        role="menu"
+                      >
                         <div style={styles.dropdownHeader}>
                           <Shield size={14} style={{ opacity: 0.6 }} />
                           <span>Administration</span>
@@ -222,6 +223,7 @@ const Navbar: React.FC = () => {
                               }}
                               onClick={() => setShowAdminDropdown(false)}
                               className="dropdown-link"
+                              role="menuitem"
                             >
                               {Icon && <Icon size={16} strokeWidth={2} />}
                               <span>{link.label}</span>
@@ -255,6 +257,9 @@ const Navbar: React.FC = () => {
                     }}
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                     className="user-menu-btn"
+                    aria-expanded={showUserDropdown}
+                    aria-haspopup="true"
+                    aria-label="User menu"
                   >
                     <div style={styles.userAvatar}>
                       <User size={16} strokeWidth={2.5} />
@@ -277,7 +282,11 @@ const Navbar: React.FC = () => {
                   </button>
 
                   {showUserDropdown && (
-                    <div style={styles.userDropdown} className="fade-in">
+                    <div
+                      style={styles.userDropdown}
+                      className="fade-in"
+                      role="menu"
+                    >
                       <div style={styles.userDropdownHeader}>
                         <div style={styles.userDropdownAvatar}>
                           <User size={20} strokeWidth={2} />
@@ -299,6 +308,7 @@ const Navbar: React.FC = () => {
                         onClick={handleLogout}
                         style={styles.logoutBtn}
                         className="logout-btn"
+                        role="menuitem"
                       >
                         <LogOut size={18} strokeWidth={2} />
                         <span>Sign Out</span>
@@ -329,6 +339,7 @@ const Navbar: React.FC = () => {
           style={styles.mobileMenuBtn}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
           className="mobile-menu-btn"
         >
           {isMenuOpen ? (

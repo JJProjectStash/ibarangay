@@ -24,16 +24,15 @@ import Notifications from "./pages/Notifications";
 import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
 import Help from "./pages/Help";
+import NotFound from "./pages/NotFound";
 
 // Lazy loaded components for better performance
 import {
   LazyAdminDashboard,
   LazyUserManagement,
   LazyAnnouncementManagement,
-  LazyAnalytics,
   LazyAuditLogs,
   LazySystemConfig,
-  LazyAutomationSettings,
   LazyStaffDashboard,
   LazyEvents,
   LazyComplaints,
@@ -220,14 +219,6 @@ function AppContent() {
           }
         />
         <Route
-          path="/admin/analytics"
-          element={
-            <RoleBasedRoute allowedRoles={["admin", "staff"]}>
-              <LazyAnalytics />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
           path="/admin/audit-logs"
           element={
             <RoleBasedRoute allowedRoles={["admin"]}>
@@ -243,14 +234,6 @@ function AppContent() {
             </RoleBasedRoute>
           }
         />
-        <Route
-          path="/admin/automation"
-          element={
-            <RoleBasedRoute allowedRoles={["admin"]}>
-              <LazyAutomationSettings />
-            </RoleBasedRoute>
-          }
-        />
 
         {/* Staff Routes - Lazy Loaded */}
         <Route
@@ -262,8 +245,9 @@ function AppContent() {
           }
         />
 
-        {/* Catch all - redirect to home */}
-        <Route path="*" element={<Navigate to="/" />} />
+        {/* 404 Not Found */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
