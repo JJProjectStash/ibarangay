@@ -70,6 +70,7 @@ const Navbar: React.FC = () => {
       resident: { icon: User, color: "#10b981", label: "Resident" },
     };
     const badge = badges[user.role];
+    if (!badge) return null; // guard against unexpected/undefined roles
     const Icon = badge.icon;
     return (
       <span
@@ -87,7 +88,7 @@ const Navbar: React.FC = () => {
           border: `1px solid ${badge.color}30`,
         }}
       >
-        <Icon size={11} strokeWidth={2.5} />
+        {Icon && <Icon size={11} strokeWidth={2.5} />}
         {badge.label}
       </span>
     );
@@ -207,7 +208,7 @@ const Navbar: React.FC = () => {
                           <Shield size={14} style={{ opacity: 0.6 }} />
                           <span>Administration</span>
                         </div>
-                        {getAdminLinks().map((link, index) => {
+                        {getAdminLinks().map((link) => {
                           const Icon = link.icon;
                           return (
                             <Link
