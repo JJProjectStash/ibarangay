@@ -775,10 +775,82 @@ body {
   border-width: 0;
 }
 
+/* Skip to content styles: visible on focus */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 6px;
+  z-index: var(--z-sticky);
+}
+
 /* ==================== Responsive Utilities ==================== */
 @media (max-width: 639px) {
   .sm\\:hidden {
     display: none;
+  }
+}
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.98), rgba(37, 99, 235, 0.98));
+    gap: 0;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.25rem 0;
+    z-index: var(--z-sticky);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-bottom-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .mobile-bottom-nav-link.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+  }
+}
+
+/* Ensure main has padding to avoid bottom nav overlap on mobile */
+@media (max-width: 640px) {
+  main[role="main"] {
+    padding-bottom: 4.5rem;
   }
 }
 

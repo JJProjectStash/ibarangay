@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { UserPlus } from "lucide-react";
+import EnhancedInput from "../components/EnhancedInput";
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -74,11 +75,11 @@ const Signup: React.FC = () => {
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formRow}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>First Name</label>
-                <input
+                <EnhancedInput
+                  id="signup-firstname"
+                  label="First Name"
                   type="text"
                   name="firstName"
-                  className="input"
                   value={formData.firstName}
                   onChange={handleChange}
                   placeholder="Juan"
@@ -87,10 +88,10 @@ const Signup: React.FC = () => {
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Last Name</label>
-                <input
+                <EnhancedInput
+                  id="signup-lastname"
                   type="text"
                   name="lastName"
-                  className="input"
                   value={formData.lastName}
                   onChange={handleChange}
                   placeholder="Dela Cruz"
@@ -100,11 +101,11 @@ const Signup: React.FC = () => {
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Email Address</label>
-              <input
+              <EnhancedInput
+                id="signup-email"
+                label="Email Address"
                 type="email"
                 name="email"
-                className="input"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="juan@example.com"
@@ -113,11 +114,11 @@ const Signup: React.FC = () => {
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Phone Number</label>
-              <input
+              <EnhancedInput
+                id="signup-phone"
+                label="Phone Number"
                 type="tel"
                 name="phoneNumber"
-                className="input"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 placeholder="09123456789"
@@ -126,10 +127,11 @@ const Signup: React.FC = () => {
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Address</label>
-              <textarea
+              <EnhancedInput
+                id="signup-address"
+                component="textarea"
+                label="Address"
                 name="address"
-                className="input"
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="123 Street Name, Purok 1"
@@ -141,10 +143,10 @@ const Signup: React.FC = () => {
             <div style={styles.formRow}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Password</label>
-                <input
+                <EnhancedInput
+                  id="signup-password"
                   type="password"
                   name="password"
-                  className="input"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Min. 6 characters"
@@ -153,10 +155,10 @@ const Signup: React.FC = () => {
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Confirm Password</label>
-                <input
+                <EnhancedInput
+                  id="signup-confirm-password"
                   type="password"
                   name="confirmPassword"
-                  className="input"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Confirm password"

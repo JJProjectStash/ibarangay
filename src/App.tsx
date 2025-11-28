@@ -40,6 +40,7 @@ import {
 } from "./utils/lazyRoutes";
 
 import "./styles/design-system.css";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -127,6 +128,7 @@ function AppContent() {
 
   return (
     <>
+      <a href="#main" className="sr-only skip-link">Skip to content</a>
       <CSRFToken />
       <Navbar />
       <ToastProvider />
@@ -137,7 +139,8 @@ function AppContent() {
         onExtend={extendSession}
         onLogout={handleLogout}
       />
-      <Routes>
+      <main id="main" role="main">
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -248,7 +251,10 @@ function AppContent() {
         {/* 404 Not Found */}
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
+        </Routes>
+      </main>
+      {/* Bottom nav prototype for mobile (visible on small screens) */}
+      {isAuthenticated && <MobileBottomNav />}
     </>
   );
 }

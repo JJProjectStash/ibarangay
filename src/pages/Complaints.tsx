@@ -13,6 +13,9 @@ import socketService from "../services/socket";
 import { Complaint } from "../types";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
+import EnhancedInput from "../components/EnhancedInput";
+import Skeleton from "../components/Skeleton";
+import { extractListFromResponse } from "../utils/apiHelpers";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import { validators, getValidationMessage } from "../utils/validators";
@@ -101,10 +104,13 @@ const Complaints: React.FC = () => {
       if (filterPriority) params.priority = filterPriority;
 
       const response = await api.getComplaints(params);
-      // backend returns { success: boolean, data: [...] }
-      const complaintsData = Array.isArray(response.data?.data)
-        ? response.data.data
-        : [];
+      // Use helper to defensively extract list data
+      const complaintsData = extractListFromResponse(response, "complaints");
+      if (complaintsData.length === 0) {
+        // Helpful debug log for devs: prints the payload when we didn't find a list
+        // eslint-disable-next-line no-console
+        console.debug("Complaints payload not list-shaped:", response.data ?? response);
+      }
       setComplaints(complaintsData);
     } catch (error) {
       console.error("Failed to fetch complaints:", error);
@@ -302,10 +308,25 @@ const Complaints: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading complaints...
-        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          {/* Skeleton cards to indicate loading structure */}
+          <div className="card" style={{ padding: "1.5rem" }}>
+            <EnhancedInput component="input" placeholder="Loading title..." disabled />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width="6rem" height="1.5rem" />
+              <Skeleton width="6rem" height="1.5rem" />
+            </div>
+          </div>
+          <div className="card" style={{ padding: "1.5rem" }}>
+            <EnhancedInput component="input" placeholder="Loading title..." disabled />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width="6rem" height="1.5rem" />
+              <Skeleton width="6rem" height="1.5rem" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -687,12 +708,13 @@ const Complaints: React.FC = () => {
                 >
                   Title *
                 </label>
-                <input
-                  className="input"
+                <EnhancedInput
+                  id="complaint-title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  onChange={(e: any) => handleInputChange("title", e.target.value)}
                   placeholder="Brief description of the issue"
                   disabled={isSubmitting}
+                  error={errors.title}
                 />
                 {errors.title && (
                   <p
@@ -782,15 +804,16 @@ const Complaints: React.FC = () => {
                 >
                   Description *
                 </label>
-                <textarea
-                  className="input"
-                  rows={5}
+                <EnhancedInput
+                  component="textarea"
+                  id="complaint-description"
                   value={formData.description}
-                  onChange={(e) =>
+                  onChange={(e: any) =>
                     handleInputChange("description", e.target.value)
                   }
                   placeholder="Provide detailed information about your complaint"
                   disabled={isSubmitting}
+                  error={errors.description}
                 />
                 {errors.description && (
                   <p

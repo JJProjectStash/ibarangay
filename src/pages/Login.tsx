@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import EnhancedInput from "../components/EnhancedInput";
 import { showToast } from "../utils/toast";
 
 const Login: React.FC = () => {
@@ -12,6 +13,30 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const devLogin = (role: 'admin' | 'staff' | 'resident') => {
+    if (!import.meta.env.DEV) return;
+
+    const user = {
+      _id: `dev-${role}-id`,
+      id: `dev-${role}-id`,
+      firstName: role === 'admin' ? 'Admin' : role === 'staff' ? 'Staff' : 'Resident',
+      lastName: 'User',
+      email: `${role}@dev.local`,
+      role,
+      address: '123 Dev Lane',
+      phoneNumber: '09171234567',
+      isVerified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('token', `dev-token-${role}`);
+    localStorage.setItem('user', JSON.stringify(user));
+
+    // reload so AuthProvider can rehydrate from localStorage
+    window.location.reload();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +77,12 @@ const Login: React.FC = () => {
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Email Address</label>
-              <input
+              <EnhancedInput
+                id="login-email"
+                label="Email Address"
                 type="email"
-                className="input"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: any) => setEmail(e.target.value)}
                 placeholder="juan@example.com"
                 required
                 disabled={isLoading}
@@ -67,15 +92,16 @@ const Login: React.FC = () => {
             <div style={styles.formGroup}>
               <label style={styles.label}>Password</label>
               <div style={styles.passwordWrapper}>
-                <input
+                <EnhancedInput
+                  id="login-password"
+                  label="Password"
                   type={showPassword ? "text" : "password"}
-                  className="input"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: any) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
                   disabled={isLoading}
-                  style={{ paddingRight: "3rem" }}
+                  className="password-input"
                 />
                 <button
                   type="button"
@@ -123,6 +149,31 @@ const Login: React.FC = () => {
               👤 Resident: resident@barangay.com / resident123
             </p>
           </div>
+          {import.meta.env.DEV && (
+            <div style={{ marginTop: '1rem' }}>
+              <p style={{ fontWeight: 600 }}>Dev Login (Local only):</p>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => devLogin('admin')}
+                >
+                  Login as Admin (dev)
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => devLogin('staff')}
+                >
+                  Login as Staff (dev)
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => devLogin('resident')}
+                >
+                  Login as Resident (dev)
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

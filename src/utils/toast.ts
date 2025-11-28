@@ -39,6 +39,8 @@ export const showToast = (
     container.className = `fixed ${getPositionClass(
       position
     )} z-50 space-y-2 p-4`;
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-live', 'polite');
     document.body.appendChild(container);
   }
 
@@ -70,6 +72,13 @@ export const showToast = (
 
   toast.appendChild(icon);
   toast.appendChild(messageEl);
+  // For errors, announce as alert; otherwise use role=status
+  if (type === 'error') {
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-atomic', 'true');
+  } else {
+    toast.setAttribute('role', 'status');
+  }
   toast.appendChild(closeBtn);
   container.appendChild(toast);
 

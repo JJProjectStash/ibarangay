@@ -4,6 +4,8 @@ import api from "../services/apiExtensions";
 import { Event } from "../types";
 import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";
+import Skeleton from "../components/Skeleton";
+import { extractListFromResponse } from "../utils/apiHelpers";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import EventAttendeesModal from "../components/events/EventAttendeesModal";
@@ -28,9 +30,8 @@ const Events: React.FC = () => {
     try {
       setIsLoading(true);
         const response = await api.getEvents();
-        const eventsData = Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
+        const eventsData = extractListFromResponse(response, "events");
+        if (eventsData.length === 0) console.debug("Events payload:", response.data ?? response);
       setEvents(eventsData);
     } catch (error) {
       console.error("Failed to fetch events:", error);
@@ -123,10 +124,24 @@ const Events: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading events...
-        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "1.5rem" }}>
+          <div className="card" style={{ padding: "1.25rem" }}>
+            <Skeleton height={"1.5rem"} className="skeleton-title" />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width={"6rem"} height={"1.5rem"} />
+              <Skeleton width={"6rem"} height={"1.5rem"} />
+            </div>
+          </div>
+          <div className="card" style={{ padding: "1.25rem" }}>
+            <Skeleton height={"1.5rem"} className="skeleton-title" />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width={"6rem"} height={"1.5rem"} />
+              <Skeleton width={"6rem"} height={"1.5rem"} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef } from "react";
+import useFocusTrap from "../hooks/useFocusTrap";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = "Cancel",
   type = "info",
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isOpen, onCancel);
+
   if (!isOpen) return null;
 
   const getTypeStyles = () => {
@@ -36,9 +40,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-        <p className="text-gray-600 mb-6">{message}</p>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-desc"
+        className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+      >
+        <h3 id="confirm-dialog-title" className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <p id="confirm-dialog-desc" className="text-gray-600 mb-6">{message}</p>
         <div className="flex space-x-3">
           <button
             onClick={onCancel}

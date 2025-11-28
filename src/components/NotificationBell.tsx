@@ -166,15 +166,24 @@ const NotificationBell: React.FC = () => {
   return (
     <div style={styles.container} ref={dropdownRef}>
       <button
+          id="notification-bell"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           ...styles.bellButton,
           ...(isOpen ? styles.bellButtonActive : {}),
         }}
         className="notification-bell-btn"
-        aria-label="Notifications"
+        aria-label={`Notifications${unreadCount > 0 ? `: ${unreadCount} unread` : ''}`}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
       >
-        <Bell size={18} strokeWidth={2.2} />
+        <Bell size={18} strokeWidth={2.2} aria-hidden={true} focusable={false} />
         {unreadCount > 0 && (
           <span style={styles.badge} className="notification-badge">
             {unreadCount > 99 ? "99+" : unreadCount}
@@ -183,11 +192,11 @@ const NotificationBell: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div style={styles.dropdown} className="notification-dropdown">
+        <div id="notification-dropdown" style={styles.dropdown} className="notification-dropdown" role="menu" aria-labelledby="notification-bell" >
           {/* Header */}
           <div style={styles.header}>
             <div style={styles.headerLeft}>
-              <Bell size={18} strokeWidth={2.5} style={{ color: "#1E3A8A" }} />
+              <Bell size={18} strokeWidth={2.5} style={{ color: "#1E3A8A" }} aria-hidden={true} focusable={false} />
               <h3 style={styles.headerTitle}>Notifications</h3>
               {unreadCount > 0 && (
                 <span style={styles.headerBadge}>{unreadCount}</span>
@@ -211,7 +220,7 @@ const NotificationBell: React.FC = () => {
                 style={styles.markAllButton}
                 className="mark-all-btn"
               >
-                <Check size={14} strokeWidth={2.5} />
+                <Check size={14} strokeWidth={2.5} aria-hidden={true} focusable={false} />
                 <span>Mark all as read</span>
               </button>
             </div>
@@ -219,7 +228,7 @@ const NotificationBell: React.FC = () => {
 
           {/* Notifications List */}
           <div style={styles.notificationsList}>
-            {isLoading ? (
+              {isLoading ? (
               <div style={styles.emptyState}>
                 <div style={styles.loader} className="notification-loader" />
                 <p style={styles.emptyText}>Loading notifications...</p>
@@ -234,13 +243,21 @@ const NotificationBell: React.FC = () => {
                   We'll notify you when something arrives
                 </p>
               </div>
-            ) : (
+              ) : (
               notifications.map((notification) => {
                 const iconData = getNotificationIcon(notification.type);
                 return (
                   <div
                     key={notification._id}
                     onClick={() => handleNotificationClick(notification)}
+                    role="menuitem"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleNotificationClick(notification);
+                      }
+                    }}
                     style={{
                       ...styles.notificationItem,
                       ...(notification.isRead
@@ -298,12 +315,16 @@ const NotificationBell: React.FC = () => {
                 className="view-all-btn"
               >
                 <span>View all notifications</span>
-                <ArrowRight size={16} strokeWidth={2.5} />
+                <ArrowRight size={16} strokeWidth={2.5} aria-hidden={true} focusable={false} />
               </button>
             </div>
           )}
         </div>
       )}
+      {/* Visually hidden region for screen readers to announce unread count updates */}
+      <span id="notification-unread-count" className="sr-only" aria-live="polite" aria-atomic="true">
+        {unreadCount > 0 ? `${unreadCount} unread notifications` : 'No unread notifications'}
+      </span>
     </div>
   );
 };

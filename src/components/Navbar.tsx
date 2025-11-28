@@ -481,7 +481,7 @@ const styles: Record<string, React.CSSProperties> = {
     background:
       "linear-gradient(135deg, #1E3A8A 0%, #2563eb 50%, #1e40af 100%)",
     color: "white",
-    padding: "0.875rem 0",
+    padding: "0.75rem 0",
     boxShadow:
       "0 4px 24px rgba(30, 58, 138, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)",
     position: "sticky",
@@ -564,7 +564,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     opacity: 0.85,
     position: "relative",
-    padding: "0.5rem 0.875rem",
+    padding: "0.5rem 0.75rem",
     display: "flex",
     alignItems: "center",
     gap: "0.5rem",
@@ -811,8 +811,10 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255, 255, 255, 0.25)",
     color: "white",
     cursor: "pointer",
-    padding: "0.5rem",
-    borderRadius: "8px",
+    padding: "0.625rem",
+    minWidth: "44px",
+    minHeight: "44px",
+    borderRadius: "10px",
     transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   },
   mobileMenu: {

@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import api from "../../services/apiExtensions";
 import { Complaint, Service } from "../../types";
+import { extractListFromResponse } from "../../utils/apiHelpers";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { showToast } from "../../utils/toast";
 import { useAuth } from "../../context/AuthContext";
@@ -54,8 +55,8 @@ const StaffDashboard = () => {
 
       // backend responses use { success, data }
       setStats(statsRes.data?.data ?? statsRes.data);
-      setAssignedComplaints(complaintsRes.data?.data || []);
-      setPendingServices(servicesRes.data?.data || []);
+      setAssignedComplaints(extractListFromResponse(complaintsRes, "complaints"));
+      setPendingServices(extractListFromResponse(servicesRes, "services"));
 
       // Find current staff performance
       const staffPerf = performanceRes.data.find(

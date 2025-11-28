@@ -3,10 +3,12 @@ import { Bell, Check, Trash2, RefreshCw } from "lucide-react";
 import api from "../services/apiExtensions";
 import socketService from "../services/socket";
 import { Notification } from "../types";
+import { extractListFromResponse } from "../utils/apiHelpers";
 import { format } from "date-fns";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
 import { useAuth } from "../context/AuthContext";
+import Skeleton from "../components/Skeleton";
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -40,8 +42,10 @@ const Notifications: React.FC = () => {
         setIsRefreshing(true);
       }
       const response = await api.getNotifications();
-      const payload = response.data?.data ?? response.data;
-      setNotifications(payload.notifications || []);
+      const notifs = extractListFromResponse(response, "notifications");
+      // Also try existing shape for unread count
+      setNotifications(notifs);
+      // unread count is derived from notifications state, keep derived variable for consistency
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       showErrorToast(getErrorMessage(error));
@@ -109,10 +113,14 @@ const Notifications: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading notifications...
-        </p>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          <Skeleton width={"100%"} height={"1.5rem"} className="skeleton-title" />
+        </div>
+        <div style={{ marginTop: "1rem" }}>
+          <Skeleton height={"1rem"} className="skeleton-text" />
+          <Skeleton height={"1rem"} className="skeleton-text" />
+          <Skeleton height={"1rem"} className="skeleton-text" />
+        </div>
       </div>
     );
   }

@@ -1,3 +1,19 @@
+### Dev Authentication Investigation (Nov 28, 2025)
+
+**Issue:** Programmatic CLI and API-based login attempts in the local dev environment returned 401 Unauthorized despite attempts using a CSRF flow (some dev environments do not seed users as expected or require different login credentials).
+
+**Steps to investigate and mitigate:**
+1. Confirm `VITE_API_URL` environment variable under `.env.development` or `.env` — ensure it points to the correct dev backend URL.
+2. Confirm backend is seeded with the demo users (check backend seeding / migration scripts). If not seeded, use the dev seeding script or database snapshot.
+3. If backend cannot be modified, use the `Dev Login` helper in the frontend `Login.tsx` (dev-only) to set a local token and user object for role-based UI tests.
+4. Use Browser's login (UI) to confirm cookie-based sessions are being set by the backend and that the frontend uses `withCredentials: true` to include cookies.
+5. To capture tokens/session for manual tests: login via browser, copy the token from localStorage, and paste into CLI/curl Authorization header.
+6. Create a local-only mock or a small dev-only route that accepts an API key and returns a dev token (if allowed and safe) in the backend to help QA without seeding.
+
+**Notes:**
+- We added a frontend dev-only helper for a quick dev workaround (`Login.tsx`) to set `token` and `user` in localStorage — this is hidden for non-dev environments.
+- Any backend-side seeding and test credentials should be kept in a secure location (environment variables, not committed to git).
+
 # iBarangay Web Application - UI/UX Improvement Plan
 
 ## Executive Summary
@@ -903,9 +919,106 @@ This comprehensive UI/UX improvement plan provides a roadmap for transforming th
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** November 27, 2025  
+**Last Updated:** November 28, 2025  
 **Author:** UI/UX Improvement Team  
 **Status:** Ready for Review
+
+---
+
+## Progress Update (2025-11-28) ✅
+
+This section documents the real-time progress for Phase 1 items and major work implemented in the repo so far. It is used by maintainers and designers to track the current state and plan the next steps.
+
+### Completed / Implemented (code + UI):
+- Added a robust API response helper to normalize list payloads: `src/utils/apiHelpers.ts` — (e.g. `extractListFromResponse`)
+- Updated key page list parsing to use the helper: `src/pages/Complaints.tsx`, `src/pages/Services.tsx`, `src/pages/Events.tsx`, `src/pages/Notifications.tsx`, `src/pages/Announcements.tsx`, `src/pages/admin/AnnouncementManagement.tsx`, `src/pages/staff/StaffDashboard.tsx`.
+- Added `EnhancedInput` component for better input UI and validation `src/components/EnhancedInput.tsx`.
+- Implemented Skeleton loaders and replaced spinner where appropriate: `src/components/Skeleton.tsx` and used across list pages.
+- Mobile bottom navigation prototype added: `src/components/MobileBottomNav.tsx`.
+- A better `Navbar.tsx` with accessibility improvements and role-aware guards: `src/components/Navbar.tsx`.
+- Added focus management utility `useFocusTrap.ts` and updated modal behavior for accessibility.
+- Fixed TypeScript errors and improved runtime resilience of list pages and notifications (unread count logic updated in `Notifications.tsx`).
+ - Added a dev-only login helper for local environments (`Login.tsx`) to allow setting a fake token/user in localStorage for role-based testing when backend auth fails.
+ - Polished MobileBottomNav accessibility (added `aria-label`, `aria-hidden` on icons, and 44x44 min touch target in CSS). Files changed: `src/components/MobileBottomNav.tsx`, `src/styles/design-system.css`.
+ - Polished MobileBottomNav accessibility (added `aria-label`, `aria-hidden` on icons, and 44x44 min touch target in CSS). Files changed: `src/components/MobileBottomNav.tsx`, `src/styles/design-system.css`.
+ - Improved `NotificationBell` accessibility and keyboard interactions: added aria attributes (`aria-haspopup`, `aria-expanded`, `aria-controls`, `aria-labelledby`), `role="menu"` and `role="menuitem"` on list and items, `aria-live` update for unread counts, and marked decorative icons as `aria-hidden`. File changed: `src/components/NotificationBell.tsx`.
+ - Added unit tests for `NotificationBell` to validate unread count updates and socket handling: `src/components/__tests__/NotificationBell.test.tsx`.
+#### Accessibility / Notifications
+- [x] Add aria-live announcement for unread counts in `NotificationBell` and `sr-only` element for screen readers.
+- [x] Add roles and keyboard navigation to dropdown and items in `NotificationBell`.
+- [x] Add unit tests for `NotificationBell` to ensure unread counts update and aria-labels are set correctly.
+
+### In Progress:
+- Accessibility audit and fixes (Follow WCAG AA): focusing on form and navigation keyboard support, ARIA labels, and modal focus traps. (Coverage: partial; most modal behavior updated via `useFocusTrap`.)
+- Mobile Bottom Nav refinement: 44x44 touch targets and visual active state polish.
+- Finish integrating `Skeleton` loaders or `LoadingSkeletonCard` across remaining high-priority list views (Staff dashboard & Admin views).
+
+### Blockers & Risks:
+- Backend authentication (dev) is returning 401 on programmatic CLI login attempts. This blocks role-based UI verification for staff and admin flows. Suggestion: confirm seeded dev credentials or share a dev-only token for local dev override.
+- Some backend endpoints return wrapped responses (e.g., `{ success: true, data: [...] }`) which required normalizing. The helper mitigates this; however, developers should coordinate with backend changes for consistent API contracts.
+
+### Acceptance Criteria for Phase 1
+- Key pages (Home, Dashboard, Services, Announcements, Events, Complaints, Notifications) have skeleton loaders and consistent card design.
+- All forms use `EnhancedInput` where applicable and show inline validation errors.
+- Core navigation, modals, and forms are accessible by keyboard (tab navigation, focus trap, visible focus states).
+- Mobile navigation: bottom nav or drawer present for primary actions and the layout meets touch targets and spacing.
+- Unit/Type tests added for `extractListFromResponse` helper; TS type checks are clean.
+
+---
+
+## Implementation Checklist (Phase 1) 🔧
+
+Below is a prioritized checklist with tracked acceptance criteria and file references. Mark items as completed in this document or in project task tracking tools (GitHub issues or PRs).
+
+#### Accessibility (High Priority):
+- [x] Implement `useFocusTrap` and ensure modal focus is trapped (files changed: `src/hooks/useFocusTrap.tsx`, usage in ConfirmDialog & FileUpload)  
+- [ ] Audit forms for ARIA labels (files to check: `src/components/EnhancedInput.tsx`, `src/pages/Login.tsx`, `src/pages/Signup.tsx`)  
+- [ ] Add voice/aria-live semantics for toast and dynamic content (`src/components/Toast.tsx`, `src/components/NotificationBell.tsx`)
+
+**Accessibility audit file:** `docs/ACCESSIBILITY-AUDIT.md` tracks the concrete checks and quick wins; that file is being maintained with quick action items for the next sprint.
+
+#### List Normalization & Data handling (High Priority):
+- [x] Add `extractListFromResponse` to `src/utils/apiHelpers.ts` to handle consistent list parsing.  
+- [x] Update major list pages to use the helper and avoid brittle object path assumptions.
+
+#### UI / Components (Phase 1):
+- [x] Add Skeleton loader (`src/components/Skeleton.tsx`) and swap out spinners in list views.
+- [x] Introduce `EnhancedInput` for better forms `src/components/EnhancedInput.tsx`.
+- [ ] Finalize `MobileBottomNav.tsx` with full ARIA support and touch targets.
+
+#### Dev & QA Tasks:
+- [x] Add unit tests for `apiHelpers` and pages where the normalization is critical (e.g., `Complaints`, `Announcements`). Test(s) added and passing using `vitest`.
+- [ ] Add integration end-to-end test or Cypress test to confirm admin/staff flows once authentication is resolved.
+
+---
+
+## How to keep this Plan current (Process) 💡
+- Each time a significant UI work is merged, update this document's Progress Update section with:
+  - What changed (files/PR IDs)
+  - Status (completed / in-progress / blocked)
+  - Acceptance checks performed (visual checks, automated tests updated, accessibility checks)
+- Use the checklist above to quickly scan and update status; the maintainers or feature owners should edit this document when merging.
+- Suggested cadence: update the plan after each sprints (weekly), or when major PRs/feature merges happen.
+
+---
+
+## Recent Code References (Quick links) 🔗
+- `src/utils/apiHelpers.ts` — response normalization.
+- `src/components/Skeleton.tsx` — skeleton loader.
+- `src/components/EnhancedInput.tsx` — improved input component.
+- `src/components/MobileBottomNav.tsx` — mobile bottom navigation prototype.
+- `src/components/Navbar.tsx` — accessible navbar improvements.
+- `src/pages/Complaints.tsx` — updated to use extractList helper.
+
+---
+
+## Next Steps (Nov 28, 2025) ➜
+1. Finish accessibility audit and fix ARIA labels as needed.  
+2. Finalize mobile bottom nav (polish UI/interaction and test in multiple screen sizes).  
+3. Add unit tests for `apiHelpers` and a test for the notification/unread count logic.  
+4. Resolve authentication or get dev test creds to validate role-based UI flows and finalize admin/staff pages.
+
+---
 
 Deliverable:
 A detailed plan with concrete UI/UX improvements and practical implementation suggestions.

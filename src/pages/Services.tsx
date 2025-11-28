@@ -11,6 +11,9 @@ import api from "../services/apiExtensions";
 import { Service } from "../types";
 import { format } from "date-fns";
 import { showSuccessToast, showErrorToast } from "../components/Toast";
+import EnhancedInput from "../components/EnhancedInput";
+import Skeleton from "../components/Skeleton";
+import { extractListFromResponse } from "../utils/apiHelpers";
 import { getErrorMessage } from "../utils/errorHandler";
 import { validators, getValidationMessage } from "../utils/validators";
 import { useAuth } from "../context/AuthContext";
@@ -54,9 +57,8 @@ const Services: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.getServiceRequests();
-      const servicesData = Array.isArray(response.data?.data)
-        ? response.data.data
-        : [];
+      const servicesData = extractListFromResponse(response, "services");
+      if (servicesData.length === 0) console.debug("Services payload:", response.data ?? response);
       setServices(servicesData);
     } catch (error) {
       console.error("Failed to fetch services:", error);
@@ -204,10 +206,24 @@ const Services: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <div className="spinner" />
-        <p style={{ marginTop: "1rem", color: "var(--text-secondary)" }}>
-          Loading services...
-        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          <div className="card" style={{ padding: "1.5rem" }}>
+            <Skeleton width="100%" height="1.5rem" className="skeleton-title" />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width="6rem" height="1.5rem" />
+              <Skeleton width="6rem" height="1.5rem" />
+            </div>
+          </div>
+          <div className="card" style={{ padding: "1.5rem" }}>
+            <Skeleton width="100%" height="1.5rem" className="skeleton-title" />
+            <div style={{ height: "0.75rem", margin: "1rem 0" }} className="skeleton" />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Skeleton width="6rem" height="1.5rem" />
+              <Skeleton width="6rem" height="1.5rem" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -501,14 +517,15 @@ const Services: React.FC = () => {
                 >
                   Item Name *
                 </label>
-                <input
-                  className="input"
+                <EnhancedInput
+                  id="service-item-name"
                   value={formData.itemName}
-                  onChange={(e) =>
+                  onChange={(e: any) =>
                     handleInputChange("itemName", e.target.value)
                   }
                   disabled={isSubmitting}
                   placeholder="e.g., Folding Chairs, Sound System"
+                  error={errors.itemName}
                 />
                 {errors.itemName && (
                   <p
@@ -676,13 +693,14 @@ const Services: React.FC = () => {
                 >
                   Purpose *
                 </label>
-                <textarea
-                  className="input"
-                  rows={3}
+                <EnhancedInput
+                  component="textarea"
+                  id="service-purpose"
                   value={formData.purpose}
-                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  onChange={(e: any) => handleInputChange("purpose", e.target.value)}
                   disabled={isSubmitting}
                   placeholder="Describe the purpose of borrowing"
+                  error={errors.purpose}
                 />
                 {errors.purpose && (
                   <p
@@ -706,11 +724,11 @@ const Services: React.FC = () => {
                 >
                   Notes (Optional)
                 </label>
-                <textarea
-                  className="input"
-                  rows={2}
+                <EnhancedInput
+                  component="textarea"
+                  id="service-notes"
                   value={formData.notes}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  onChange={(e: any) => handleInputChange("notes", e.target.value)}
                   disabled={isSubmitting}
                   placeholder="Any additional information"
                 />

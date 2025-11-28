@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import api from "../../services/apiExtensions";
 import { Announcement, PaginatedResponse } from "../../types";
+import { extractListFromResponse } from "../../utils/apiHelpers";
 import { showSuccessToast, showErrorToast } from "../../components/Toast";
 import { getErrorMessage } from "../../utils/errorHandler";
 import { format } from "date-fns";
@@ -62,7 +63,7 @@ const AnnouncementManagement: React.FC = () => {
 
       const res = await api.getAnnouncements(params);
       const response: PaginatedResponse<Announcement> = res.data;
-      setAnnouncements(response.data);
+      setAnnouncements(extractListFromResponse(res, "announcements") || response.data);
       setPagination(response.pagination);
     } catch (error) {
       console.error("Failed to fetch announcements:", error);

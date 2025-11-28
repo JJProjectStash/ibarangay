@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Calendar, Eye, AlertCircle } from "lucide-react";
 import api from "../services/apiExtensions";
 import { Announcement, PaginatedResponse } from "../types";
+import { extractListFromResponse } from "../utils/apiHelpers";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { showErrorToast } from "../components/Toast";
 import { getErrorMessage } from "../utils/errorHandler";
@@ -42,7 +43,8 @@ const Announcements: React.FC = () => {
 
       const res = await api.getAnnouncements(params);
       const response: PaginatedResponse<Announcement> = res.data;
-      setAnnouncements(response.data);
+      // Use extractListFromResponse in case backend uses different shapes
+      setAnnouncements(extractListFromResponse(res, "announcements") || response.data);
       setPagination(response.pagination);
     } catch (error) {
       console.error("Failed to fetch announcements:", error);
